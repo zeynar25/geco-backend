@@ -2,10 +2,7 @@ package com.example.geco.domains;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
-import jakarta.persistence.OneToOne;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,16 +11,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="user_detail")
-public class UserDetail {
+@Table(name="atttraction")
+public class Attraction {
 	@Id
-	int userId;
-	
-	@OneToOne
-	@JoinColumn(name = "userId", referencedColumnName = "userId")
-    private Account account;
-	
+	private int attractionId;
 	private String name;
-	private String contactNumber;
-	
+	private String description;
 }
