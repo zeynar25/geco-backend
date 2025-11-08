@@ -22,7 +22,8 @@ public class UserDetail {
 	@OneToOne
 	@JoinColumn(name = "userId", referencedColumnName = "userId")
     private Account account;
-	
+
+	private String email;
 	private String name;
 	private String contactNumber;
 	

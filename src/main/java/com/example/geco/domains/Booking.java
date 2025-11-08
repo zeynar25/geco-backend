@@ -27,7 +27,7 @@ public class Booking {
 	
 	@ManyToOne
 	@JoinColumn(name = "packageId", referencedColumnName = "packageId")
-	private ParkPackage tourPackage;
+	private TourPackage tourPackage;
 	
 //	@ManyToOne
 //	@JoinColumn(name = "discountId", referencedColumnName = "discountId")

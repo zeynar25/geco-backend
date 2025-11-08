@@ -15,7 +15,7 @@ import jakarta.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="package")
-public class ParkPackage {
+public class TourPackage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private int packageId;
