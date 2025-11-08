@@ -1,6 +1,7 @@
 package com.example.geco;
 
 import com.example.geco.domains.Account;
+import com.example.geco.domains.Attraction;
 import com.example.geco.domains.UserDetail;
 
 public class DataUtil {
@@ -20,5 +21,23 @@ public class DataUtil {
 		detail.setEmail("krysscoleen.creus@cvsu.edu.ph");
 		
 		return detail;
+	}
+	
+	public static Attraction createAttractionA() {
+		Attraction attraction = new Attraction();
+		attraction.setAttractionId(0);
+		attraction.setName("Inang Kalikasan");
+		attraction.setDescription("A special statue.");
+		
+		return attraction;
+	}
+	
+	public static Attraction createAttractionB() {
+		Attraction attraction = new Attraction();
+		attraction.setAttractionId(1);
+		attraction.setName("Hanging bridge");
+		attraction.setDescription("A bridge that is hanging.");
+		
+		return attraction;
 	}
 }

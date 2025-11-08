@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,6 +24,7 @@ import com.example.geco.domains.Faq;
 import com.example.geco.domains.Feedback;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
+import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.SignupRequest;
 import com.example.geco.services.AccountService;
 import com.example.geco.services.AttractionService;
@@ -93,19 +95,6 @@ public class MainController {
 	public void displayDashboardAttractions() {
 		
 	}
-
-	@PostMapping("/signup")
-	public ResponseEntity<?> addAccount(@RequestBody SignupRequest request) {
-		try {
-			Account savedAccount  = accountService.addAccount(request);
-			return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
-			
-		} catch (IllegalArgumentException e) {
-			Map<String, String> errorResponse = new HashMap<>();
-	        errorResponse.put("error", e.getMessage());
-	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	    }
-	}
 	
 	// to implement
 	@PostMapping("/login")
@@ -117,6 +106,33 @@ public class MainController {
 	public void logout(@RequestBody Account account) {
 		
 	}
+
+	@PostMapping("/account")
+	public ResponseEntity<?> addAccount(@RequestBody SignupRequest request) {
+		try {
+			AccountResponse savedAccount  = accountService.addAccount(request);
+			return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
+			
+		} catch (IllegalArgumentException e) {
+			Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", e.getMessage());
+	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	    }
+	}
+	
+	@PatchMapping("/account")
+	public ResponseEntity<?> updateAccount(@RequestBody SignupRequest request) {
+		try {
+			AccountResponse savedAccount  = accountService.updateAccount(request);
+			return new ResponseEntity<>(savedAccount, HttpStatus.OK);
+			
+		} catch (IllegalArgumentException e) {
+			Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", e.getMessage());
+	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	    }
+	}
+	
 	
 	@PostMapping("/attraction")
 	public ResponseEntity<?> addAttraction(@RequestBody Attraction attraction) {
@@ -125,7 +141,9 @@ public class MainController {
 	        return new ResponseEntity<>(savedAttraction, HttpStatus.CREATED);
 	        
 	    } catch (IllegalArgumentException e) {
-	        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", e.getMessage());
+	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	    }
 	}
 
