@@ -3,6 +3,7 @@ package com.example.geco.controllers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import com.example.geco.domains.Faq;
 import com.example.geco.domains.Feedback;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
+import com.example.geco.dto.SignupRequest;
 import com.example.geco.services.AccountService;
 import com.example.geco.services.AttractionService;
 import com.example.geco.services.BookingService;
@@ -91,12 +93,18 @@ public class MainController {
 	public void displayDashboardAttractions() {
 		
 	}
-	
-	// implement error handling
+
 	@PostMapping("/signup")
-	public ResponseEntity<?> addAccount(@RequestBody Account account) {
-		Account savedAccount  = accountService.addAccount(account);
-		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
+	public ResponseEntity<?> addAccount(@RequestBody SignupRequest request) {
+		try {
+			Account savedAccount  = accountService.addAccount(request);
+			return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
+			
+		} catch (IllegalArgumentException e) {
+			Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", e.getMessage());
+	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	    }
 	}
 	
 	// to implement
@@ -110,23 +118,30 @@ public class MainController {
 		
 	}
 	
-	// to implement
 	@PostMapping("/attraction")
-	public ResponseEntity<Attraction> addAttraction(@RequestBody Attraction attraction) {
-	        return new ResponseEntity<>(new Attraction(), HttpStatus.CREATED);
+	public ResponseEntity<?> addAttraction(@RequestBody Attraction attraction) {
+		try {
+	        Attraction savedAttraction = attractionService.addAttraction(attraction);
+	        return new ResponseEntity<>(savedAttraction, HttpStatus.CREATED);
+	        
+	    } catch (IllegalArgumentException e) {
+	        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+	    }
 	}
 
-	// to implement
 	@GetMapping("/attraction/{id}")
 	public ResponseEntity<Attraction> getAttraction(@PathVariable int id) {
-		return new ResponseEntity<>(new Attraction(), HttpStatus.OK);
+		Attraction savedAttraction = attractionService.getAttraction(id);
+		if (savedAttraction == null) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
 	}
 
-	// to implement
 	@GetMapping("/attraction")
 	public ResponseEntity<List<Attraction>> getAllAttractions() {
-		List<Attraction> attractions = new ArrayList();
-		return new ResponseEntity<>(attractions, HttpStatus.OK);
+		List<Attraction> savedAttractions = attractionService.getAllAttractions();
+		return new ResponseEntity<>(savedAttractions, HttpStatus.OK);
 	}
 	
 	// to implement
@@ -179,7 +194,7 @@ public class MainController {
 	}
 	
 	// to implement
-	@GetMapping("/feedback/{id}")
+	@GetMapping("/faq/{id}")
 	public ResponseEntity<Faq> getFaq(@PathVariable int id) {
 		return new ResponseEntity<>(new Faq(), HttpStatus.OK);
 	}
