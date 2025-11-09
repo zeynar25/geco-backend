@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,18 +34,7 @@ import com.example.geco.services.BookingService;
 import com.example.geco.services.FeedbackService;
 
 @RestController
-public class MainController {
-	@Autowired
-	private AccountService accountService;
-	
-	@Autowired
-	private AttractionService attractionService;
-	
-	@Autowired
-	private BookingService bookingService;
-	
-	@Autowired
-	private FeedbackService feedbackService;
+public class MainController extends AbstractController{
 	
 	// Functionalities in home page
 	@GetMapping
@@ -109,83 +97,6 @@ public class MainController {
 	public void logout(@RequestBody Account account) {
 		
 	}
-
-	@PostMapping("/account")
-	public ResponseEntity<?> addAccount(@RequestBody SignupRequest request) {
-		AccountResponse savedAccount  = accountService.addAccount(request);
-		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
-	}
-	
-	@PatchMapping("/account")
-	public ResponseEntity<?> updateAccount(@RequestBody SignupRequest request) {
-		AccountResponse savedAccount  = accountService.updateAccount(request);
-		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
-	}
-	
-	
-	@PostMapping("/attraction")
-	public ResponseEntity<?> addAttraction(@RequestBody Attraction attraction) {
-		AttractionResponse savedAttraction = attractionService.addAttraction(attraction);
-        return new ResponseEntity<>(savedAttraction, HttpStatus.CREATED);
-	}
-
-	@GetMapping("/attraction/{id}")
-	public ResponseEntity<?> getAttraction(@PathVariable int id) {
-		AttractionResponse savedAttraction = attractionService.getAttraction(id);
-		return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
-	}
-
-	@GetMapping("/attraction")
-	public ResponseEntity<List<AttractionResponse>> getAllAttractions() {
-		List<AttractionResponse> savedAttractions = attractionService.getAllAttractions();
-		return new ResponseEntity<>(savedAttractions, HttpStatus.OK);
-	}
-	
-	@PatchMapping("/attraction/{id}")
-	public ResponseEntity<?> updateAttraction(@PathVariable int id, @RequestBody Attraction attraction) {
-		attraction.setAttractionId(id);
-        AttractionResponse savedAttraction  = attractionService.updateAttraction(attraction);
-		return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
-	}
-
-	@DeleteMapping("/attraction/{id}")
-	public ResponseEntity<?> deleteAttraction(@PathVariable int id) {
-		AttractionResponse savedAttraction = attractionService.deleteAttraction(id);
-        return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
-	}
-	
-	
-	@PostMapping("/feedback-category")
-	public ResponseEntity<?> addFeedbackCategory(@RequestBody FeedbackCategory category) {
-		FeedbackCategory savedCategory = feedbackService.addCategory(category);
-        return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
-	}
-	
-	@GetMapping("/feedback-category/{id}")
-	public ResponseEntity<?> getFeedbackCategory(@PathVariable int id) {
-		FeedbackCategory savedCategory = feedbackService.getCategory(id);
-        return new ResponseEntity<>(savedCategory, HttpStatus.OK);
-	}
-	
-	@GetMapping("/feedback-category")
-	public ResponseEntity<List<FeedbackCategory>> getAllFeedbackCategories() {
-		List<FeedbackCategory> categories = feedbackService.getAllCategories();
-		return new ResponseEntity<>(categories, HttpStatus.OK);
-	}
-	
-	@PatchMapping("/feedback-category/{id}")
-	public ResponseEntity<?> updateFeedbackCategory(@PathVariable int id, @RequestBody FeedbackCategory category) {
-		category.setFeedbackCategoryId(id);
-		FeedbackCategory savedCategory = feedbackService.updateCategory(category);
-        return new ResponseEntity<>(savedCategory, HttpStatus.OK);
-	}
-
-	@DeleteMapping("/feedback-category/{id}")
-	public ResponseEntity<?> deleteFeedbackCategory(@PathVariable int id) {
-		FeedbackCategory savedCategory = feedbackService.deleteCategory(id);
-        return new ResponseEntity<>(savedCategory, HttpStatus.OK);
-	}
-	
 	
 	@PostMapping("/feedback")
 	public ResponseEntity<?> addFeedback(@RequestBody Feedback feedback) {
