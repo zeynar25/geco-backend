@@ -1,9 +1,6 @@
 package com.example.geco.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,39 +19,40 @@ import com.example.geco.dto.FeedbackResponse;
 public class FeedbackController extends AbstractController {
 	@PostMapping("/feedback")
 	public ResponseEntity<?> addFeedback(@RequestBody Feedback feedback) {
-		try {
-			FeedbackResponse savedFeedback = feedbackService.addFeedback(feedback);
-			return new ResponseEntity<>(savedFeedback, HttpStatus.CREATED);
-	        
-	    } catch (IllegalArgumentException e) {
-	    	Map<String, String> errorResponse = new HashMap<>();
-	        errorResponse.put("error", e.getMessage());
-	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	    }
+		FeedbackResponse savedFeedback = feedbackService.addFeedback(feedback);
+		return new ResponseEntity<>(savedFeedback, HttpStatus.CREATED);
 	}
 	
-	// to implement
 	@GetMapping("/feedback/{id}")
-	public ResponseEntity<Feedback> getFeedback(@PathVariable int id) {
-		return new ResponseEntity<>(new Feedback(), HttpStatus.OK);
+	public ResponseEntity<?> getFeedback(@PathVariable int id) {
+		FeedbackResponse savedfeedback = feedbackService.getFeedback(id);
+		return new ResponseEntity<>(savedfeedback, HttpStatus.OK);
 	}
 	
 	// to implement
-	@GetMapping("/feedback/{category}/{year}/{month}")
-	public ResponseEntity<List<Feedback>> getFeedbackByCategory(@PathVariable String category, @PathVariable int year, @PathVariable int month) {
-		List<Feedback> feedbacks = new ArrayList();
-		return new ResponseEntity<>(feedbacks, HttpStatus.OK);
+	@GetMapping("/feedback/{categoryId}/{year}/{month}")
+	public ResponseEntity<?> getFeedbackByCategory(
+			@PathVariable int categoryId, 
+			@PathVariable int year, 
+			@PathVariable int month) {
+		
+		List<FeedbackResponse> feedbackResponses = feedbackService.getFeedbackByCategoryNameAndDate(categoryId, year, month);
+
+	    return new ResponseEntity<>(feedbackResponses, HttpStatus.OK);
 	}
 	
 	// to implement
-	@PatchMapping("/feedback")
-	public ResponseEntity<Feedback> updateFeedback(@RequestBody Feedback feedback) {
-		return new ResponseEntity<>(new Feedback(), HttpStatus.OK);
+	@PatchMapping("/feedback/{id}")
+	public ResponseEntity<?> updateFeedback(@PathVariable int id, @RequestBody Feedback feedback) {
+		feedback.setFeedbackId(id);
+		FeedbackResponse savedfeedback = feedbackService.getFeedback(id);
+		return new ResponseEntity<>(savedfeedback, HttpStatus.OK);
 	}
 
 	// to implement
 	@DeleteMapping("/feedback/{id}")
-	public ResponseEntity<Feedback> deleteFeedback(@PathVariable int id) {
-		return new ResponseEntity<>(new Feedback(), HttpStatus.OK);
+	public ResponseEntity<?> deleteFeedback(@PathVariable int id) {
+		FeedbackResponse deletedFeedback = feedbackService.getFeedback(id);
+		return new ResponseEntity<>(deletedFeedback, HttpStatus.OK);
 	}
 }

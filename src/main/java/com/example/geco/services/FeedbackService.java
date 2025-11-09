@@ -1,5 +1,8 @@
 package com.example.geco.services;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +15,10 @@ import com.example.geco.repositories.FeedbackCategoryRepository;
 import com.example.geco.repositories.FeedbackRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class FeedbackService {
 	@Autowired
 	private FeedbackCategoryRepository feedbackCategoryRepository;
@@ -47,22 +52,6 @@ public class FeedbackService {
 	    ).orElseThrow(
 	    		() -> new EntityNotFoundException("Booking not found.")
 	    );
-	    
-	    if (feedback.getCategory() == null || feedback.getCategory().getFeedbackCategoryId() == null) {
-	        throw new IllegalArgumentException("Category is missing or invalid.");
-	    }
-	    
-	    if (feedback.getStars() < 0 || feedback.getStars() > 5) {
-	        throw new IllegalArgumentException("Stars must be between 0 and 5.");
-	    }
-		
-		if (feedback.getComment() == null || feedback.getComment().trim().length() < 10) {
-		    throw new IllegalArgumentException("Feedback comment must be at least 10 characters long.");
-		}
-		
-		if (feedback.getSuggestion() == null || feedback.getSuggestion().trim().length() < 10) {
-		    throw new IllegalArgumentException("Suggestion comment must be at least 10 characters long.");
-		}
 	}
 	
 	public FeedbackResponse toResponse(Feedback feedback) {
@@ -77,33 +66,97 @@ public class FeedbackService {
 		);
 	}
 	
-	
 	public FeedbackResponse addFeedback(Feedback feedback) {
 		validateFeedback(feedback);
+
+	    
+	    if (feedback.getCategory() == null || feedback.getCategory().getFeedbackCategoryId() == null) {
+	        throw new IllegalArgumentException("Category is missing or invalid.");
+	    }
+	    
+	    if (feedback.getStars() == null || feedback.getStars() < 0 || feedback.getStars() > 5) {
+	        throw new IllegalArgumentException("Stars must be between 0 and 5.");
+	    }
 		
-		// Check if the account's feedback for that booking already exist.
-		if (feedbackRepository.existsByBooking_BookingId(feedback.getBooking().getBookingId())) {
-			throw new EntityNotFoundException("Feedback for this booking already exist.");
+		if (feedback.getComment() == null || feedback.getComment().trim().length() < 10) {
+		    throw new IllegalArgumentException("Feedback comment must be at least 10 characters long.");
+		}
+		
+		if (feedback.getSuggestion() == null || feedback.getSuggestion().trim().length() < 10) {
+		    throw new IllegalArgumentException("Suggestion comment must be at least 10 characters long.");
+		}
+		
+		// Check if the account's feedback for this booking already exist.
+		if (feedbackRepository.existsByBooking_BookingIdAndAccount_AccountId(
+		        feedback.getBooking().getBookingId(),
+		        feedback.getAccount().getAccountId()
+		)) {
+		    throw new IllegalArgumentException("Feedback for this booking by this account already exists.");
 		}
 		
 		FeedbackCategory existingCategory = feedbackCategoryRepository.findById(
-	    		feedback.getCategory().getFeedbackCategoryId())
-		.orElseThrow(() ->
-				new EntityNotFoundException("Category not found.")
-		);
+		        feedback.getCategory().getFeedbackCategoryId())
+				.orElseThrow(() -> new EntityNotFoundException("Category not found."));
 		
-	    String providedLabel = feedback.getCategory().getLabel().trim().toLowerCase();
-	    String actualLabel = existingCategory.getLabel().trim().toLowerCase();
+		feedback.setCategory(existingCategory);
 	    
-	    if (!providedLabel.equals(actualLabel)) {
-	        throw new IllegalArgumentException(
-	            "Category label does not match the stored category name for this ID."
-	        );
-	    }
+	    return toResponse(feedbackRepository.save(feedback));
+	}
+	
+	public FeedbackResponse getFeedback(int id) {
+		Feedback feedback = feedbackRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID \"" + id + "\" not found."));
 	    
-		Feedback savedFeedback = feedbackRepository.save(feedback);
+	    return toResponse(feedback);
+	}
+	
+	public List<FeedbackResponse> getFeedbackByCategoryNameAndDate(int categoryId, int year, int month) {
+		LocalDate startDate = LocalDate.of(year, month, 1);
+	    LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-	    return toResponse(savedFeedback);
+	    List<Feedback> feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetween(
+	        categoryId, startDate, endDate
+	    );
+
+	    return feedbacks.stream()
+	                    .map(this::toResponse)
+	                    .toList();
+	}
+	
+	public FeedbackResponse updateFeedback(Feedback feedback) {
+		validateFeedback(feedback);
+		
+		Feedback existingFeedback = feedbackRepository.findById(feedback.getFeedbackId())
+				.orElseThrow(() -> new EntityNotFoundException("Feedback with ID \"" + feedback.getFeedbackId() + "\" not found."));
+		
+		FeedbackCategory existingCategory = feedbackCategoryRepository.findById(
+		        feedback.getCategory().getFeedbackCategoryId())
+				.orElseThrow(() -> new EntityNotFoundException("Category not found."));
+		
+		existingFeedback.setCategory(existingCategory);
+		
+		if (feedback.getStars() != null && feedback.getStars() >= 0 && feedback.getStars() <= 5) {
+	      existingFeedback.setStars(feedback.getStars());  
+	    } 
+		
+		if (feedback.getComment() != null && feedback.getComment().length() >= 10) {
+		      existingFeedback.setComment(feedback.getComment());  
+	    } 
+		
+		if (feedback.getSuggestion() != null && feedback.getSuggestion().length() >= 10) {
+		      existingFeedback.setSuggestion(feedback.getSuggestion());  
+	    } 
+	    
+	    return toResponse(feedbackRepository.save(existingFeedback));
+	}
+	
+	public FeedbackResponse deleteFeedback(int id) {
+		Feedback feedback = feedbackRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID \"" + id + "\" not found."));
+	    
+		feedbackRepository.delete(feedback);
+		
+	    return toResponse(feedback);
 	}
 	
 	public double getAverageRating() {
