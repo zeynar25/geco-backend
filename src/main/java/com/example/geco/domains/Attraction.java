@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name="atttraction")
 public class Attraction {
 	@Id
-	private int attractionId;
+	private Integer attractionId;
 	private String name;
 	private String description;
 }

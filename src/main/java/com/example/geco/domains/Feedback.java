@@ -20,24 +20,24 @@ import lombok.NoArgsConstructor;
 public class Feedback {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private int feedbackId;
+	private Integer feedbackId;
 
     // A user can have as many feedback as many as his/her booking.
 	@ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
-	private Account userId;
+	private Account account;
 	
 	// Pertaining to the booking this feedback is related to.
 	@ManyToOne
     @JoinColumn(name = "booking_id", referencedColumnName = "bookingId")
-	private Booking bookingId;
+	private Booking booking;
 
 	// Pertaining to the feedback category this feedback is related to.
 	@OneToOne
 	@JoinColumn(name = "category_id", referencedColumnName = "feedbackCategoryId")
 	private FeedbackCategory category;
 	
-	private double stars;
+	private Double stars;
 	private String comment;
 	private String suggestion;
 }

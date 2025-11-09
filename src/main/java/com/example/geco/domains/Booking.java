@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 public class Booking {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private int bookingId;
+	private Integer bookingId;
 	
 	@ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")
@@ -39,7 +39,7 @@ public class Booking {
 	private LocalDate visitDate;
 	private LocalTime visitTime;
 	
-	private int groupSize;
+	private Integer groupSize;
 	private String status;
-	private int totalPrice;
+	private Integer totalPrice;
 }

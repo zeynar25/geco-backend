@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class FeedbackCategory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private int feedbackCategoryId;
+	private Integer feedbackCategoryId;
 	
 	private String label;
 }

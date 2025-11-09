@@ -18,7 +18,7 @@ import jakarta.persistence.Id;
 public class PackageInclusion {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private int inclusionId;
+	private Integer inclusionId;
 	private String inclusionName;
-	private int inclusionPrice;
+	private Integer inclusionPrice;
 }

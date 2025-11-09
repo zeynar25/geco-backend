@@ -18,13 +18,13 @@ import jakarta.persistence.Id;
 public class TourPackage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private int packageId;
-	private int pricePerPerson;
+	private Integer packageId;
+	private Integer pricePerPerson;
 	
 	// String list of package inclusions separated by comma.
 	private String packageInclusions;
 	
 	// Short description about the package.
 	private String description;
-	private int basePrice;
+	private Integer basePrice;
 }

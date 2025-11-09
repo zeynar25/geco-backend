@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class UserDetail {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	int detailId;
+	Integer detailId;
 
 	private String email;
 	private String surname;
