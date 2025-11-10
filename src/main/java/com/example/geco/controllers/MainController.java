@@ -85,37 +85,6 @@ public class MainController extends AbstractController{
 	}
 	
 	// to implement
-	@PostMapping("/package")
-	public ResponseEntity<?> addPackage(@RequestBody TourPackage tourPackage) {
-		return new ResponseEntity<>(new TourPackage(), HttpStatus.OK);
-	}
-	
-	// to implement
-	@GetMapping("/package/{id}")
-	public ResponseEntity<TourPackage> getPackage(@PathVariable int id) {
-		return new ResponseEntity<>(new TourPackage(), HttpStatus.OK);
-	}
-	
-	// to implement
-	@GetMapping("/package")
-	public ResponseEntity<List<TourPackage>> getAllPackages() {
-		List<TourPackage> packages = new ArrayList();
-		return new ResponseEntity<>(packages, HttpStatus.OK);
-	}
-	
-	// to implement
-	@PutMapping("/package")
-	public ResponseEntity<TourPackage> updatePackage(@RequestBody TourPackage tourPackage) {
-		return new ResponseEntity<>(new TourPackage(), HttpStatus.OK);
-	}
-
-	// to implement
-	@DeleteMapping("/package/{id}")
-	public ResponseEntity<TourPackage> deletePackage(@PathVariable int id) {
-		return new ResponseEntity<>(new TourPackage(), HttpStatus.OK);
-	}
-	
-	// to implement
 	@PostMapping("/package-inclusion")
 	public ResponseEntity<?> addPackageInclusion(@RequestBody PackageInclusion inclusion) {
 		return new ResponseEntity<>(new PackageInclusion(), HttpStatus.OK);
