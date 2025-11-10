@@ -54,7 +54,6 @@ public class AttractionService {
 	            .stream()
 	            .map(this::toResponse)
 	            .collect(Collectors.toList());
-
 	}
 	
 	public AttractionResponse updateAttraction(Attraction attraction) {
