@@ -115,6 +115,13 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.label").value(savedCategoryA.getLabel())
 			);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/feedback-category/" + savedCategoryA.getFeedbackCategoryId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNotFound()
+			);
 		}
 	}
 	
