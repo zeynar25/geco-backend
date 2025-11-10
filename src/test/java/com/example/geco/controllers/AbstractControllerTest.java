@@ -9,12 +9,14 @@ import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.AttractionRepository;
 import com.example.geco.repositories.FaqRepository;
 import com.example.geco.repositories.FeedbackCategoryRepository;
+import com.example.geco.repositories.PackageInclusionRepository;
 import com.example.geco.repositories.TourPackageRepository;
 import com.example.geco.repositories.UserDetailRepository;
 import com.example.geco.services.AccountService;
 import com.example.geco.services.AttractionService;
 import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
+import com.example.geco.services.PackageInclusionService;
 import com.example.geco.services.TourPackageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,6 +40,12 @@ public abstract class AbstractControllerTest {
 	
 	@Autowired
 	protected FaqService faqService;
+
+	@Autowired
+	protected TourPackageService tourPackageService;
+	
+	@Autowired
+	protected PackageInclusionService packageInclusionService;
 	
 	@Autowired
 	protected AccountRepository accountRepository;
@@ -53,4 +61,10 @@ public abstract class AbstractControllerTest {
 	
 	@Autowired
 	protected FaqRepository faqRepository;
+
+	@Autowired
+	protected TourPackageRepository tourPackageRepository;
+
+	@Autowired
+	protected PackageInclusionRepository packageInclusionRepository;
 }

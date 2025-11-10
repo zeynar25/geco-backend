@@ -1,9 +1,13 @@
 package com.example.geco;
 
+import java.util.List;
+
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Attraction;
 import com.example.geco.domains.Faq;
 import com.example.geco.domains.FeedbackCategory;
+import com.example.geco.domains.PackageInclusion;
+import com.example.geco.domains.TourPackage;
 import com.example.geco.domains.UserDetail;
 
 public class DataUtil {
@@ -67,5 +71,40 @@ public class DataUtil {
 		faq.setQuestion("When does this park open and close?");
 		faq.setAnswer("It is usually open --:--am to 05:00pm every Monday to Thursday.");
 		return faq;
+	}
+	
+	public static PackageInclusion createPackageInclusionA() {
+		PackageInclusion inclusion = new PackageInclusion();
+		inclusion.setInclusionName("Buffet Lunch");
+		inclusion.setInclusionPricePerPerson(500);
+		
+		return inclusion;
+	}
+	
+	public static PackageInclusion createPackageInclusionB() {
+		PackageInclusion inclusion = new PackageInclusion();
+		inclusion.setInclusionName("Horse Back Riding");
+		inclusion.setInclusionPricePerPerson(150);
+		
+		return inclusion;
+	}
+	
+	
+	public static TourPackage createPackageA(List<PackageInclusion> inclusions) {
+		TourPackage tourPackage = new TourPackage();
+		tourPackage.setDescription("Detailed description about this package.");
+		tourPackage.setBasePrice(500);
+		tourPackage.setInclusions(inclusions);
+		
+		return tourPackage;
+	}
+	
+	public static TourPackage createPackageB(List<PackageInclusion> inclusions) {
+		TourPackage tourPackage = new TourPackage();
+		tourPackage.setDescription("Detailed description about this package but more pricey.");
+		tourPackage.setBasePrice(1000);
+		tourPackage.setInclusions(inclusions);
+		
+		return tourPackage;
 	}
 }

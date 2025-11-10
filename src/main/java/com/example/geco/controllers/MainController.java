@@ -83,44 +83,6 @@ public class MainController extends AbstractController{
 	public void logout(@RequestBody Account account) {
 		
 	}
-	
-	// to implement
-	@PostMapping("/package-inclusion")
-	public ResponseEntity<?> addPackageInclusion(@RequestBody PackageInclusion inclusion) {
-		return new ResponseEntity<>(new PackageInclusion(), HttpStatus.OK);
-	}
-	
-	// to implement
-	@GetMapping("/package-inclusion/{id}")
-	public ResponseEntity<PackageInclusion> getPackageInclusion(@PathVariable int id) {
-		return new ResponseEntity<>(new PackageInclusion(), HttpStatus.OK);
-	}
-	
-	// to implement
-	@GetMapping("/package-inclusion/not/{id}")
-	public ResponseEntity<List<PackageInclusion>> getPackageInclusionNotInPackage(@PathVariable int id) {
-		List<PackageInclusion> inclusions = new ArrayList();
-		return new ResponseEntity<>(inclusions, HttpStatus.OK);
-	}
-	
-	// to implement
-	@GetMapping("/package-inclusion")
-	public ResponseEntity<List<PackageInclusion>> getAllPackageInclusions() {
-		List<PackageInclusion> inclusions = new ArrayList();
-		return new ResponseEntity<>(inclusions, HttpStatus.OK);
-	}
-	
-	// to implement
-	@PutMapping("/package-inclusion")
-	public ResponseEntity<PackageInclusion> updatePackageInclusion(@RequestBody PackageInclusion inclusion) {
-		return new ResponseEntity<>(new PackageInclusion(), HttpStatus.OK);
-	}
-
-	// to implement
-	@DeleteMapping("/package-inclusion/{id}")
-	public ResponseEntity<PackageInclusion> deletePackageInclusion(@PathVariable int id) {
-		return new ResponseEntity<>(new PackageInclusion(), HttpStatus.OK);
-	}
 
 	// to implement
 	@PostMapping("/booking")

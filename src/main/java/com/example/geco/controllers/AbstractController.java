@@ -8,6 +8,7 @@ import com.example.geco.services.BookingService;
 import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
 import com.example.geco.services.FeedbackService;
+import com.example.geco.services.PackageInclusionService;
 import com.example.geco.services.TourPackageService;
 
 public abstract class AbstractController {
@@ -31,4 +32,7 @@ public abstract class AbstractController {
 
 	@Autowired
 	protected TourPackageService tourPackageService;
+	
+	@Autowired
+	protected PackageInclusionService packageInclusionService;
 }
