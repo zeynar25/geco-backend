@@ -27,26 +27,26 @@ public class AttractionController extends AbstractController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getAttraction(@PathVariable int id) {
-		AttractionResponse savedAttraction = attractionService.getAttraction(id);
-		return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
+		AttractionResponse attraction = attractionService.getAttraction(id);
+		return new ResponseEntity<>(attraction, HttpStatus.OK);
 	}
 
 	@GetMapping
 	public ResponseEntity<List<AttractionResponse>> getAllAttractions() {
-		List<AttractionResponse> savedAttractions = attractionService.getAllAttractions();
-		return new ResponseEntity<>(savedAttractions, HttpStatus.OK);
+		List<AttractionResponse> attractions = attractionService.getAllAttractions();
+		return new ResponseEntity<>(attractions, HttpStatus.OK);
 	}
 	
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> updateAttraction(@PathVariable int id, @RequestBody Attraction attraction) {
 		attraction.setAttractionId(id);
-        AttractionResponse savedAttraction  = attractionService.updateAttraction(attraction);
-		return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
+        AttractionResponse updatedAttraction  = attractionService.updateAttraction(attraction);
+		return new ResponseEntity<>(updatedAttraction, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteAttraction(@PathVariable int id) {
-		AttractionResponse savedAttraction = attractionService.deleteAttraction(id);
-        return new ResponseEntity<>(savedAttraction, HttpStatus.OK);
+		AttractionResponse deletedAttraction = attractionService.deleteAttraction(id);
+        return new ResponseEntity<>(deletedAttraction, HttpStatus.OK);
 	}
 }

@@ -26,8 +26,8 @@ public class FeedbackCategoryController extends AbstractController {
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getFeedbackCategory(@PathVariable int id) {
-		FeedbackCategory savedCategory = feedbackCategoryService.getCategory(id);
-        return new ResponseEntity<>(savedCategory, HttpStatus.OK);
+		FeedbackCategory category = feedbackCategoryService.getCategory(id);
+        return new ResponseEntity<>(category, HttpStatus.OK);
 	}
 	
 	@GetMapping
@@ -39,13 +39,13 @@ public class FeedbackCategoryController extends AbstractController {
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> updateFeedbackCategory(@PathVariable int id, @RequestBody FeedbackCategory category) {
 		category.setFeedbackCategoryId(id);
-		FeedbackCategory savedCategory = feedbackCategoryService.updateCategory(category);
-        return new ResponseEntity<>(savedCategory, HttpStatus.OK);
+		FeedbackCategory updatedCategory = feedbackCategoryService.updateCategory(category);
+        return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteFeedbackCategory(@PathVariable int id) {
-		FeedbackCategory savedCategory = feedbackCategoryService.deleteCategory(id);
-        return new ResponseEntity<>(savedCategory, HttpStatus.OK);
+		FeedbackCategory deletedCategory = feedbackCategoryService.deleteCategory(id);
+        return new ResponseEntity<>(deletedCategory, HttpStatus.OK);
 	}
 }

@@ -27,8 +27,8 @@ public class FeedbackController extends AbstractController {
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getFeedback(@PathVariable int id) {
-		FeedbackResponse savedfeedback = feedbackService.getFeedback(id);
-		return new ResponseEntity<>(savedfeedback, HttpStatus.OK);
+		FeedbackResponse feedback = feedbackService.getFeedback(id);
+		return new ResponseEntity<>(feedback, HttpStatus.OK);
 	}
 	
 	@GetMapping("/{categoryId}/{year}/{month}")
@@ -37,16 +37,16 @@ public class FeedbackController extends AbstractController {
 			@PathVariable int year, 
 			@PathVariable int month) {
 		
-		List<FeedbackResponse> feedbackResponses = feedbackService.getFeedbackByCategoryNameAndDate(categoryId, year, month);
+		List<FeedbackResponse> feedbacks = feedbackService.getFeedbackByCategoryNameAndDate(categoryId, year, month);
 
-	    return new ResponseEntity<>(feedbackResponses, HttpStatus.OK);
+	    return new ResponseEntity<>(feedbacks, HttpStatus.OK);
 	}
 	
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> updateFeedback(@PathVariable int id, @RequestBody Feedback feedback) {
 		feedback.setFeedbackId(id);
-		FeedbackResponse savedfeedback = feedbackService.getFeedback(id);
-		return new ResponseEntity<>(savedfeedback, HttpStatus.OK);
+		FeedbackResponse updatedFeedback = feedbackService.getFeedback(id);
+		return new ResponseEntity<>(updatedFeedback, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
