@@ -17,7 +17,7 @@ import jakarta.persistence.Id;
 public class Discount {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private int discountId;
-	private int groupSize;
-	private double percentOff;
+	private Integer discountId;
+	private Integer groupSize;
+	private Double percentOff;
 }
