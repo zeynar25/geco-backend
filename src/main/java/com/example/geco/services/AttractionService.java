@@ -71,12 +71,10 @@ public class AttractionService {
         return toResponse(updated);
 	}
 	
-	public AttractionResponse deleteAttraction(int id) {
+	public void deleteAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID \""+ id + "\" not found."));
 		
 		attractionRepository.delete(attraction);
-		
-		return toResponse(attraction);
 	}
 }
