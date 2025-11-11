@@ -246,15 +246,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 					MockMvcRequestBuilders.delete("/package/" + savedPackageA.getPackageId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.packageId").value(savedPackageA.getPackageId())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.description").value(savedPackageA.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(savedPackageA.getBasePrice())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.inclusions").exists()
+					MockMvcResultMatchers.status().isNoContent()
 			);
 			
 			mockMvc.perform(

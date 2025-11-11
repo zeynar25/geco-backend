@@ -76,7 +76,7 @@ public class TourPackageService {
 		return tourPackageRepository.save(existingTourPackage);
 	}
 	
-	public TourPackage deletePackage(int id) {
+	public void deletePackage(int id) {
 		TourPackage tourPackage = tourPackageRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Package with ID \"" + id + "\" not found."));
 	    
@@ -86,6 +86,5 @@ public class TourPackageService {
 	    }
 		
 		tourPackageRepository.delete(tourPackage);
-	    return tourPackage;
 	}
 }

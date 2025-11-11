@@ -46,7 +46,7 @@ public class TourPackageController extends AbstractController{
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<TourPackage> deletePackage(@PathVariable int id) {
-		TourPackage deletedPackage = tourPackageService.deletePackage(id);
-        return new ResponseEntity<>(deletedPackage, HttpStatus.OK);
+		tourPackageService.deletePackage(id);
+	    return ResponseEntity.noContent().build();
 	}
 }
