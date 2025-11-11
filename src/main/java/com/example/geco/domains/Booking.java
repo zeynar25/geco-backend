@@ -7,6 +7,8 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +26,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name="booking")
 public class Booking {
+	public enum BookingStatus {
+	    PENDING, ACCEPTED, REJECTED, CANCELLED, COMPLETED
+	}
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private Integer bookingId;
@@ -38,7 +44,7 @@ public class Booking {
 	
 	// Extra services availed.
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookingInclusion> addOns = new ArrayList<>();
+    private List<BookingInclusion> inclusions = new ArrayList<>();
 	
 //	@ManyToOne
 //	@JoinColumn(name = "discountId", referencedColumnName = "discountId")
@@ -48,6 +54,9 @@ public class Booking {
 	private LocalTime visitTime;
 	
 	private Integer groupSize;
-	private String status;
+	
+	@Enumerated(EnumType.STRING)
+	private BookingStatus status;
+	
 	private Integer totalPrice;
 }

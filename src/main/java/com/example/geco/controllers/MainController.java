@@ -1,23 +1,17 @@
 package com.example.geco.controllers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Account;
-import com.example.geco.domains.Booking;
-import com.example.geco.domains.PackageInclusion;
-import com.example.geco.domains.TourPackage;
 
 @RestController
 public class MainController extends AbstractController{
@@ -82,25 +76,6 @@ public class MainController extends AbstractController{
 	@PostMapping("/logout")
 	public void logout(@RequestBody Account account) {
 		
-	}
-
-	// to implement
-	@PostMapping("/booking")
-	public ResponseEntity<?> addBooking(@RequestBody Booking booking) {
-		return new ResponseEntity<>(new Booking(), HttpStatus.CREATED);
-	}
-
-	// to implement
-	@GetMapping("/{id}/booking")
-	public ResponseEntity<List<Booking>> getBookingsByUser(@PathVariable("id") String userId) {
-		List<Booking> bookings = new ArrayList();
-		return new ResponseEntity<>(bookings, HttpStatus.OK);
-    }
-	
-	// to implement
-	@PutMapping("/booking/{id}")
-	public ResponseEntity<Booking> updateBooking(@RequestBody Booking booking) {
-		return new ResponseEntity<>(new Booking(), HttpStatus.OK);
 	}
 	
 	// to implement
