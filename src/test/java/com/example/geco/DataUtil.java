@@ -10,6 +10,7 @@ import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.Faq;
+import com.example.geco.domains.Feedback;
 import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
@@ -30,6 +31,16 @@ public class DataUtil {
 		detail.setSurname("Creus");
 		detail.setFirstName("Coleen");
 		detail.setEmail("krysscoleen.creus@cvsu.edu.ph");
+		
+		return detail;
+	}
+	
+	public static UserDetail createUserDetailB() {
+		UserDetail detail = new UserDetail();
+		
+		detail.setSurname("Soliman");
+		detail.setFirstName("Daniella");
+		detail.setEmail("daniellalyn.soliman@cvsu.edu.ph");
 		
 		return detail;
 	}
@@ -173,5 +184,17 @@ public class DataUtil {
 	    booking.setTotalPrice(tourPackage.getBasePrice() * booking.getGroupSize() + inclusionsPrice);
 
 	    return booking;
+	}
+	
+	public static Feedback createFeedbackA(Account account, Booking booking, FeedbackCategory category) {
+		 Feedback feedback = new Feedback();
+		 feedback.setAccount(account);      
+		 feedback.setBooking(booking); 
+		 feedback.setCategory(category); 
+		 feedback.setStars(4.5);           
+		 feedback.setComment("Great experience!"); 
+		 feedback.setSuggestion("Keep the place clean.");
+		 
+		 return feedback;
 	}
 }

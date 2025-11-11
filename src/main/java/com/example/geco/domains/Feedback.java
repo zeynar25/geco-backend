@@ -33,7 +33,7 @@ public class Feedback {
 	private Booking booking;
 
 	// Pertaining to the feedback category this feedback is related to.
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "category_id", referencedColumnName = "feedbackCategoryId")
 	private FeedbackCategory category;
 	

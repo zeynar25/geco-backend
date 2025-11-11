@@ -48,7 +48,7 @@ public class FeedbackController extends AbstractController {
 	@PatchMapping("/{id}")
 	public ResponseEntity<FeedbackResponse> updateFeedback(@PathVariable int id, @RequestBody Feedback feedback) {
 		feedback.setFeedbackId(id);
-		FeedbackResponse updatedFeedback = feedbackService.getFeedback(id);
+		FeedbackResponse updatedFeedback = feedbackService.updateFeedback(feedback);
 		return new ResponseEntity<>(updatedFeedback, HttpStatus.OK);
 	}
 

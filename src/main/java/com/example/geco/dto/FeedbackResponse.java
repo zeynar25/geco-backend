@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class FeedbackResponse {
 	private int feedbackId;
 	
-	private Account userId;
-	private Booking bookingId;
+	private Account account;
+	private Booking booking;
 	
 	private String category;
 	private double stars;

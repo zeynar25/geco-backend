@@ -18,6 +18,7 @@ import com.example.geco.services.BookingInclusionService;
 import com.example.geco.services.BookingService;
 import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
+import com.example.geco.services.FeedbackService;
 import com.example.geco.services.PackageInclusionService;
 import com.example.geco.services.TourPackageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +55,9 @@ public abstract class AbstractControllerTest {
 	
 	@Autowired
 	protected BookingInclusionService bookingInclusionService;
+	
+	@Autowired
+	protected FeedbackService feedbackService;
 	
 	@Autowired
 	protected AccountRepository accountRepository;
