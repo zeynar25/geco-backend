@@ -104,11 +104,10 @@ public class BookingInclusionService {
 		return inclusionRepository.save(existingInclusion);
 	}
 	
-	public BookingInclusion deleteInclusion(int id) {
+	public void deleteInclusion(int id) {
 		BookingInclusion inclusion = inclusionRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Booking Inclusion with ID \"" + id + "\" not found."));
 	    
 		inclusionRepository.delete(inclusion);
-	    return inclusion;
 	}
 }

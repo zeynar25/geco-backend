@@ -45,7 +45,7 @@ public class BookingInclusionController extends AbstractController{
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<BookingInclusion> deleteInclusion(@PathVariable int id) {
-		BookingInclusion deletedInclusion = bookingInclusionService.deleteInclusion(id);
-        return new ResponseEntity<>(deletedInclusion, HttpStatus.OK);
+		bookingInclusionService.deleteInclusion(id);
+	    return ResponseEntity.noContent().build();
 	}
 }

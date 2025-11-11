@@ -1,5 +1,7 @@
 package com.example.geco.domains;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +25,7 @@ public class BookingInclusion {
 
     @ManyToOne
     @JoinColumn(name = "booking_id", referencedColumnName = "bookingId")
+    @JsonBackReference
     private Booking booking;
 
     @ManyToOne
