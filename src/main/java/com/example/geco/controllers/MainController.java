@@ -1,7 +1,6 @@
 package com.example.geco.controllers;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,23 +11,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Account;
+import com.example.geco.dto.HomeStats;
 
 @RestController
 public class MainController extends AbstractController{
 	
 	// Functionalities in home page
-	@GetMapping
-	public HashMap<String, Double> home() {
-		HashMap<String, Double> stats = new HashMap<>();
-		Double attractions = attractionService.getAttractionsNumber();
-		Double monthlyVisitors = bookingService.getAverageVisitor("Month");
-		Double avgRating = feedbackService.getAverageRating();
-		
-		stats.put("attractionsNumber", attractions);
-		stats.put("monthlyVisitors", monthlyVisitors);
-		stats.put("averageRating", avgRating);
-		
-        return stats;
+	@GetMapping("/home")
+	public HomeStats home() {
+		HomeStats stats = new HomeStats(
+				attractionService.getAttractionsNumber(),
+				bookingService.getAverageVisitor("Month"),
+				feedbackService.getAverageRating()
+		);
+		return stats;
     }
 	
 	// functionalities of admin-dashboard bookings

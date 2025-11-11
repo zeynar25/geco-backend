@@ -17,7 +17,7 @@ public class AttractionService {
 	@Autowired
 	AttractionRepository attractionRepository;
 	
-	public double getAttractionsNumber() {
+	public long getAttractionsNumber() {
 		return attractionRepository.count();
 	}
 	
