@@ -14,6 +14,8 @@ import com.example.geco.repositories.TourPackageRepository;
 import com.example.geco.repositories.UserDetailRepository;
 import com.example.geco.services.AccountService;
 import com.example.geco.services.AttractionService;
+import com.example.geco.services.BookingInclusionService;
+import com.example.geco.services.BookingService;
 import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
 import com.example.geco.services.PackageInclusionService;
@@ -46,6 +48,12 @@ public abstract class AbstractControllerTest {
 	
 	@Autowired
 	protected PackageInclusionService packageInclusionService;
+	
+	@Autowired
+	protected BookingService bookingService;
+	
+	@Autowired
+	protected BookingInclusionService bookingInclusionService;
 	
 	@Autowired
 	protected AccountRepository accountRepository;

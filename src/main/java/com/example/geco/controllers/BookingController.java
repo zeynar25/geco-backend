@@ -44,6 +44,16 @@ public class BookingController extends AbstractController{
 	
 	@PatchMapping("/{id}")
 	public ResponseEntity<Booking> updateBooking(@PathVariable int id, @RequestBody Booking booking) {
+		if (booking.getAccount() == null &&
+		    booking.getTourPackage() == null &&
+		    booking.getInclusions() == null &&
+		    booking.getVisitDate() == null &&
+		    booking.getVisitTime() == null &&
+		    booking.getGroupSize() == null &&
+		    booking.getStatus() == null) {
+		    throw new IllegalArgumentException("No fields provided to update for Booking.");
+		}
+		
 		booking.setBookingId(id);
 		Booking updatedAttraction  = bookingService.updateBooking(booking);
 		return new ResponseEntity<>(updatedAttraction, HttpStatus.OK);
@@ -51,7 +61,7 @@ public class BookingController extends AbstractController{
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Booking> deleteBooking(@PathVariable int id) {
-		Booking deletedBooking = bookingService.deleteBooking(id);
-        return new ResponseEntity<>(deletedBooking, HttpStatus.OK);
+		bookingService.deleteBooking(id);
+	    return ResponseEntity.noContent().build();
 	}
 }

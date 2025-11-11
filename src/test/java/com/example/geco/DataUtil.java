@@ -96,6 +96,7 @@ public class DataUtil {
 	
 	public static TourPackage createPackageA(List<PackageInclusion> inclusions) {
 		TourPackage tourPackage = new TourPackage();
+		tourPackage.setDuration(60);
 		tourPackage.setDescription("Detailed description about this package.");
 		tourPackage.setBasePrice(500);
 		tourPackage.setInclusions(inclusions);
@@ -105,6 +106,7 @@ public class DataUtil {
 	
 	public static TourPackage createPackageB(List<PackageInclusion> inclusions) {
 		TourPackage tourPackage = new TourPackage();
+		tourPackage.setDuration(120);
 		tourPackage.setDescription("Detailed description about this package but more pricey.");
 		tourPackage.setBasePrice(1000);
 		tourPackage.setInclusions(inclusions);
@@ -135,12 +137,11 @@ public class DataUtil {
 
 	public static Booking createBookingA(Account account, TourPackage tourPackage, List<BookingInclusion> inclusions) {
 	    Booking booking = new Booking();
-	    booking.setBookingId(1);
 	    booking.setAccount(account);
 	    booking.setTourPackage(tourPackage);
 	    booking.setInclusions(inclusions);
-	    booking.setVisitDate(LocalDate.now());
-	    booking.setVisitTime(LocalTime.of(10, 30));
+	    booking.setVisitDate(LocalDate.now().plusDays(3));
+	    booking.setVisitTime(LocalTime.of(9, 30));
 	    booking.setGroupSize(4);
 	    booking.setStatus(BookingStatus.PENDING);
 	    
@@ -149,18 +150,17 @@ public class DataUtil {
 	    	inclusionsPrice += inclusion.getPriceAtBooking() * inclusion.getQuantity();
 	    }
 	    
-	    booking.setTotalPrice(tourPackage.getBasePrice() + inclusionsPrice);
+	    booking.setTotalPrice(tourPackage.getBasePrice() * booking.getGroupSize() + inclusionsPrice);
 
 	    return booking;
 	}
 	
 	public static Booking createBookingB(Account account, TourPackage tourPackage, List<BookingInclusion> inclusions) {
 	    Booking booking = new Booking();
-	    booking.setBookingId(2);
 	    booking.setAccount(account);
 	    booking.setTourPackage(tourPackage);
 	    booking.setInclusions(inclusions);
-	    booking.setVisitDate(LocalDate.now());
+	    booking.setVisitDate(LocalDate.now().plusDays(5));
 	    booking.setVisitTime(LocalTime.of(10, 30));
 	    booking.setGroupSize(4);
 	    booking.setStatus(BookingStatus.PENDING);
@@ -170,7 +170,7 @@ public class DataUtil {
 	    	inclusionsPrice += inclusion.getPriceAtBooking() * inclusion.getQuantity();
 	    }
 	    
-	    booking.setTotalPrice(tourPackage.getBasePrice() + inclusionsPrice);
+	    booking.setTotalPrice(tourPackage.getBasePrice() * booking.getGroupSize() + inclusionsPrice);
 
 	    return booking;
 	}

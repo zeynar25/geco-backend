@@ -155,7 +155,6 @@ public class BookingService {
 	public Booking updateBooking(Booking booking) {
 		if (booking.getAccount() == null &&
 				booking.getTourPackage() == null &&
-				booking.getInclusions() == null &&
 				booking.getVisitDate() == null &&
 				booking.getVisitTime() == null &&
 				booking.getGroupSize() == null &&
@@ -177,10 +176,10 @@ public class BookingService {
 			recalculatePrice = true;
 	    }
 		
-		if (booking.getInclusions() != null) {
-			existingBooking.setInclusions(booking.getInclusions());
-			recalculatePrice = true;
-		}
+//		if (booking.getInclusions() != null) {
+//			existingBooking.setInclusions(booking.getInclusions());
+//			recalculatePrice = true;
+//		}
 		
 		if (booking.getVisitDate() != null) {
 			// Should add a condition that if existingBooking.getVisitDate is 2 days from today, we can't change dates.
