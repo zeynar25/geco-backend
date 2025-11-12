@@ -3,6 +3,7 @@ package com.example.geco;
 import java.time.LocalDate;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,36 +37,6 @@ import com.example.geco.domains.TourPackage;
 import com.example.geco.domains.UserDetail;
 
 public class DataUtil {
-	@Autowired
-	protected AccountService accountService;
-	
-	@Autowired
-	protected AttractionService attractionService;
-
-	@Autowired
-	protected FeedbackCategoryService feedbackCategoryService;
-	
-	@Autowired
-	protected FaqService faqService;
-
-	@Autowired
-	protected TourPackageService tourPackageService;
-	
-	@Autowired
-	protected PackageInclusionService packageInclusionService;
-	
-	@Autowired
-	protected BookingService bookingService;
-	
-	@Autowired
-	protected BookingInclusionService bookingInclusionService;
-	
-	@Autowired
-	protected FeedbackService feedbackService;
-	
-	@Autowired
-	protected AccountRepository accountRepository;
-	
 	public static UserDetail createUserDetailA() {
 		UserDetail detail = new UserDetail();
 		
@@ -166,7 +137,13 @@ public class DataUtil {
 		return inclusion;
 	}
 	
-	public static TourPackage createPackageA(List<PackageInclusion> inclusions) {
+	public static TourPackage createPackageA(PackageInclusionService packageInclusionService) {
+		PackageInclusion inclusion = DataUtil.createPackageInclusionA();
+		packageInclusionService.addInclusion(inclusion);
+		
+		List<PackageInclusion> inclusions = new ArrayList<>();
+		inclusions.add(inclusion);
+		
 		TourPackage tourPackage = new TourPackage();
 		tourPackage.setDuration(60);
 		tourPackage.setDescription("Detailed description about this package.");
@@ -176,7 +153,17 @@ public class DataUtil {
 		return tourPackage;
 	}
 	
-	public static TourPackage createPackageB(List<PackageInclusion> inclusions) {
+	public static TourPackage createPackageB(PackageInclusionService packageInclusionService) {
+		PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
+		packageInclusionService.addInclusion(inclusionA);
+		
+		PackageInclusion inclusionB = DataUtil.createPackageInclusionB();
+		packageInclusionService.addInclusion(inclusionB);
+		
+		List<PackageInclusion> inclusions = new ArrayList<>();
+		inclusions.add(inclusionA);
+		inclusions.add(inclusionB);
+		
 		TourPackage tourPackage = new TourPackage();
 		tourPackage.setDuration(120);
 		tourPackage.setDescription("Detailed description about this package but more pricey.");

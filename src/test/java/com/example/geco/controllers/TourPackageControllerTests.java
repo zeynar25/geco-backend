@@ -20,13 +20,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
     class SuccessTests {
 		@Test
 		public void canAddPackage() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
 			mockMvc.perform(
@@ -48,13 +42,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void canGetPackage() throws Exception {
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
 			
 			mockMvc.perform(
@@ -75,16 +63,10 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void canGetAllPackages() throws Exception {
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
 			
-			TourPackage packageB = DataUtil.createPackageB(inclusions);
+			TourPackage packageB = DataUtil.createPackageB(packageInclusionService);
 			TourPackage savedPackageB = tourPackageService.addPackage(packageB);
 			
 			mockMvc.perform(
@@ -125,13 +107,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void canUpdatePackage() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
 			
 			packageA.setDescription("new description for this package");
@@ -157,13 +133,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 
 		@Test
 		public void canUpdatePackageDescriptionOnly() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
 
 			TourPackage newPackage = new TourPackage(
@@ -195,13 +165,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 
 		@Test
 		public void canUpdatePackagePriceOnly() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
 
 			TourPackage newPackage = new TourPackage(
@@ -233,13 +197,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 
 		@Test
 		public void canDeletePackage() throws Exception {
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
 			
 			mockMvc.perform(
@@ -262,13 +220,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
     class FailureTests {
 		@Test
 		public void cannotAddPackageNullDescription() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setDescription(null);
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
@@ -285,13 +237,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotAddPackageBlankDescription() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setDescription("    ");
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
@@ -308,13 +254,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotAddPackageShortDescription() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setDescription("short");
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
@@ -331,13 +271,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotAddPackageNullPrice() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setBasePrice(null);
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
@@ -354,13 +288,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotAddPackageInvalidPrice() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setBasePrice(-1);
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
@@ -377,13 +305,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotAddPackageNullInclusion() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setInclusions(null);
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
@@ -400,16 +322,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotAddPackageMissingInclusion() throws Exception{
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
-			
-			inclusions.clear();
-			packageA.setInclusions(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
+			packageA.getInclusions().clear();
 			String packageJson = objectMapper.writeValueAsString(packageA);
 			
 			mockMvc.perform(
@@ -442,13 +356,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		
 		@Test
 		public void cannotUpdatePackageIdNotFound() throws Exception {
-			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-			packageInclusionService.addInclusion(inclusionA);
-
-			List<PackageInclusion> inclusions = new ArrayList<>();
-			inclusions.add(inclusionA);
-			
-			TourPackage packageA = DataUtil.createPackageA(inclusions);
+			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
 			packageA.setPackageId(0);
 			String packageJson = objectMapper.writeValueAsString(packageA);
 
