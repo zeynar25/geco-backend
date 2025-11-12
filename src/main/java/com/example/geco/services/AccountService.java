@@ -9,7 +9,6 @@ import com.example.geco.domains.Account;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
-import com.example.geco.dto.SignupRequest;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.UserDetailRepository;
 
@@ -50,9 +49,8 @@ public class AccountService {
         );
 	}
 	
-	public AccountResponse addAccount(SignupRequest request) {
-		Account account = request.getAccount();
-		UserDetail detail = request.getUserDetail();
+	public AccountResponse addAccount(Account account) {
+		UserDetail detail = account.getDetail();
 		validateResponse(account, detail);
 		
 		if (account.getPassword() == null || account.getPassword().trim().length() < 8) {
@@ -139,9 +137,8 @@ public class AccountService {
 		return toResponse(existingAccount, "No changes made");
 	}
 	
-	public AccountResponse updateAccount(SignupRequest request) {
-		Account account = request.getAccount();
-		UserDetail detail = request.getUserDetail();
+	public AccountResponse updateAccount(Account account) {
+		UserDetail detail = account.getDetail();
 		validateResponse(account, detail);
 		
 		Account existingAccount = accountRepository.findById(account.getAccountId())

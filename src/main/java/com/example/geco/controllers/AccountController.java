@@ -12,14 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.geco.domains.Account;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
-import com.example.geco.dto.SignupRequest;
 
 @RestController
 @RequestMapping("/account")
 public class AccountController extends AbstractController{
 	@PostMapping
-	public ResponseEntity<AccountResponse> addAccount(@RequestBody SignupRequest request) {
-		AccountResponse savedAccount  = accountService.addAccount(request);
+	public ResponseEntity<AccountResponse> addAccount(@RequestBody Account account) {
+		AccountResponse savedAccount  = accountService.addAccount(account);
 		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
 	}
 	
