@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Account;
+import com.example.geco.domains.Attraction;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
@@ -185,5 +186,11 @@ public class AccountService {
 		
 
 		return toResponse(existingAccount, censoredPassword);
+	}
+	
+	public Account getAccount(int id) {
+		Account account = accountRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+        return account;
 	}
 }
