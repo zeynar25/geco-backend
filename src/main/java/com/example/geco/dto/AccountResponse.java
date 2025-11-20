@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AccountResponse {
 	Integer accountId;
+	String role;
 	String passwordNotice;
 	
 	Integer detailId;

@@ -1,7 +1,5 @@
 package com.example.geco.controllers;
 
-import java.util.HashMap;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +24,15 @@ public class MainController extends AbstractController{
 		);
 		return stats;
     }
+	
+	// to implement
+	// payment function, either through gcash api or saving a screenshot of proof of payment
+	
+	// to implement
+	@GetMapping("/calendar/{year}/{month}")
+	public ResponseEntity<?> displayCalendar(@PathVariable int year, @PathVariable int month) {
+		return new ResponseEntity<>("calendar", HttpStatus.OK);
+	}
 	
 	// functionalities of admin-dashboard bookings
 	@GetMapping("/dashboard/bookings")
@@ -61,25 +68,5 @@ public class MainController extends AbstractController{
 	@GetMapping("/dashboard/attractions")
 	public void displayDashboardAttractions() {
 		
-	}
-	
-	// to implement
-	@PostMapping("/login")
-	public void login(@RequestBody Account account) {
-	}
-	
-	// to implement
-	@PostMapping("/logout")
-	public void logout(@RequestBody Account account) {
-		
-	}
-	
-	// to implement
-	// payment function, either through gcash api or saving a screenshot of proof of payment
-	
-	// to implement
-	@GetMapping("/calendar/{year}/{month}")
-	public ResponseEntity<?> displayCalendar(@PathVariable int year, @PathVariable int month) {
-		return new ResponseEntity<>("calendar", HttpStatus.OK);
 	}
 }

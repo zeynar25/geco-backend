@@ -6,27 +6,14 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Attraction;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.dto.AccountResponse;
-import com.example.geco.repositories.AccountRepository;
-import com.example.geco.repositories.AttractionRepository;
-import com.example.geco.repositories.FaqRepository;
-import com.example.geco.repositories.FeedbackCategoryRepository;
-import com.example.geco.repositories.PackageInclusionRepository;
-import com.example.geco.repositories.TourPackageRepository;
-import com.example.geco.repositories.UserDetailRepository;
 import com.example.geco.services.AccountService;
-import com.example.geco.services.AttractionService;
-import com.example.geco.services.BookingInclusionService;
 import com.example.geco.services.BookingService;
-import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
-import com.example.geco.services.FeedbackService;
 import com.example.geco.services.PackageInclusionService;
 import com.example.geco.services.TourPackageService;
 import com.example.geco.domains.BookingInclusion;
@@ -205,7 +192,7 @@ public class DataUtil {
 			TourPackageService tourPackageService,
 			PackageInclusionService packageInclusionService) {
 		Account account = DataUtil.createAccountA();
-		AccountResponse savedResponse = accountService.addAccount(account);
+		AccountResponse savedResponse = accountService.addTouristAccount(account);
 		
 		Account savedAccount = accountService.getAccount(savedResponse.getAccountId());
 		
@@ -240,7 +227,7 @@ public class DataUtil {
 			TourPackageService tourPackageService,
 			PackageInclusionService packageInclusionService) {
 		Account account = DataUtil.createAccountA();
-		AccountResponse savedResponse = accountService.addAccount(account);
+		AccountResponse savedResponse = accountService.addTouristAccount(account);
 		
 		Account savedAccount = accountService.getAccount(savedResponse.getAccountId());
 		

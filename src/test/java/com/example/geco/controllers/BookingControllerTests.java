@@ -47,7 +47,7 @@ public class BookingControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.account").value(savedBookingA.getAccount())
+					MockMvcResultMatchers.jsonPath("$.account.accountId").value(savedBookingA.getAccount().getAccountId())
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.tourPackage.packageId").value(savedBookingA.getTourPackage().getPackageId())
 			).andExpect(
@@ -85,7 +85,7 @@ public class BookingControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].account").value(savedBookingA.getAccount())
+					MockMvcResultMatchers.jsonPath("$[0].account.accountId").value(savedBookingA.getAccount().getAccountId())
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$[0].tourPackage.packageId").value(savedBookingA.getTourPackage().getPackageId())
 			).andExpect(
@@ -101,7 +101,7 @@ public class BookingControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$[0].totalPrice").value(savedBookingA.getTotalPrice())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].account").value(savedBookingB.getAccount())
+					MockMvcResultMatchers.jsonPath("$[1].account.accountId").value(savedBookingB.getAccount().getAccountId())
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$[1].tourPackage.packageId").value(savedBookingB.getTourPackage().getPackageId())
 			).andExpect(
@@ -187,7 +187,7 @@ public class BookingControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.account").value(savedBookingA.getAccount())
+					MockMvcResultMatchers.jsonPath("$.account.accountId").value(savedBookingA.getAccount().getAccountId())
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.tourPackage.packageId").value(savedBookingA.getTourPackage().getPackageId())
 			).andExpect(

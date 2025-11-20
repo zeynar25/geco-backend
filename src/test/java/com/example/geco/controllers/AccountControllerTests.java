@@ -3,6 +3,7 @@ package com.example.geco.controllers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -44,7 +45,8 @@ public class AccountControllerTests extends AbstractControllerTest {
 		public void canUpdateAccountPassword() throws Exception {
 			Account accountA = DataUtil.createAccountA();
 			
-			AccountResponse savedResponse = accountService.addAccount(accountA);
+			// Save a guest account in the database.
+			AccountResponse savedResponse = accountService.addTouristAccount(accountA);
 			
 			// Fetch the saved account and detail
 		    Account managedAccount = accountRepository.findById(savedResponse.getAccountId()).get();
@@ -57,13 +59,15 @@ public class AccountControllerTests extends AbstractControllerTest {
 		    String accountJson = objectMapper.writeValueAsString(managedAccount);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-password/" + managedAccount.getAccountId())
+					MockMvcRequestBuilders.patch("/account/update-account/" + managedAccount.getAccountId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(accountJson)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.passwordNotice").value(censoredPassword)
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.role").value(managedAccount.getRole().toString())
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.surname").value(managedDetail.getSurname())
 			).andExpect(
@@ -76,7 +80,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		public void canUpdateAccountDetailsEmail() throws Exception {
 			Account accountA = DataUtil.createAccountA();
-			AccountResponse savedResponse = accountService.addAccount(accountA);
+			AccountResponse savedResponse = accountService.addTouristAccount(accountA);
 			
 			// Fetch the saved account and detail
 		    Account managedAccount = accountRepository.findById(savedResponse.getAccountId()).get();
@@ -96,6 +100,8 @@ public class AccountControllerTests extends AbstractControllerTest {
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.passwordNotice").value("No changes made")
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.role").value(managedAccount.getRole().toString())
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.surname").value(managedDetail.getSurname())
 			).andExpect(
@@ -135,7 +141,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		    String requestJson = objectMapper.writeValueAsString(accountA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-password/" + accountA.getAccountId())
+					MockMvcRequestBuilders.patch("/account/update-account/" + accountA.getAccountId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(requestJson)
 			).andExpect(
@@ -148,13 +154,13 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		public void cannotUpdateAccountImproperPassword() throws Exception {
 			Account accountA = DataUtil.createAccountA();
-			accountService.addAccount(accountA);
+			accountService.addTouristAccount(accountA);
 			
 			accountA.setPassword("123"); // password too short.
 		    String accountJson = objectMapper.writeValueAsString(accountA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-password/" + accountA.getAccountId())
+					MockMvcRequestBuilders.patch("/account/update-account/" + accountA.getAccountId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(accountJson)
 			).andExpect(
@@ -167,7 +173,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		public void cannotUpdateAccountImproperEmail() throws Exception {
 			Account accountA = DataUtil.createAccountA();
-			AccountResponse savedAccount = accountService.addAccount(accountA);
+			AccountResponse savedAccount = accountService.addTouristAccount(accountA);
 			
 			DetailRequest newRequest = new DetailRequest();
 		    newRequest.setAccountId(savedAccount.getAccountId());

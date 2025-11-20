@@ -7,5 +7,4 @@ import com.example.geco.domains.UserDetail;
 
 @Repository
 public interface UserDetailRepository extends JpaRepository<UserDetail, Integer>{
-
 }

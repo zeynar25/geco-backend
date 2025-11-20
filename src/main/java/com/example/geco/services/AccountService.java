@@ -1,12 +1,17 @@
 package com.example.geco.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Account;
-import com.example.geco.domains.Attraction;
+import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
@@ -18,7 +23,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class AccountService {
+public class AccountService implements UserDetailsService{
 	@Autowired
 	private AccountRepository accountRepository;
 	
@@ -26,6 +31,19 @@ public class AccountService {
 	private UserDetailRepository userDetailRepository;
 	
 	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	
+	
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Optional<Account> account = accountRepository.findByDetailEmail(username);
+		
+        if (account.isEmpty()) {
+            throw new UsernameNotFoundException("User not found with email: " + username);
+        }
+        
+        return account.get();
+	}
+	
 	
 	private void validateResponse(Account account, UserDetail detail) {
 		if (account == null) {
@@ -41,6 +59,7 @@ public class AccountService {
 		UserDetail detail = account.getDetail();
         return new AccountResponse(
                 account.getAccountId(),
+                account.getRole().toString(),
                 censoredPassword,
                 detail.getDetailId(),
                 detail.getSurname(),
@@ -50,10 +69,7 @@ public class AccountService {
         );
 	}
 	
-	public AccountResponse addAccount(Account account) {
-		UserDetail detail = account.getDetail();
-		validateResponse(account, detail);
-		
+	public AccountResponse addAccount(Account account, UserDetail detail) {
 		if (account.getPassword() == null || account.getPassword().trim().length() < 8) {
 		    throw new IllegalArgumentException("Password must have at least 8 characters.");
 		}
@@ -72,6 +88,22 @@ public class AccountService {
 		accountRepository.save(account);
 		
 		return toResponse(account, censoredPassword);
+	}
+	
+	public AccountResponse addTouristAccount(Account account) {
+		UserDetail detail = account.getDetail();
+		validateResponse(account, detail);
+        account.setRole(Role.GUEST);
+		
+		return addAccount(account, detail);
+	}
+	
+	public AccountResponse addAccountByAdmin(Account account) {
+		UserDetail detail = account.getDetail();
+		validateResponse(account, detail);
+        account.setRole(account.getRole());
+		
+		return addAccount(account, detail);
 	}
 	
 	public AccountResponse updatePassword(Account account) {
@@ -98,44 +130,6 @@ public class AccountService {
         return toResponse(
         		existingAccount, "*".repeat(account.getPassword().length())
         );
-	}
-	
-	public AccountResponse updateDetails(DetailRequest request) {
-		if (request.getAccountId() == null) {
-			throw new IllegalArgumentException("Account ID is null.");
-		}
-			
-		Account existingAccount = accountRepository.findById(request.getAccountId())
-				.orElseThrow(() -> new EntityNotFoundException("Account not found."));
-		
-		UserDetail existingDetail = existingAccount.getDetail();
-		
-        // Update email if provided.
-        if (request.getEmail() != null && !request.getEmail().isBlank()) {
-            if (!request.getEmail().contains("@") || request.getEmail().trim().length() < 5) {
-                throw new IllegalArgumentException("Please include a proper email address.");
-            }
-            existingDetail.setEmail(request.getEmail());
-        }
-
-        // Update surname if provided.
-        if (request.getSurname() != null) {
-        	existingDetail.setSurname(request.getSurname());
-        }
-
-        // Update first name if provided.
-        if (request.getFirstName() != null) {
-        	existingDetail.setFirstName(request.getFirstName());
-        }
-
-        // Update contact number if provided.
-        if (request.getContactNumber() != null) {
-        	existingDetail.setContactNumber(request.getContactNumber());
-        }
-
-		accountRepository.save(existingAccount);
-
-		return toResponse(existingAccount, "No changes made");
 	}
 	
 	public AccountResponse updateAccount(Account account) {
@@ -186,6 +180,49 @@ public class AccountService {
 		
 
 		return toResponse(existingAccount, censoredPassword);
+	}
+	
+	public AccountResponse updateAccountByAdmin(Account account) {
+        account.setRole(account.getRole());
+        return updateAccount(account);
+	}
+	
+	public AccountResponse updateDetails(DetailRequest request) {
+		if (request.getAccountId() == null) {
+			throw new IllegalArgumentException("Account ID is null.");
+		}
+			
+		Account existingAccount = accountRepository.findById(request.getAccountId())
+				.orElseThrow(() -> new EntityNotFoundException("Account not found."));
+		
+		UserDetail existingDetail = existingAccount.getDetail();
+		
+        // Update email if provided.
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            if (!request.getEmail().contains("@") || request.getEmail().trim().length() < 5) {
+                throw new IllegalArgumentException("Please include a proper email address.");
+            }
+            existingDetail.setEmail(request.getEmail());
+        }
+
+        // Update surname if provided.
+        if (request.getSurname() != null) {
+        	existingDetail.setSurname(request.getSurname());
+        }
+
+        // Update first name if provided.
+        if (request.getFirstName() != null) {
+        	existingDetail.setFirstName(request.getFirstName());
+        }
+
+        // Update contact number if provided.
+        if (request.getContactNumber() != null) {
+        	existingDetail.setContactNumber(request.getContactNumber());
+        }
+
+		accountRepository.save(existingAccount);
+
+		return toResponse(existingAccount, "No changes made");
 	}
 	
 	public Account getAccount(int id) {
