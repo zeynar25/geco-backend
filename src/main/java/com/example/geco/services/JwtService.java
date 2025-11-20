@@ -63,5 +63,16 @@ public class JwtService {
 	private Date extractExpiration(String token) {
 		return extractClaim(token, Claims::getExpiration);
 	}
+
+	public long getExpiryMillis(String token) {
+		Claims claims = Jwts.parserBuilder()      
+	            .setSigningKey(getkey())            
+	            .build()
+	            .parseClaimsJws(token)
+	            .getBody();
+		
+		Date expiration = claims.getExpiration();
+		return expiration.getTime();
+	}
 	
 }

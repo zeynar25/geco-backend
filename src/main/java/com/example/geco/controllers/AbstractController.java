@@ -12,6 +12,7 @@ import com.example.geco.services.FeedbackCategoryService;
 import com.example.geco.services.FeedbackService;
 import com.example.geco.services.JwtService;
 import com.example.geco.services.PackageInclusionService;
+import com.example.geco.services.TokenBlacklistService;
 import com.example.geco.services.TourPackageService;
 
 public abstract class AbstractController {
@@ -47,4 +48,7 @@ public abstract class AbstractController {
     
     @Autowired
     protected JwtService jwtService;
+    
+    @Autowired
+    protected TokenBlacklistService tokenBlacklistService;
 }

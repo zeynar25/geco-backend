@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.geco.services.AccountService;
 import com.example.geco.services.JwtService;
+import com.example.geco.services.TokenBlacklistService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,6 +23,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtFilter extends OncePerRequestFilter{
 
+	@Autowired
+	private TokenBlacklistService blacklistService;
+	
 	@Autowired
 	private JwtService jwtService;
 	
@@ -39,6 +43,13 @@ public class JwtFilter extends OncePerRequestFilter{
 		
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			token = authHeader.substring(7);
+			
+			// Check if token is marked as a logged out account.
+			if (blacklistService.isBlacklisted(token)) {
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            return;
+	        }
+			
 			username = jwtService.extractUsername(token);
 		}
 		

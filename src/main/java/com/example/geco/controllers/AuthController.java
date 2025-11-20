@@ -21,6 +21,21 @@ public class AuthController extends AbstractController{
 		String token = authService.verify(request);
         return ResponseEntity.ok(token);
 	}
+	
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(HttpServletRequest request) {
+	    String authHeader = request.getHeader("Authorization");
+	    
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	        return ResponseEntity.badRequest().body("No token provided");
+	    }
+	    
+	    String token = authHeader.substring(7); 
+	    tokenBlacklistService.blacklist(token);
+	    
+	    return ResponseEntity.ok("Logged out successfully");
+	}
+
 
     @GetMapping("/my-account")
     public Account getMyAccount(HttpServletRequest request) {
