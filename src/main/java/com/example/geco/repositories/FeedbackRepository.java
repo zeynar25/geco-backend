@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.geco.domains.Feedback;
+import com.example.geco.domains.Feedback.FeedbackStatus;
 
 @Repository
 public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
@@ -25,4 +26,6 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 	);
 	
 	List<Feedback> findByCategory_FeedbackCategoryId(int id);
+
+	Integer countByStatus(FeedbackStatus status);
 }

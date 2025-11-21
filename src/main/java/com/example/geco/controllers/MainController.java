@@ -1,5 +1,7 @@
 package com.example.geco.controllers;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -8,7 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.geco.domains.Feedback.FeedbackStatus;
 import com.example.geco.dto.CalendarDay;
+import com.example.geco.dto.DashboardStats;
 import com.example.geco.dto.HomeStats;
 
 @RestController
@@ -35,12 +39,14 @@ public class MainController extends AbstractController{
 	}
 	
 	@GetMapping("/dashboard")
-	public void displayDashboard() {
-//		admin-dashboard
-//		 - current month's booking
-//		 - current month's revenue
-//		 - pending bookings
-//		 - current month's feedback
+	public DashboardStats displayDashboard() {
+		DashboardStats stats = new DashboardStats(
+				bookingService.getNumberOfBookingByMonth(LocalDate.now()),
+				bookingService.getRevenueByMonth(LocalDate.now()),
+				bookingService.getNumberOfPendingBookings(),
+				feedbackService.getNumberOfNewFeedbacks(FeedbackStatus.NEW)
+		);
+		return stats;
 	}
 	
 	// functionalities of admin-dashboard bookings

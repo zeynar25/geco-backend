@@ -2,7 +2,7 @@ package com.example.geco.dto;
 
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Booking;
-import com.example.geco.domains.FeedbackCategory;
+import com.example.geco.domains.Feedback.FeedbackStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,5 +21,5 @@ public class FeedbackResponse {
 	private double stars;
 	private String comment;
 	private String suggestion;
-	private String Status;
+	private FeedbackStatus status;
 }

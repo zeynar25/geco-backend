@@ -1,6 +1,8 @@
 package com.example.geco.domains;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,6 +20,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name="feedback")
 public class Feedback {
+	public enum FeedbackStatus {
+	    NEW, VIEWED
+	}
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private Integer feedbackId;
@@ -40,5 +46,7 @@ public class Feedback {
 	private Double stars;
 	private String comment;
 	private String suggestion;
-	private String status;
+	
+	@Enumerated(EnumType.STRING)
+	private FeedbackStatus status;
 }

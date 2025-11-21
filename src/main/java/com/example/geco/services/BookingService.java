@@ -2,8 +2,11 @@ package com.example.geco.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.BookingInclusion;
+import com.example.geco.dto.CalendarDay;
 import com.example.geco.repositories.BookingRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -276,5 +280,75 @@ public class BookingService {
 		}
 			
 		return n;
+	}
+	
+	public Map<Integer, CalendarDay> getCalendar(int year, int month) {
+		if (year <= 0) {
+	        throw new IllegalArgumentException("Invalid year.");
+		}
+		
+		if (month <= 0 || month > 12) {
+	        throw new IllegalArgumentException("Invalid month.");
+		}
+		
+		Map<Integer, CalendarDay> calendar = new HashMap<>();
+		
+		YearMonth yearMonth = YearMonth.of(year, month);
+        int daysInMonth = yearMonth.lengthOfMonth();
+        
+    	List<Booking> allBookings = bookingRepository.findByVisitDateBetween(
+    		    LocalDate.of(year, month, 1),
+    		    LocalDate.of(year, month, daysInMonth)
+    		);
+    	
+    	Map<LocalDate, List<Booking>> bookingsByDate = allBookings.stream()
+    		    .collect(Collectors.groupingBy(Booking::getVisitDate));
+        
+        for (int day = 1; day <= daysInMonth; day++) {
+        	LocalDate date = LocalDate.of(year, month, day);
+            List<Booking> bookingList = bookingsByDate.getOrDefault(date, List.of());
+            
+        	int visitorCount = 0;
+        	for (Booking booking : bookingList) {
+        		visitorCount += booking.getGroupSize();
+        	}
+
+        	CalendarDay cDay = new CalendarDay();
+        	cDay.setBookings(bookingList.size());
+        	cDay.setVisitors(visitorCount);
+       
+        	calendar.put(day, cDay);
+        }
+		
+		return calendar;
+	}
+	
+	public Integer getNumberOfBookingByMonth(LocalDate date) {
+		Integer year = date.getYear();
+		Integer month = date.getMonthValue();
+		
+		YearMonth yearMonth = YearMonth.of(year, month);
+	    LocalDate startDate = yearMonth.atDay(1);
+	    LocalDate endDate = yearMonth.atEndOfMonth();
+		
+		List<Booking> bookings = bookingRepository.findByVisitDateBetween(startDate, endDate);
+		
+		return bookings.size();
+	}
+
+	public Integer getRevenueByMonth(LocalDate date) {
+		Integer year = date.getYear();
+		Integer month = date.getMonthValue();
+		
+		YearMonth yearMonth = YearMonth.of(year, month);
+	    LocalDate startDate = yearMonth.atDay(1);
+	    LocalDate endDate = yearMonth.atEndOfMonth();
+		
+	    Integer revenue = bookingRepository.getRevenueByMonth(startDate, endDate, BookingStatus.COMPLETED);
+		return revenue != null ? revenue : 0;
+	}
+
+	public Integer getNumberOfPendingBookings() {
+		return bookingRepository.countByStatus(BookingStatus.PENDING).intValue();
 	}
 }

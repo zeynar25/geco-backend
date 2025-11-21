@@ -12,6 +12,7 @@ import com.example.geco.DataUtil;
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Feedback;
 import com.example.geco.domains.FeedbackCategory;
+import com.example.geco.domains.Feedback.FeedbackStatus;
 import com.example.geco.dto.FeedbackResponse;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -49,7 +50,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(feedbackA.getSuggestion())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.status").value("New")
+	        		MockMvcResultMatchers.jsonPath("$.status").value(FeedbackStatus.NEW.toString())
 			);
 		}
 		
@@ -82,7 +83,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(savedFeedbackA.getSuggestion())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.status").value("New")
+	        		MockMvcResultMatchers.jsonPath("$.status").value(FeedbackStatus.NEW.toString())
 			);
 		}
 		
@@ -123,7 +124,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[0].suggestion").value(savedFeedbackA.getSuggestion())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[0].status").value("New")
+	        		MockMvcResultMatchers.jsonPath("$[0].status").value(FeedbackStatus.NEW.toString())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].feedbackId").value(savedFeedbackB.getFeedbackId())
 			).andExpect(
@@ -139,7 +140,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].suggestion").value(savedFeedbackB.getSuggestion())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[1].status").value("New")
+	        		MockMvcResultMatchers.jsonPath("$[1].status").value(FeedbackStatus.NEW.toString())
 			);
 		}
 		
@@ -183,7 +184,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(savedFeedbackA.getSuggestion())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.status").value("New")
+	        		MockMvcResultMatchers.jsonPath("$.status").value(FeedbackStatus.NEW.toString())
 			);
 		}
 		
@@ -197,7 +198,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 		    FeedbackResponse savedFeedbackA = feedbackService.addFeedback(feedbackA);
 		    
 		    Feedback newFeedback = new Feedback();
-		    newFeedback.setStatus("Viewed");
+		    newFeedback.setStatus(FeedbackStatus.VIEWED);
 		    
 			String feedbackJson = objectMapper.writeValueAsString(newFeedback);
 			
@@ -222,7 +223,7 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(savedFeedbackA.getSuggestion())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.status").value(newFeedback.getStatus())
+	        		MockMvcResultMatchers.jsonPath("$.status").value(newFeedback.getStatus().toString())
 			);
 		}
 		
@@ -387,31 +388,6 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.error").value("Category not found.")
-			);
-		}
-	    
-	    @Test
-		public void cannotUpdateFeedbackInvalidStatus() throws Exception {
-			Feedback feedbackA = DataUtil.createFeedbackA(accountService, 
-					tourPackageService, 
-					packageInclusionService,
-					bookingService,
-					feedbackCategoryService);
-		    FeedbackResponse savedFeedbackA = feedbackService.addFeedback(feedbackA);
-		    
-		    Feedback newFeedback = new Feedback();
-		    newFeedback.setStatus("completed");
-		    
-			String feedbackJson = objectMapper.writeValueAsString(newFeedback);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/feedback/" + savedFeedbackA.getFeedbackId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(feedbackJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Invalid status value. Must be 'New' or 'Viewed'.")
 			);
 		}
 	    

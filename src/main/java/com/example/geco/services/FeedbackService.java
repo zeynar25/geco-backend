@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Feedback;
+import com.example.geco.domains.Feedback.FeedbackStatus;
 import com.example.geco.domains.FeedbackCategory;
+import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.dto.FeedbackResponse;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
@@ -95,7 +97,7 @@ public class FeedbackService {
 				.orElseThrow(() -> new EntityNotFoundException("Category not found."));
 		
 		feedback.setCategory(existingCategory);
-		feedback.setStatus("New");
+		feedback.setStatus(FeedbackStatus.NEW);
 	    
 	    return toResponse(feedbackRepository.save(feedback));
 	}
@@ -176,13 +178,7 @@ public class FeedbackService {
 	    } 
 		
 		if (feedback.getStatus() != null) {
-			String status = feedback.getStatus().strip();
-			
-			if ("New".equals(status) || "Viewed".equals(status)) {
-			    existingFeedback.setStatus(status);  
-			} else {
-		        throw new IllegalArgumentException("Invalid status value. Must be 'New' or 'Viewed'.");
-		    }
+			existingFeedback.setStatus(feedback.getStatus());
 	    } 
 	    
 	    return toResponse(feedbackRepository.save(existingFeedback));
@@ -197,5 +193,10 @@ public class FeedbackService {
 	
 	public double getAverageRating() {
 		return feedbackRepository.getAverageStars();
+	}
+
+	public int getNumberOfNewFeedbacks(FeedbackStatus status) {
+		Integer count = feedbackRepository.countByStatus(status);
+	    return count != null ? count : 0;
 	}
 }
