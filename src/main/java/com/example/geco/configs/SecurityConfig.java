@@ -31,6 +31,7 @@ public class SecurityConfig {
 		return http.csrf(customizer -> 
 				customizer.disable())
 			.authorizeHttpRequests(request -> request
+					.requestMatchers(HttpMethod.GET, "/attraction/**").permitAll()
 					.requestMatchers("/account/admin/**").hasRole("ADMIN")
 					.requestMatchers("/attraction/**").hasRole("ADMIN")
 					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -16,11 +17,11 @@ import com.example.geco.domains.Attraction;
 import com.example.geco.dto.AttractionResponse;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@AutoConfigureMockMvc(addFilters = false) // disables spring security for attraction controller tests.
 public class AttractionControllerTests extends AbstractControllerTest{
 	@Nested
     class SuccessTests {
  		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canAddAttraction() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			String attractionJson = objectMapper.writeValueAsString(attractionA);
@@ -39,6 +40,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canGetAttraction() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -57,6 +59,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canGetAllAttraction() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -84,6 +87,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canUpdateAttraction() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -107,6 +111,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canDeleteAttraction() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -127,6 +132,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canGetNumberOfAttractions() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			Attraction attractionB = DataUtil.createAttractionB();
@@ -144,6 +150,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
  	@Nested
     class FailureTests {
 	 	@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotAddAttractionImproperTitle() throws Exception {
 			Attraction attraction = DataUtil.createAttractionA();
 		    attraction.setName(""); // invalid title
@@ -161,6 +168,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotAddAttractionImproperDescription() throws Exception {
 			Attraction attraction = DataUtil.createAttractionA();
 		    attraction.setName("valid title"); 
@@ -179,6 +187,22 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "GUEST")
+		public void cannotAddAttractionAsGuest() throws Exception {
+			Attraction attractionA = DataUtil.createAttractionA();
+			String attractionJson = objectMapper.writeValueAsString(attractionA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.post("/attraction")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(attractionJson)
+			).andExpect(
+					MockMvcResultMatchers.status().isForbidden()
+			);
+		}
+		
+		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotGetAttraction() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionA.setAttractionId(0);
@@ -195,6 +219,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotUpdateAttractionImproperName() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -214,6 +239,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotUpdateAttractionImproperDescription() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -233,6 +259,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotUpdateAttractionMissing() throws Exception {
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionA.setAttractionId(0);
@@ -250,6 +277,25 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "GUEST")
+		public void cannotUpdateAttractionAsGuest() throws Exception {
+			Attraction attractionA = DataUtil.createAttractionA();
+			attractionService.addAttraction(attractionA);
+			
+			attractionA.setName("Ang Ina ng Kalikasan");
+		    String attractionJson = objectMapper.writeValueAsString(attractionA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/attraction/" + attractionA.getAttractionId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(attractionJson)
+			).andExpect(
+					MockMvcResultMatchers.status().isForbidden()
+			);
+		}
+		
+		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotDeleteAttraction() throws Exception {
 			int id = 1;
 			
@@ -260,6 +306,20 @@ public class AttractionControllerTests extends AbstractControllerTest{
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
 					MockMvcResultMatchers.jsonPath("$.error").value("Attraction with ID \""+ id + "\" not found.")
+			);
+		}
+
+		@Test
+		@WithMockUser(roles = "GUEST")
+		public void cannotDeleteAttractionAsGuest() throws Exception {
+			Attraction attractionA = DataUtil.createAttractionA();
+			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.delete("/attraction/" + savedAttractionA.getAttractionId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isForbidden()
 			);
 		}
 	 
