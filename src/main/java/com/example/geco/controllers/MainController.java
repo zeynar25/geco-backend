@@ -1,14 +1,14 @@
 package com.example.geco.controllers;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.geco.domains.Account;
+import com.example.geco.dto.CalendarDay;
 import com.example.geco.dto.HomeStats;
 
 @RestController
@@ -28,15 +28,25 @@ public class MainController extends AbstractController{
 	// to implement
 	// payment function, either through gcash api or saving a screenshot of proof of payment
 	
-	// to implement
 	@GetMapping("/calendar/{year}/{month}")
 	public ResponseEntity<?> displayCalendar(@PathVariable int year, @PathVariable int month) {
-		return new ResponseEntity<>("calendar", HttpStatus.OK);
+		Map<Integer, CalendarDay> calendar = bookingService.getCalendar(year, month);
+		return new ResponseEntity<>(calendar, HttpStatus.OK);
+	}
+	
+	@GetMapping("/dashboard")
+	public void displayDashboard() {
+//		admin-dashboard
+//		 - current month's booking
+//		 - current month's revenue
+//		 - pending bookings
+//		 - current month's feedback
 	}
 	
 	// functionalities of admin-dashboard bookings
 	@GetMapping("/dashboard/bookings")
 	public void displayDashboardBookings() {
+		
 		
 	}
 
