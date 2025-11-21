@@ -1,7 +1,9 @@
 package com.example.geco.controllers;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -64,4 +66,11 @@ public class BookingController extends AbstractController{
 		bookingService.deleteBooking(id);
 	    return ResponseEntity.noContent().build();
 	}
+	
+	@GetMapping("/statuses")
+    public List<String> getBookingStatuses() {
+        return Arrays.stream(Booking.BookingStatus.values())
+             .map(Enum::name)
+             .collect(Collectors.toList());
+    }
 }

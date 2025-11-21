@@ -229,6 +229,19 @@ public class BookingControllerTests extends AbstractControllerTest{
 					MockMvcResultMatchers.status().isNotFound()
 			);
 		}
+		
+		@Test
+		@WithMockUser(roles = "ADMIN")
+		public void canGetBookingStatuses() throws Exception {
+		    mockMvc.perform(MockMvcRequestBuilders.get("/booking/statuses")
+		            .contentType(MediaType.APPLICATION_JSON))
+		            .andExpect(MockMvcResultMatchers.status().isOk())
+		            .andExpect(MockMvcResultMatchers.jsonPath("$[0]").value("PENDING"))
+		            .andExpect(MockMvcResultMatchers.jsonPath("$[1]").value("ACCEPTED"))
+		            .andExpect(MockMvcResultMatchers.jsonPath("$[2]").value("REJECTED"))
+		            .andExpect(MockMvcResultMatchers.jsonPath("$[3]").value("CANCELLED"))
+		            .andExpect(MockMvcResultMatchers.jsonPath("$[4]").value("COMPLETED"));
+		}
 	}
 	
 	@Nested
