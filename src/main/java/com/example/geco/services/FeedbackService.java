@@ -40,7 +40,8 @@ public class FeedbackService {
 				feedback.getCategory().getLabel(),
 				feedback.getStars(),
 				feedback.getComment(),
-				feedback.getSuggestion()
+				feedback.getSuggestion(),
+				feedback.getStatus()
 		);
 	}
 	
@@ -94,6 +95,7 @@ public class FeedbackService {
 				.orElseThrow(() -> new EntityNotFoundException("Category not found."));
 		
 		feedback.setCategory(existingCategory);
+		feedback.setStatus("New");
 	    
 	    return toResponse(feedbackRepository.save(feedback));
 	}
@@ -133,7 +135,8 @@ public class FeedbackService {
 				feedback.getCategory() == null && 
 				feedback.getStars() == null && 
 				feedback.getComment() == null &&
-				feedback.getSuggestion() == null) {
+				feedback.getSuggestion() == null &&
+				feedback.getStatus() == null) {
 			throw new IllegalArgumentException("No fields provided to update feedback.");
 		}
 		
@@ -148,21 +151,38 @@ public class FeedbackService {
 		}
 		
 		if (feedback.getStars() != null) {
-			if (feedback.getStars() >= 0 && feedback.getStars() <= 5.0) {
-				existingFeedback.setStars(feedback.getStars()); 
+			// Round getStars to one decimal.
+			Double stars = Math.round(feedback.getStars() * 10.0) / 10.0;
+			
+			if (stars >= 0 && stars <= 5.0) {
+				existingFeedback.setStars(stars); 
 			} 
 	    } 
 		
 		if (feedback.getComment() != null) {
-			if (feedback.getComment().length() >= 10) {
-			    existingFeedback.setComment(feedback.getComment());  
+			String comment = feedback.getComment().strip();
+			
+			if (comment.length() >= 10) {
+			    existingFeedback.setComment(comment);  
 			}
 	    } 
 		
 		if (feedback.getSuggestion() != null) {
-			if (feedback.getSuggestion().length() >= 10) {
-			    existingFeedback.setSuggestion(feedback.getSuggestion());  
+			String suggestion = feedback.getSuggestion().strip();
+			
+			if (suggestion.length() >= 10) {
+			    existingFeedback.setSuggestion(suggestion);  
 			}
+	    } 
+		
+		if (feedback.getStatus() != null) {
+			String status = feedback.getStatus().strip();
+			
+			if ("New".equals(status) || "Viewed".equals(status)) {
+			    existingFeedback.setStatus(status);  
+			} else {
+		        throw new IllegalArgumentException("Invalid status value. Must be 'New' or 'Viewed'.");
+		    }
 	    } 
 	    
 	    return toResponse(feedbackRepository.save(existingFeedback));

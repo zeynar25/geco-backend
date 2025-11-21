@@ -48,6 +48,8 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$.comment").value(feedbackA.getComment())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(feedbackA.getSuggestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.status").value("New")
 			);
 		}
 		
@@ -79,6 +81,8 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$.comment").value(savedFeedbackA.getComment())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(savedFeedbackA.getSuggestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.status").value("New")
 			);
 		}
 		
@@ -119,6 +123,8 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[0].suggestion").value(savedFeedbackA.getSuggestion())
 			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].status").value("New")
+			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].feedbackId").value(savedFeedbackB.getFeedbackId())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].account.accountId").value(savedFeedbackB.getAccount().getAccountId())
@@ -132,6 +138,8 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$[1].comment").value(savedFeedbackB.getComment())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].suggestion").value(savedFeedbackB.getSuggestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[1].status").value("New")
 			);
 		}
 		
@@ -174,6 +182,47 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$.comment").value(savedFeedbackA.getComment())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(savedFeedbackA.getSuggestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.status").value("New")
+			);
+		}
+		
+		@Test
+		public void canUpdateFeedbackStatus() throws Exception {
+			Feedback feedbackA = DataUtil.createFeedbackA(accountService, 
+					tourPackageService, 
+					packageInclusionService,
+					bookingService,
+					feedbackCategoryService);
+		    FeedbackResponse savedFeedbackA = feedbackService.addFeedback(feedbackA);
+		    
+		    Feedback newFeedback = new Feedback();
+		    newFeedback.setStatus("Viewed");
+		    
+			String feedbackJson = objectMapper.writeValueAsString(newFeedback);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/feedback/" + savedFeedbackA.getFeedbackId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(feedbackJson)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.feedbackId").value(savedFeedbackA.getFeedbackId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.account.accountId").value(savedFeedbackA.getAccount().getAccountId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.booking.bookingId").value(savedFeedbackA.getBooking().getBookingId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.category").value(savedFeedbackA.getCategory())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.stars").value(savedFeedbackA.getStars())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.comment").value(savedFeedbackA.getComment())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.suggestion").value(savedFeedbackA.getSuggestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.status").value(newFeedback.getStatus())
 			);
 		}
 		
@@ -338,6 +387,31 @@ public class FeedbackControllerTests extends AbstractControllerTest {
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.error").value("Category not found.")
+			);
+		}
+	    
+	    @Test
+		public void cannotUpdateFeedbackInvalidStatus() throws Exception {
+			Feedback feedbackA = DataUtil.createFeedbackA(accountService, 
+					tourPackageService, 
+					packageInclusionService,
+					bookingService,
+					feedbackCategoryService);
+		    FeedbackResponse savedFeedbackA = feedbackService.addFeedback(feedbackA);
+		    
+		    Feedback newFeedback = new Feedback();
+		    newFeedback.setStatus("completed");
+		    
+			String feedbackJson = objectMapper.writeValueAsString(newFeedback);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/feedback/" + savedFeedbackA.getFeedbackId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(feedbackJson)
+			).andExpect(
+					MockMvcResultMatchers.status().isBadRequest()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Invalid status value. Must be 'New' or 'Viewed'.")
 			);
 		}
 	    

@@ -21,4 +21,5 @@ public class FeedbackResponse {
 	private double stars;
 	private String comment;
 	private String suggestion;
+	private String Status;
 }

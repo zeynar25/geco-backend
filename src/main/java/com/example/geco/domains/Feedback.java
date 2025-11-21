@@ -40,4 +40,5 @@ public class Feedback {
 	private Double stars;
 	private String comment;
 	private String suggestion;
+	private String status;
 }
