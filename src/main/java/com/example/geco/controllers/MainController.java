@@ -1,16 +1,20 @@
 package com.example.geco.controllers;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.geco.domains.Booking;
 import com.example.geco.domains.Feedback.FeedbackStatus;
+import com.example.geco.dto.AccountResponse;
+import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.CalendarDay;
 import com.example.geco.dto.DashboardStats;
 import com.example.geco.dto.HomeStats;
@@ -20,13 +24,13 @@ public class MainController extends AbstractController{
 	
 	// Functionalities in home page
 	@GetMapping("/home")
-	public HomeStats home() {
+	public ResponseEntity<HomeStats> home() {
 		HomeStats stats = new HomeStats(
 				attractionService.getAttractionsNumber(),
 				bookingService.getAverageVisitor("Month"),
 				feedbackService.getAverageRating()
 		);
-		return stats;
+		return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 	
 	// to implement
@@ -39,20 +43,21 @@ public class MainController extends AbstractController{
 	}
 	
 	@GetMapping("/dashboard")
-	public DashboardStats displayDashboard() {
+	public ResponseEntity<DashboardStats> displayDashboard() {
 		DashboardStats stats = new DashboardStats(
 				bookingService.getNumberOfBookingByMonth(LocalDate.now()),
 				bookingService.getRevenueByMonth(LocalDate.now()),
 				bookingService.getNumberOfPendingBookings(),
 				feedbackService.getNumberOfNewFeedbacks(FeedbackStatus.NEW)
 		);
-		return stats;
+		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 	
 	// functionalities of admin-dashboard bookings
 	@GetMapping("/dashboard/bookings")
-	public void displayDashboardBookings() {
-		
+	public ResponseEntity<List<Booking>> displayDashboardBookings(@RequestBody AdminBookingRequest request) {
+		List<Booking> bookings = bookingService.getBookingByAdmin(request);
+		return new ResponseEntity<>(bookings, HttpStatus.OK);
 		
 	}
 

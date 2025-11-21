@@ -13,7 +13,7 @@ import com.example.geco.domains.Booking.BookingStatus;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer>{
-	List<Booking> findAllByOrderByVisitDateAsc();
+	List<Booking> findAllByOrderByVisitDateAscVisitTimeAsc();
 	
 	List<Booking> findByAccount_AccountIdAndVisitDateBetween(
 			int accountId, LocalDate startDate, LocalDate endDate
@@ -25,7 +25,11 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 			LocalDate startDate, LocalDate endDate
 	);
 	
-	List<Booking> findByAccount_AccountId(int id);
+	List<Booking> findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(int id);
+
+	List<Booking> findByStatusOrderByVisitDateAscVisitTimeAsc(BookingStatus status);
+	
+	List<Booking> findByAccount_AccountIdAndStatusOrderByVisitDateAscVisitTimeAsc(int id, BookingStatus status);
 	
 	List<Booking> findByVisitDateOrderByVisitTimeAsc(LocalDate visitDate);
 	

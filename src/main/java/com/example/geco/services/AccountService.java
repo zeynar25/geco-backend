@@ -1,7 +1,5 @@
 package com.example.geco.services;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,13 +33,13 @@ public class AccountService implements UserDetailsService{
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Optional<Account> account = accountRepository.findByDetailEmail(username);
+		Account account = accountRepository.findByDetailEmail(username);
 		
-        if (account.isEmpty()) {
+        if (account == null) {
             throw new UsernameNotFoundException("User not found with email: " + username);
         }
         
-        return account.get();
+        return account;
 	}
 	
 	
