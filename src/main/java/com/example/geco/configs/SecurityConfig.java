@@ -3,6 +3,7 @@ package com.example.geco.configs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -32,6 +33,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request -> request
 					.requestMatchers("/account/admin/**").hasRole("ADMIN")
 					.requestMatchers("/attraction/**").hasRole("ADMIN")
+					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")
 					.requestMatchers("/account/my-account").authenticated()
 		            .anyRequest().permitAll())
 			.httpBasic(Customizer.withDefaults())

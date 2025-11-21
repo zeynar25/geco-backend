@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -206,6 +207,7 @@ public class BookingControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void canDeleteBooking() throws Exception {
 			Booking bookingA = DataUtil.createBookingA(accountService, 
 					tourPackageService, 
@@ -388,6 +390,7 @@ public class BookingControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(roles = "ADMIN")
 		public void cannotDeleteBooking() throws Exception {
 			int id = 0;
 		    mockMvc.perform(
@@ -395,6 +398,22 @@ public class BookingControllerTests extends AbstractControllerTest{
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
+			);
+		}
+		
+		@Test
+		public void cannotDeleteBookingNotAdmin() throws Exception {
+			Booking bookingA = DataUtil.createBookingA(accountService, 
+					tourPackageService, 
+					packageInclusionService);
+			
+		    Booking savedBookingA = bookingService.addBooking(bookingA);
+		    
+		    mockMvc.perform(
+					MockMvcRequestBuilders.delete("/booking/" + savedBookingA.getBookingId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isUnauthorized()
 			);
 		}
 	}
