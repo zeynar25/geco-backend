@@ -30,9 +30,10 @@ public class SecurityConfig {
 		return http.csrf(customizer -> 
 				customizer.disable())
 			.authorizeHttpRequests(request -> request
-					.requestMatchers("/**").permitAll()
 					.requestMatchers("/account/admin/**").hasRole("ADMIN")
-					.requestMatchers("/account/my-account").authenticated())
+					.requestMatchers("/attraction/**").hasRole("ADMIN")
+					.requestMatchers("/account/my-account").authenticated()
+		            .anyRequest().permitAll())
 			.httpBasic(Customizer.withDefaults())
 			.sessionManagement(session ->
 				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
