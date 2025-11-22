@@ -34,7 +34,19 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	List<Booking> findByVisitDateOrderByVisitTimeAsc(LocalDate visitDate);
 	
 	@Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.visitDate BETWEEN :startDate AND :endDate AND b.status = :status")
-	Integer getRevenueByMonth(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("status") BookingStatus status);
+	Integer getRevenueByMonth(
+			@Param("startDate") LocalDate startDate, 
+			@Param("endDate") LocalDate endDate, 
+			@Param("status") BookingStatus status);
 
+	List<Booking> findByStatusAndVisitDateBetween(BookingStatus status, LocalDate startDate, LocalDate endDate);
+
+	@Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.status = :status")
+	Integer findTotalRevenueByStatus(@Param("status") Booking.BookingStatus status);
+	
 	Long countByStatus(BookingStatus status);
+	
+	int countByVisitDateBetween(LocalDate start, LocalDate end);
+
+	int countByStatusAndVisitDateBetween(BookingStatus status, LocalDate start, LocalDate end);
 }

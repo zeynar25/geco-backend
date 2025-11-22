@@ -3,6 +3,7 @@ package com.example.geco.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.geco.services.AccountService;
+import com.example.geco.services.AdminDashboardService;
 import com.example.geco.services.AttractionService;
 import com.example.geco.services.AuthService;
 import com.example.geco.services.BookingInclusionService;
@@ -55,4 +56,7 @@ public abstract class AbstractController {
     
     @Autowired
     protected HomepageService homepageService;
+    
+    @Autowired
+    protected AdminDashboardService adminDashboardService;
 }

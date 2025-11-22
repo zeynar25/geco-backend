@@ -52,19 +52,19 @@ public class MainController extends AbstractController{
 	
 	@GetMapping("/dashboard/bookings")
 	public ResponseEntity<List<Booking>> displayDashboardBookings(@RequestBody AdminBookingRequest request) {
-		List<Booking> bookings = bookingService.getBookingByAdmin(request);
+		List<Booking> bookings = adminDashboardService.getBookingByAdmin(request);
 		return new ResponseEntity<>(bookings, HttpStatus.OK);
 	}
 
 	// functionalities of admin-dashboard financial
-	@GetMapping("/dashboard/finances")
-	public ResponseEntity<AdminDashboardFinances> displayDashboardFinances(
-			@RequestParam int year,
-	        @RequestParam int month) {
-		AdminDashboardFinances stats = bookingService.getDashboardFinance(year, month);
-		
-		return new ResponseEntity<>(stats, HttpStatus.OK);
-	}
+//	@GetMapping("/dashboard/finances")
+//	public ResponseEntity<AdminDashboardFinances> displayDashboardFinances(
+//			@RequestParam int year,
+//	        @RequestParam int month) {
+//		AdminDashboardFinances stats = adminDashboardService.getDashboardFinance(year, month);
+//		
+//		return new ResponseEntity<>(stats, HttpStatus.OK);
+//	}
 	
 	@GetMapping("/dashboard/finances/revenue/{year}")
 	public ResponseEntity<List<MonthlyRevenue>> displayDashboardFinancesYearlyRevenueTrend(@PathVariable Integer year) {

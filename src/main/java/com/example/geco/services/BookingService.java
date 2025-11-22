@@ -19,7 +19,9 @@ import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.dto.AdminBookingRequest;
+import com.example.geco.dto.AdminDashboardFinances;
 import com.example.geco.dto.CalendarDay;
+import com.example.geco.dto.MonthlyRevenue;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
 
@@ -29,9 +31,6 @@ import jakarta.persistence.EntityNotFoundException;
 public class BookingService {
 	@Autowired
 	private BookingRepository bookingRepository;
-	
-	@Autowired
-	private AccountRepository accountRepository;
 	
 	private void checkVisitDate(Booking booking) {
 		LocalDate today = LocalDate.now();
@@ -358,27 +357,25 @@ public class BookingService {
 		return bookingRepository.countByStatus(BookingStatus.PENDING).intValue();
 	}
 
-	public List<Booking> getBookingByAdmin(AdminBookingRequest request) {
-		String email = request.getName() != null ? request.getName().strip() : null;
-		BookingStatus status = request.getStatus();
-		
-		if ((email == null || email.isBlank()) && status == null) {
-			return bookingRepository.findAllByOrderByVisitDateAscVisitTimeAsc();
-		}
-		
-		if (email == null || email.isBlank()) {
-			return bookingRepository.findByStatusOrderByVisitDateAscVisitTimeAsc(status);
-		}
-		
-		Account account = accountRepository.findByDetailEmail(email.strip()); 
-		if (account == null) {
-		    throw new EntityNotFoundException("Account with Email \"" + email + "\" not found.");
-		}
-		
-		if (status == null) {
-			return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(account.getAccountId());
-		}
-		
-		return bookingRepository.findByAccount_AccountIdAndStatusOrderByVisitDateAscVisitTimeAsc(account.getAccountId(), status);
+	public List<MonthlyRevenue> getRevenueByYear(Integer year) {
+		List<MonthlyRevenue> revenues = new ArrayList<>();
+	    
+	    for (int month = 1; month <= 12; month++) {
+	        YearMonth yearMonth = YearMonth.of(year, month);
+	        LocalDate startDate = yearMonth.atDay(1);
+	        LocalDate endDate = yearMonth.atEndOfMonth();
+	        
+	        Integer totalRevenue = bookingRepository.getRevenueByMonth(startDate, endDate, Booking.BookingStatus.COMPLETED);
+	        
+	        if (totalRevenue == null) totalRevenue = 0;
+	        
+	        revenues.add(
+	        		new MonthlyRevenue(
+	        				yearMonth.getMonth().name(), 
+	        				totalRevenue));
+	    }
+	    
+	    return revenues;
 	}
 }
+ 
