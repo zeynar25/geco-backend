@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.domains.TourPackage;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer>{
@@ -46,7 +47,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 			WHERE b.visitDate BETWEEN :startDate AND :endDate 
 			AND b.status = :status
 	""")
-	Long getRevenue(
+	Long getTotalRevenueByStatusAndVisitDateBetween(
 			@Param("startDate") LocalDate startDate, 
 			@Param("endDate") LocalDate endDate, 
 			@Param("status") BookingStatus status);
@@ -63,9 +64,9 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	
 	Long countByStatus(BookingStatus status);
 	
-	int countByVisitDateBetween(LocalDate start, LocalDate end);
+	Long countByVisitDateBetween(LocalDate start, LocalDate end);
 
-	int countByStatusAndVisitDateBetween(BookingStatus status, LocalDate start, LocalDate end);
+	Long countByStatusAndVisitDateBetween(BookingStatus status, LocalDate start, LocalDate end);
 
 	@Query("""
 	    SELECT 
@@ -81,4 +82,17 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	    @Param("startYear") int startYear,
 	    @Param("endYear") int endYear
 	);
+
+	@Query("""
+		SELECT SUM(b.groupSize) 
+		FROM Booking b 
+		WHERE b.status = :status 
+		AND b.visitDate BETWEEN :start AND :end
+			""")
+	Long totalGroupSizeByStatusAndVisitDateBetween(
+			@Param("status") BookingStatus status,
+		    @Param("startYear") LocalDate startYear,
+		    @Param("endYear") LocalDate endYear);
+
+	Long countByTourPackageAndVisitDateBetween(TourPackage tourPackage, LocalDate startDate, LocalDate endDate);
 }

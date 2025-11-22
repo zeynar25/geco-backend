@@ -14,12 +14,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Booking;
+import com.example.geco.domains.Feedback;
+import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.AdminDashboardFinances;
 import com.example.geco.dto.AdminDashboardStats;
-import com.example.geco.dto.BookingRevenue;
 import com.example.geco.dto.CalendarDay;
+import com.example.geco.dto.ChartData;
 import com.example.geco.dto.HomeStats;
+import com.example.geco.dto.TrendsResponse;
 
 @RestController
 public class MainController extends AbstractController{
@@ -63,37 +66,63 @@ public class MainController extends AbstractController{
 	}
 	
 	@GetMapping("/dashboard/finances/revenue/yearly")
-	public ResponseEntity<List<BookingRevenue>> displayDashboardFinancesYearlyRevenue(
+	public ResponseEntity<List<ChartData>> displayDashboardFinancesYearlyRevenue(
 			@RequestParam Integer startYear,
 	        @RequestParam Integer endYear) {
-		List<BookingRevenue> revenue = bookingService.getYearlyRevenue(startYear, endYear);
+		List<ChartData> revenue = bookingService.getYearlyRevenue(startYear, endYear);
 		return new ResponseEntity<>(revenue, HttpStatus.OK);
 	}
 	
 	@GetMapping("/dashboard/finances/revenue/monthly")
-	public ResponseEntity<List<BookingRevenue>> displayDashboardFinancesMonthlyRevenue(
+	public ResponseEntity<List<ChartData>> displayDashboardFinancesMonthlyRevenue(
 			@RequestParam Integer year) {
-		List<BookingRevenue> revenue = bookingService.getMonthlyRevenue(year);
+		List<ChartData> revenue = bookingService.getMonthlyRevenue(year);
 		return new ResponseEntity<>(revenue, HttpStatus.OK);
 	}
 
 	// functionalities of admin-dashboard trend
-	@GetMapping("/dashboard/trends")
-	public void displayDashboardTrends() {
+	@GetMapping("/dashboard/trends/yearly")
+	public ResponseEntity<TrendsResponse> displayDashboardTrendsYearly(
+			@RequestParam Integer startYear,
+	        @RequestParam Integer endYear) {
+		List<ChartData> yearlyBooking = adminDashboardService.getYearlyBookings(startYear, endYear);
+		List<ChartData> yearlyVisitors = adminDashboardService.getYearlyVisitors(startYear, endYear);
+		List<ChartData> yearlyAvailedPackages = adminDashboardService.getAvailedPackages(startYear, endYear);
 		
-	}
-
-	// functionalities of admin-dashboard feedback
-	@GetMapping("/dashboard/feedbacks")
-	public void displayDashboardFeedbacks() {
-		
+		return ResponseEntity.ok(TrendsResponse.builder()
+	            .bookings(yearlyBooking)
+	            .visitors(yearlyVisitors)
+	            .packages(yearlyAvailedPackages)
+	            .build()
+	            );
 	}
 	
-	// functionalities of admin-dashboard feedback categories
-	@GetMapping("/dashboard/feedback-categories")
-	public void displayDashboardFeedbackCategories() {
+	@GetMapping("/dashboard/trends/monthly")
+	public ResponseEntity<TrendsResponse> displayDashboardTrendsMontly(
+			@RequestParam Integer year) {
+		List<ChartData> yearlyBooking = adminDashboardService.getMonthlyBookings(year);
+		List<ChartData> yearlyVisitors = adminDashboardService.getMonthlyVisitors(year);
+		List<ChartData> yearlyAvailedPackages = adminDashboardService.getAvailedPackages(year, year);
 		
+		return ResponseEntity.ok(TrendsResponse.builder()
+	            .bookings(yearlyBooking)
+	            .visitors(yearlyVisitors)
+	            .packages(yearlyAvailedPackages)
+	            .build()
+	            );
 	}
+
+//	// functionalities of admin-dashboard feedback categories
+//	@GetMapping("/dashboard/feedbacks/categories")
+//	public List<FeedbackCategory> displayDashboardFeedbackCategories() {
+//		
+//	}
+//
+//	// functionalities of admin-dashboard feedback
+//	@GetMapping("/dashboard/feedbacks")
+//	public List<Feedback> displayDashboardFeedbacks() {
+//		
+//	}
 
 	// functionalities of admin-dashboard Accounts
 	@GetMapping("/dashboard/accounts")

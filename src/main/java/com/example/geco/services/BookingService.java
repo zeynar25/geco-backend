@@ -3,9 +3,11 @@ package com.example.geco.services;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -17,7 +19,7 @@ import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.dto.CalendarDay;
-import com.example.geco.dto.BookingRevenue;
+import com.example.geco.dto.ChartData;
 import com.example.geco.repositories.BookingRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -344,14 +346,14 @@ public class BookingService {
 	    LocalDate startDate = yearMonth.atDay(1);
 	    LocalDate endDate = yearMonth.atEndOfMonth();
 		
-	    return bookingRepository.getRevenue(startDate, endDate, BookingStatus.COMPLETED);
+	    return bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
 	}
 
 	public Integer getNumberOfPendingBookings() {
 		return bookingRepository.countByStatus(BookingStatus.PENDING).intValue();
 	}
 
-	public List<BookingRevenue> getYearlyRevenue(Integer startYear, Integer endYear) {
+	public List<ChartData> getYearlyRevenue(Integer startYear, Integer endYear) {
 		if (startYear == null) {
 			startYear = bookingRepository.getEarliestYear();
 		}
@@ -364,20 +366,20 @@ public class BookingService {
 			throw new IllegalArgumentException("Starting year cannot be greater than the ending year");
 		}
 		
-		List<BookingRevenue> revenues = new ArrayList<>();
+		List<ChartData> revenues = new ArrayList<>();
 	    
 	    for (int year = startYear; year <= endYear; year++) {
 	    	LocalDate startDate = LocalDate.of(year, 1, 1);
 	        LocalDate endDate = LocalDate.of(year, 12, 31);
 
-	        Long totalRevenue = bookingRepository.getRevenue(
+	        Long totalRevenue = bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(
 	            startDate, 
 	            endDate, 
 	            Booking.BookingStatus.COMPLETED
 	        );
 	        
 	        revenues.add(
-	        		new BookingRevenue(
+	        		new ChartData(
 	        				String.valueOf(year),
 	        				totalRevenue));
 	    }
@@ -385,23 +387,23 @@ public class BookingService {
 	    return revenues;
 	}
 
-	public List<BookingRevenue> getMonthlyRevenue(Integer year) {
+	public List<ChartData> getMonthlyRevenue(Integer year) {
 		if (year == null) {
 			throw new IllegalArgumentException("Please provide a year.");
 		}
 		
-		List<BookingRevenue> revenues = new ArrayList<>();
+		List<ChartData> revenues = new ArrayList<>();
 	    
 	    for (int month = 1; month <= 12; month++) {
 	        YearMonth yearMonth = YearMonth.of(year, month);
 	        LocalDate startDate = yearMonth.atDay(1);
 	        LocalDate endDate = yearMonth.atEndOfMonth();
 	        
-	        Long totalRevenue = bookingRepository.getRevenue(startDate, endDate, Booking.BookingStatus.COMPLETED);
+	        Long totalRevenue = bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(startDate, endDate, Booking.BookingStatus.COMPLETED);
 	        
 	        revenues.add(
-	        		new BookingRevenue(
-	        				yearMonth.getMonth().name(), 
+	        		new ChartData(
+	        				yearMonth.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH), 
 	        				totalRevenue));
 	    }
 	    

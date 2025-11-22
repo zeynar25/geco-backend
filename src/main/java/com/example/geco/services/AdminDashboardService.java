@@ -2,7 +2,10 @@ package com.example.geco.services;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,11 +14,14 @@ import com.example.geco.domains.Account;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.Feedback.FeedbackStatus;
+import com.example.geco.domains.TourPackage;
 import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.AdminDashboardFinances;
 import com.example.geco.dto.AdminDashboardStats;
+import com.example.geco.dto.ChartData;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
+import com.example.geco.repositories.TourPackageRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -32,6 +38,9 @@ public class AdminDashboardService {
 	
 	@Autowired
 	private AccountRepository accountRepository;
+	
+	@Autowired
+	private TourPackageRepository packageRepository;
 
 	public AdminDashboardStats getDashboardStats(LocalDate date) {
 		return new AdminDashboardStats(
@@ -67,8 +76,8 @@ public class AdminDashboardService {
 	}
 
 	public AdminDashboardFinances getDashboardFinance(Integer year, Integer month) {
-		int totalBookings = 0;
-		int completedBookings = 0;
+		long totalBookings = 0;
+		long completedBookings = 0;
 
 		long totalRevenue = 0;
 		long averageRevenuePerBooking = 0;
@@ -97,14 +106,14 @@ public class AdminDashboardService {
 
 	        totalBookings = bookingRepository.countByVisitDateBetween(startDate, endDate);
 	        completedBookings = bookingRepository.countByStatusAndVisitDateBetween(BookingStatus.COMPLETED, startDate, endDate);
-	        totalRevenue = bookingRepository.getRevenue(startDate, endDate, BookingStatus.COMPLETED);
+	        totalRevenue = bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
 			
 		} else {
 			LocalDate startDate = LocalDate.of(year, month, 1);
 			LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 			
 			totalBookings = bookingRepository.countByVisitDateBetween(startDate, endDate);
-			totalRevenue = bookingRepository.getRevenue(startDate, endDate, BookingStatus.COMPLETED);
+			totalRevenue = bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
 			completedBookings = bookingRepository.countByStatusAndVisitDateBetween(BookingStatus.COMPLETED, startDate, endDate);		
 		}
 
@@ -116,5 +125,141 @@ public class AdminDashboardService {
 			    .totalBookings(totalBookings)
 			    .completedBookings(completedBookings)
 			    .build();
+	}
+
+	public List<ChartData> getYearlyBookings(Integer startYear, Integer endYear) {
+		if (startYear == null) {
+			startYear = bookingRepository.getEarliestYear();
+		}
+		
+		if (endYear == null) {
+			endYear = bookingRepository.getLatestYear();
+		}
+		
+		List<ChartData> yearlyBookings = new ArrayList<>();
+		for (int year = startYear; year <= endYear; year++) {
+			LocalDate startDate = LocalDate.of(year, 1, 1);
+	        LocalDate endDate = LocalDate.of(year, 12, 31);
+	        
+	        yearlyBookings.add(
+					ChartData.builder()
+					.period(String.valueOf(year))
+					.value(bookingRepository.countByStatusAndVisitDateBetween(
+							BookingStatus.COMPLETED,
+							startDate,
+							endDate))
+					.build()
+					);
+		}
+		
+		return yearlyBookings;
+	}
+
+	public List<ChartData> getMonthlyBookings(Integer year) {
+		if (year == null) {
+			throw new IllegalArgumentException("Please provide a year.");
+		}
+		
+		List<ChartData> getMonthlyBookings = new ArrayList<>();
+		for (int month = 1; month <= 12; month++) {
+			YearMonth yearMonth = YearMonth.of(year, month);
+		    LocalDate startDate = yearMonth.atDay(1);
+		    LocalDate endDate = yearMonth.atEndOfMonth();
+	        
+		    getMonthlyBookings.add(
+					ChartData.builder()
+					.period(yearMonth.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+					.value(bookingRepository.countByStatusAndVisitDateBetween(
+							BookingStatus.COMPLETED,
+							startDate,
+							endDate))
+					.build()
+					);
+		}
+		
+		return getMonthlyBookings;
+	}
+
+	public List<ChartData> getYearlyVisitors(Integer startYear, Integer endYear) {
+		if (startYear == null) {
+			startYear = bookingRepository.getEarliestYear();
+		}
+		
+		if (endYear == null) {
+			endYear = bookingRepository.getLatestYear();
+		}
+		
+		List<ChartData> yearlyVisitors = new ArrayList<>();
+		
+		for (int year = startYear; year <= endYear; year++) {
+			LocalDate startDate = LocalDate.of(year, 1, 1);
+	        LocalDate endDate = LocalDate.of(year, 12, 31);
+	        
+	        yearlyVisitors.add(
+					ChartData.builder()
+					.period(String.valueOf(year))
+					.value(bookingRepository.totalGroupSizeByStatusAndVisitDateBetween(
+							BookingStatus.COMPLETED,
+							startDate,
+							endDate))
+					.build()
+					);
+		}
+		return yearlyVisitors;
+	}
+	
+	public List<ChartData> getMonthlyVisitors(Integer year) {
+		if (year == null) {
+			throw new IllegalArgumentException("Please provide a year.");
+		}
+		
+		List<ChartData> monthlyVisitors = new ArrayList<>();
+		for (int month = 1; month <= 12; month++) {
+			YearMonth yearMonth = YearMonth.of(year, month);
+		    LocalDate startDate = yearMonth.atDay(1);
+		    LocalDate endDate = yearMonth.atEndOfMonth();
+	        
+		    monthlyVisitors.add(
+					ChartData.builder()
+					.period(yearMonth.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+					.value(bookingRepository.totalGroupSizeByStatusAndVisitDateBetween(
+							BookingStatus.COMPLETED,
+							startDate,
+							endDate))
+					.build()
+					);
+		}
+		
+		return monthlyVisitors;
+	}
+
+	public List<ChartData> getAvailedPackages(Integer startYear, Integer endYear) {
+		if (startYear == null) {
+			startYear = bookingRepository.getEarliestYear();
+		}
+		
+		if (endYear == null) {
+			endYear = bookingRepository.getLatestYear();
+		}
+		
+		LocalDate startDate = LocalDate.of(startYear, 1, 1);
+        LocalDate endDate = LocalDate.of(endYear, 12, 31);
+		
+		List<ChartData> availedPackages = new ArrayList<>();
+		List<TourPackage> tourPackages = packageRepository.findAll();
+
+		for (TourPackage tourPackage : tourPackages) {
+			availedPackages.add(
+					ChartData.builder()
+					.period(tourPackage.getName())
+					.value(bookingRepository.countByTourPackageAndVisitDateBetween(
+							tourPackage,
+							startDate,
+							endDate))
+					.build()
+					);
+		}
+		
+		return availedPackages;
 	}
 }
