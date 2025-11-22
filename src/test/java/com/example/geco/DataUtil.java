@@ -133,6 +133,7 @@ public class DataUtil {
 		inclusions.add(inclusion);
 		
 		TourPackage tourPackage = new TourPackage();
+		tourPackage.setName("The best");
 		tourPackage.setDuration(60);
 		tourPackage.setDescription("Detailed description about this package.");
 		tourPackage.setBasePrice(500);
@@ -153,6 +154,7 @@ public class DataUtil {
 		inclusions.add(inclusionB);
 		
 		TourPackage tourPackage = new TourPackage();
+		tourPackage.setName("The double best");
 		tourPackage.setDuration(120);
 		tourPackage.setDescription("Detailed description about this package but more pricey.");
 		tourPackage.setBasePrice(1000);
