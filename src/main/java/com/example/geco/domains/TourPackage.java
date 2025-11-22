@@ -25,6 +25,7 @@ public class TourPackage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private Integer packageId;
 	
+	private String name;
 	private Integer duration; // in minutes.
 	private String description;
 	private Integer basePrice;

@@ -20,6 +20,12 @@ public class TourPackageService {
 	        throw new IllegalArgumentException("Description is missing.");
 	    }
 		
+		if (tourPackage.getName().trim().length() == 0) {
+	        throw new IllegalArgumentException("Name must at least have one character.");
+	    }
+		tourPackage.setName(tourPackage.getName().trim());
+		
+		
 		if (tourPackage.getDescription().trim().length() < 10) {
 	        throw new IllegalArgumentException("Description must have at least 10 characters.");
 	    }
@@ -50,12 +56,16 @@ public class TourPackageService {
 	}
 	
 	public TourPackage updatePackage(TourPackage tourPackage) {
-		if (tourPackage.getDescription() == null && tourPackage.getBasePrice() == null && tourPackage.getInclusions() == null) {
+		if (tourPackage.getName() == null && tourPackage.getDescription() == null && tourPackage.getBasePrice() == null && tourPackage.getInclusions() == null) {
 			throw new IllegalArgumentException("Package description, base price, and inclusions are missing.");
 		}
 		
 		TourPackage existingTourPackage = tourPackageRepository.findById(tourPackage.getPackageId())
 	            .orElseThrow(() -> new EntityNotFoundException("Package with ID \"" + tourPackage.getPackageId() + "\" not found."));
+		
+		if (tourPackage.getName() != null && !tourPackage.getName().isBlank()) {
+			existingTourPackage.setName(tourPackage.getName().trim());
+		}
 		
 		if (tourPackage.getDescription() != null && !tourPackage.getDescription().isBlank()) {
 			existingTourPackage.setDescription(tourPackage.getDescription().trim());

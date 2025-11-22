@@ -29,6 +29,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
 			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.name").value(packageA.getName())
+			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.description").value(packageA.getDescription())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(packageA.getBasePrice())
@@ -49,6 +51,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.packageId").value(savedPackageA.getPackageId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.name").value(savedPackageA.getName())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.description").value(savedPackageA.getDescription())
 			).andExpect(
@@ -74,6 +78,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[0].packageId").value(savedPackageA.getPackageId())
 			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].name").value(savedPackageA.getName())
+			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[0].description").value(savedPackageA.getDescription())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[0].basePrice").value(savedPackageA.getBasePrice())
@@ -81,6 +87,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$[0].inclusions").exists()
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].packageId").value(savedPackageB.getPackageId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[1].name").value(savedPackageB.getName())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$[1].description").value(savedPackageB.getDescription())
 			).andExpect(
@@ -120,6 +128,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
 			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.name").value(savedPackageA.getName())
+			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.description").value(packageA.getDescription())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(packageA.getBasePrice())
@@ -135,6 +145,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 
 			TourPackage newPackage = new TourPackage(
 					savedPackageA.getPackageId(),
+					"The light at the end of the tunnel",
 					120,
 					"new description for this package",
 					null,
@@ -152,6 +163,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
 			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.name").value(newPackage.getName())
+			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.description").value(newPackage.getDescription())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(savedPackageA.getBasePrice())
@@ -167,6 +180,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 
 			TourPackage newPackage = new TourPackage(
 					savedPackageA.getPackageId(),
+					null,
 					60,
 					null,
 					100,
@@ -183,6 +197,8 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.name").value(savedPackageA.getName())
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.description").value(savedPackageA.getDescription())
 			).andExpect(
