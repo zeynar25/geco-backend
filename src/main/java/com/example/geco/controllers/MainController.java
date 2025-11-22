@@ -34,6 +34,7 @@ public class MainController extends AbstractController{
     }
 	
 	// to implement
+	// logging to track changes made by everyone? admin
 	// payment function, either through gcash api or saving a screenshot of proof of payment
 	
 	@GetMapping("/calendar/{year}/{month}")
@@ -111,8 +112,6 @@ public class MainController extends AbstractController{
 	            .build()
 	            );
 	}
-	
-	// implement logging to track changes made by everyone? admin
 
 	// Admin-dashboard feedback categories
 	// call GET /feedback-category for list of feedback categories
@@ -122,6 +121,8 @@ public class MainController extends AbstractController{
 	// call GET /account/list/{role} for list accounts with certain roles
 
 	// functionalities of admin-dashboard tour packages and package inclusions
+	// call GET /package for tour packages
+	// call GET /
 	
 	// functionalities of admin-dashboard attractions
 

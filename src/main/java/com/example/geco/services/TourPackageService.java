@@ -52,7 +52,7 @@ public class TourPackageService {
 	}
 	
 	public List<TourPackage> getAllPackages() {
-		return tourPackageRepository.findAll();
+		return tourPackageRepository.findAllByOrderByName();
 	}
 	
 	public TourPackage updatePackage(TourPackage tourPackage) {

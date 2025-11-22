@@ -37,7 +37,7 @@ public class PackageInclusionService {
 	}
 	
 	public List<PackageInclusion> getAllInclusions() {
-		return packageInclusionRepository.findAll();
+		return packageInclusionRepository.findAllByOrderByInclusionName();
 	}
 	
 	public PackageInclusion updateInclusion(PackageInclusion inclusion) {
