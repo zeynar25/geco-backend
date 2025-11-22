@@ -10,6 +10,7 @@ import com.example.geco.services.BookingService;
 import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
 import com.example.geco.services.FeedbackService;
+import com.example.geco.services.HomepageService;
 import com.example.geco.services.JwtService;
 import com.example.geco.services.PackageInclusionService;
 import com.example.geco.services.TokenBlacklistService;
@@ -51,4 +52,7 @@ public abstract class AbstractController {
     
     @Autowired
     protected TokenBlacklistService tokenBlacklistService;
+    
+    @Autowired
+    protected HomepageService homepageService;
 }

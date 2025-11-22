@@ -9,15 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Feedback.FeedbackStatus;
-import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.AdminBookingRequest;
+import com.example.geco.dto.AdminDashboardFinances;
+import com.example.geco.dto.AdminDashboardStats;
 import com.example.geco.dto.CalendarDay;
-import com.example.geco.dto.DashboardStats;
 import com.example.geco.dto.HomeStats;
+import com.example.geco.dto.MonthlyRevenue;
 
 @RestController
 public class MainController extends AbstractController{
@@ -25,12 +27,7 @@ public class MainController extends AbstractController{
 	// Functionalities in home page
 	@GetMapping("/home")
 	public ResponseEntity<HomeStats> home() {
-		HomeStats stats = new HomeStats(
-				attractionService.getAttractionsNumber(),
-				bookingService.getAverageVisitor("Month"),
-				feedbackService.getAverageRating()
-		);
-		return new ResponseEntity<>(stats, HttpStatus.OK);
+		return ResponseEntity.ok(homepageService.getHomeStats());
     }
 	
 	// to implement
@@ -43,8 +40,8 @@ public class MainController extends AbstractController{
 	}
 	
 	@GetMapping("/dashboard")
-	public ResponseEntity<DashboardStats> displayDashboard() {
-		DashboardStats stats = new DashboardStats(
+	public ResponseEntity<AdminDashboardStats> displayDashboard() {
+		AdminDashboardStats stats = new AdminDashboardStats(
 				bookingService.getNumberOfBookingByMonth(LocalDate.now()),
 				bookingService.getRevenueByMonth(LocalDate.now()),
 				bookingService.getNumberOfPendingBookings(),
@@ -53,18 +50,26 @@ public class MainController extends AbstractController{
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 	
-	// functionalities of admin-dashboard bookings
 	@GetMapping("/dashboard/bookings")
 	public ResponseEntity<List<Booking>> displayDashboardBookings(@RequestBody AdminBookingRequest request) {
 		List<Booking> bookings = bookingService.getBookingByAdmin(request);
 		return new ResponseEntity<>(bookings, HttpStatus.OK);
-		
 	}
 
 	// functionalities of admin-dashboard financial
 	@GetMapping("/dashboard/finances")
-	public void displayDashboardFinances() {
+	public ResponseEntity<AdminDashboardFinances> displayDashboardFinances(
+			@RequestParam int year,
+	        @RequestParam int month) {
+		AdminDashboardFinances stats = bookingService.getDashboardFinance(year, month);
 		
+		return new ResponseEntity<>(stats, HttpStatus.OK);
+	}
+	
+	@GetMapping("/dashboard/finances/revenue/{year}")
+	public ResponseEntity<List<MonthlyRevenue>> displayDashboardFinancesYearlyRevenueTrend(@PathVariable Integer year) {
+		List<MonthlyRevenue> revenue = bookingService.getRevenueByYear(year);
+		return new ResponseEntity<>(revenue, HttpStatus.OK);
 	}
 
 	// functionalities of admin-dashboard trend
