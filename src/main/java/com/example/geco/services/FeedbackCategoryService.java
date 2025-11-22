@@ -42,7 +42,7 @@ public class FeedbackCategoryService {
 	}
 	
 	public List<FeedbackCategory> getAllCategories() {
-		return feedbackCategoryRepository.findAll();
+		return feedbackCategoryRepository.findAllByOrderByLabel();
 	}
 	
 	public FeedbackCategory updateCategory(FeedbackCategory category) {

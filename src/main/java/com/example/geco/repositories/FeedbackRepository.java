@@ -16,16 +16,15 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 	double getAverageStars();
 	
 	boolean existsByBooking_BookingIdAndAccount_AccountId(Integer bookingId, Integer accountId);
-	
-	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetween(
-			int categoryId, LocalDate startDate, LocalDate endDate
-	);
-	
-	List<Feedback> findByBooking_VisitDateBetween(
-			LocalDate startDate, LocalDate endDate
-	);
-	
-	List<Feedback> findByCategory_FeedbackCategoryId(int id);
 
 	Integer countByStatus(FeedbackStatus status);
+
+	List<Feedback> findByBooking_VisitDateBetweenOrderByStatus(LocalDate startDate, LocalDate endDate);
+
+	List<Feedback> findByCategory_FeedbackCategoryIdOrderByStatus(Integer categoryId);
+
+	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByStatus(
+			Integer categoryId,
+			LocalDate startDate, 
+			LocalDate endDate);
 }

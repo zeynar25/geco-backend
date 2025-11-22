@@ -112,17 +112,9 @@ public class MainController extends AbstractController{
 	            );
 	}
 
-//	// functionalities of admin-dashboard feedback categories
-//	@GetMapping("/dashboard/feedbacks/categories")
-//	public List<FeedbackCategory> displayDashboardFeedbackCategories() {
-//		
-//	}
-//
-//	// functionalities of admin-dashboard feedback
-//	@GetMapping("/dashboard/feedbacks")
-//	public List<Feedback> displayDashboardFeedbacks() {
-//		
-//	}
+	// Admin-dashboard feedback categories
+	// call GET /feedback-category for list of feedback categories
+	// call GET /feedback for list of feedbacks w/ optional categoryId, startDate, endDate
 
 	// functionalities of admin-dashboard Accounts
 	@GetMapping("/dashboard/accounts")

@@ -85,13 +85,13 @@ public class DataUtil {
 	
 	public static FeedbackCategory createFeedbackCategoryA() {
 		FeedbackCategory category = new FeedbackCategory();
-		category.setLabel("Facilities");
+		category.setLabel("Attractions");
 		return category;
 	}
 	
 	public static FeedbackCategory createFeedbackCategoryB() {
 		FeedbackCategory category = new FeedbackCategory();
-		category.setLabel("Attractions");
+		category.setLabel("Facilities");
 		return category;
 	}
 	

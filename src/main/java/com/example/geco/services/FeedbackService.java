@@ -110,26 +110,36 @@ public class FeedbackService {
 	}
 	
 	public List<FeedbackResponse> getFeedbackByCategoryAndDateRange(
-	        Integer categoryId, 
-	        LocalDate startDate, 
+	        Integer categoryId,
+	        LocalDate startDate,
 	        LocalDate endDate) {
+	    if (startDate == null) {
+            startDate = LocalDate.of(bookingRepository.getEarliestYear(), 1, 1);
+        }
+        
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+        
+        if (endDate.isBefore(startDate)) {
+	        throw new IllegalArgumentException("End date cannot be earlier than start date.");
+	    }
 
 	    List<Feedback> feedbacks;
 
-	    if (categoryId == null && startDate == null && endDate == null) {
-	        feedbacks = feedbackRepository.findAll();
-	    } else if (categoryId == null) {
-	        feedbacks = feedbackRepository.findByBooking_VisitDateBetween(startDate, endDate);
-	    } else if (startDate == null && endDate == null) {
-	        feedbacks = feedbackRepository.findByCategory_FeedbackCategoryId(categoryId);
+	    if (categoryId == null) {
+	        feedbacks = feedbackRepository
+	                .findByBooking_VisitDateBetweenOrderByStatus(startDate, endDate);
 	    } else {
-	        feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetween(
-	                categoryId, startDate, endDate);
+	        feedbacks = feedbackRepository
+	                .findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByStatus(
+	                        categoryId, startDate, endDate);
 	    }
 
-	    return feedbacks.stream().map(this::toResponse).toList();
+	    return feedbacks.stream()
+	            .map(this::toResponse)
+	            .toList();
 	}
-
 	
 	public FeedbackResponse updateFeedback(Feedback feedback) {
 		if (feedback.getAccount() == null && 
