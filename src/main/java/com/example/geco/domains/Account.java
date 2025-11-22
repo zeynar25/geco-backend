@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 public class Account implements UserDetails {
 	public enum Role {
 	    ADMIN,
-	    MANAGER,
+	    STAFF,
 	    GUEST
 	}
 	

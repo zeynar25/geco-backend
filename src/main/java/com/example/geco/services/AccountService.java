@@ -1,5 +1,7 @@
 package com.example.geco.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -227,5 +229,32 @@ public class AccountService implements UserDetailsService{
 		Account account = accountRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
         return account;
+	}
+
+
+	public List<AccountResponse> getAllAdmin(Account account) {
+		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.ADMIN);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, null))
+	            .toList();
+	}
+
+
+	public List<AccountResponse> getAllStaffs(Account account) {
+		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.STAFF);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, null))
+	            .toList();
+	}
+
+
+	public List<AccountResponse> getAllGuests(Account account) {
+		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.GUEST);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, null))
+	            .toList();
 	}
 }

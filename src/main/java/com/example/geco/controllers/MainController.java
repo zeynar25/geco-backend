@@ -111,32 +111,19 @@ public class MainController extends AbstractController{
 	            .build()
 	            );
 	}
+	
+	// implement logging to track changes made by everyone? admin
 
 	// Admin-dashboard feedback categories
 	// call GET /feedback-category for list of feedback categories
 	// call GET /feedback for list of feedbacks w/ optional categoryId, startDate, endDate
 
 	// functionalities of admin-dashboard Accounts
-	@GetMapping("/dashboard/accounts")
-	public void displayDashboardAccounts() {
-		
-	}
+	// call GET /account/list/{role} for list accounts with certain roles
 
 	// functionalities of admin-dashboard tour packages and package inclusions
-	@GetMapping("/dashboard/packages")
-	public void displayDashboardPackages() {
-		
-	}
-
+	
 	// functionalities of admin-dashboard attractions
-	@GetMapping("/dashboard/attractions")
-	public void displayDashboardAttractions() {
-		
-	}
 
 	// functionalities of admin-dashboard frequently asked questions
-	@GetMapping("/dashboard/faq")
-	public void displayDashboardFaq() {
-		
-	}
 }
