@@ -16,8 +16,9 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	List<Booking> findAllByOrderByVisitDateAscVisitTimeAsc();
 	
 	List<Booking> findByAccount_AccountIdAndVisitDateBetween(
-			int accountId, LocalDate startDate, LocalDate endDate
-	);
+			int accountId, 
+			LocalDate startDate, 
+			LocalDate endDate);
 
 	List<Booking> findByVisitDate(LocalDate date);
 	
@@ -25,22 +26,37 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 			LocalDate startDate, LocalDate endDate
 	);
 	
+	List<Booking> findByVisitDateOrderByVisitTimeAsc(LocalDate visitDate);
+	
 	List<Booking> findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(int id);
+	
+	List<Booking> findByAccount_AccountIdAndStatusOrderByVisitDateAscVisitTimeAsc(
+			int id, 
+			BookingStatus status);
 
 	List<Booking> findByStatusOrderByVisitDateAscVisitTimeAsc(BookingStatus status);
 	
-	List<Booking> findByAccount_AccountIdAndStatusOrderByVisitDateAscVisitTimeAsc(int id, BookingStatus status);
+	List<Booking> findByStatusAndVisitDateBetween(
+			BookingStatus status, 
+			LocalDate startDate, 
+			LocalDate endDate);
 	
-	List<Booking> findByVisitDateOrderByVisitTimeAsc(LocalDate visitDate);
-	
-	@Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.visitDate BETWEEN :startDate AND :endDate AND b.status = :status")
-	Integer getRevenueByMonth(
+	@Query(
+			"SELECT COALESCE(SUM(b.totalPrice), 0) FROM Booking b "
+			+ "WHERE b.visitDate BETWEEN :startDate AND :endDate "
+			+ "AND b.status = :status")
+	Long getRevenue(
 			@Param("startDate") LocalDate startDate, 
 			@Param("endDate") LocalDate endDate, 
 			@Param("status") BookingStatus status);
 
-	List<Booking> findByStatusAndVisitDateBetween(BookingStatus status, LocalDate startDate, LocalDate endDate);
+	
+	@Query("SELECT MIN(YEAR(b.visitDate)) FROM Booking b")
+	Integer getEarliestYear();
 
+	@Query("SELECT MAX(YEAR(b.visitDate)) FROM Booking b")
+	Integer getLatestYear();
+	
 	@Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.status = :status")
 	Integer findTotalRevenueByStatus(@Param("status") Booking.BookingStatus status);
 	

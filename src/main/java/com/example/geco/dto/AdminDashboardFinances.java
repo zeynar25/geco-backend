@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminDashboardStats {
-	Integer monthlyBooking;
-	Long monthlyRevenue;
-	Integer pendingBookings;
-	Integer unreadFeedback;
+public class AdminDashboardFinances {
+	Long totalRevenue;
+	Long averageRevenuePerBooking;
+	Integer totalBookings;
+	Integer conmpletedBookings;
 }

@@ -21,7 +21,7 @@ import com.example.geco.domains.BookingInclusion;
 import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.AdminDashboardFinances;
 import com.example.geco.dto.CalendarDay;
-import com.example.geco.dto.MonthlyRevenue;
+import com.example.geco.dto.BookingRevenue;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
 
@@ -341,7 +341,7 @@ public class BookingService {
 		return bookings.size();
 	}
 
-	public Integer getRevenueByMonth(LocalDate date) {
+	public Long getMonthRevenue(LocalDate date) {
 		Integer year = date.getYear();
 		Integer month = date.getMonthValue();
 		
@@ -349,28 +349,63 @@ public class BookingService {
 	    LocalDate startDate = yearMonth.atDay(1);
 	    LocalDate endDate = yearMonth.atEndOfMonth();
 		
-	    Integer revenue = bookingRepository.getRevenueByMonth(startDate, endDate, BookingStatus.COMPLETED);
-		return revenue != null ? revenue : 0;
+	    return bookingRepository.getRevenue(startDate, endDate, BookingStatus.COMPLETED);
 	}
 
 	public Integer getNumberOfPendingBookings() {
 		return bookingRepository.countByStatus(BookingStatus.PENDING).intValue();
 	}
 
-	public List<MonthlyRevenue> getRevenueByYear(Integer year) {
-		List<MonthlyRevenue> revenues = new ArrayList<>();
+	public List<BookingRevenue> getYearlyRevenue(Integer startYear, Integer endYear) {
+		if (startYear == null) {
+			startYear = bookingRepository.getEarliestYear();
+		}
+		
+		if (endYear == null) {
+			endYear = bookingRepository.getLatestYear();
+		}
+		
+		if (startYear > endYear) {
+			throw new IllegalArgumentException("Starting year cannot be greater than the ending year");
+		}
+		
+		List<BookingRevenue> revenues = new ArrayList<>();
+	    
+	    for (int year = startYear; year <= endYear; year++) {
+	    	LocalDate startDate = LocalDate.of(year, 1, 1);
+	        LocalDate endDate = LocalDate.of(year, 12, 31);
+
+	        Long totalRevenue = bookingRepository.getRevenue(
+	            startDate, 
+	            endDate, 
+	            Booking.BookingStatus.COMPLETED
+	        );
+	        
+	        revenues.add(
+	        		new BookingRevenue(
+	        				String.valueOf(year),
+	        				totalRevenue));
+	    }
+	    
+	    return revenues;
+	}
+
+	public List<BookingRevenue> getMonthlyRevenue(Integer year) {
+		if (year == null) {
+			throw new IllegalArgumentException("Please provide a year.");
+		}
+		
+		List<BookingRevenue> revenues = new ArrayList<>();
 	    
 	    for (int month = 1; month <= 12; month++) {
 	        YearMonth yearMonth = YearMonth.of(year, month);
 	        LocalDate startDate = yearMonth.atDay(1);
 	        LocalDate endDate = yearMonth.atEndOfMonth();
 	        
-	        Integer totalRevenue = bookingRepository.getRevenueByMonth(startDate, endDate, Booking.BookingStatus.COMPLETED);
-	        
-	        if (totalRevenue == null) totalRevenue = 0;
+	        Long totalRevenue = bookingRepository.getRevenue(startDate, endDate, Booking.BookingStatus.COMPLETED);
 	        
 	        revenues.add(
-	        		new MonthlyRevenue(
+	        		new BookingRevenue(
 	        				yearMonth.getMonth().name(), 
 	        				totalRevenue));
 	    }

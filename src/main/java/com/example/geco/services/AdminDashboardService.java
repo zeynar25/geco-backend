@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.domains.Feedback.FeedbackStatus;
 import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.AdminDashboardFinances;
+import com.example.geco.dto.AdminDashboardStats;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
 
@@ -22,10 +24,22 @@ public class AdminDashboardService {
 	private BookingService bookingService;
 	
 	@Autowired
+	private FeedbackService feedbackService;
+	
+	@Autowired
 	private BookingRepository bookingRepository;
 	
 	@Autowired
 	private AccountRepository accountRepository;
+
+	public AdminDashboardStats getDashboardStats(LocalDate date) {
+		return new AdminDashboardStats(
+				bookingService.getNumberOfBookingByMonth(LocalDate.now()),
+				bookingService.getMonthRevenue(LocalDate.now()),
+				bookingService.getNumberOfPendingBookings(),
+				feedbackService.getNumberOfNewFeedbacks(FeedbackStatus.NEW)
+		);
+	}
 
 	public List<Booking> getBookingByAdmin(AdminBookingRequest request) {
 		String email = request.getName() != null ? request.getName().strip() : null;
@@ -49,5 +63,10 @@ public class AdminDashboardService {
 		}
 		
 		return bookingRepository.findByAccount_AccountIdAndStatusOrderByVisitDateAscVisitTimeAsc(account.getAccountId(), status);
+	}
+
+
+	public AdminDashboardFinances getDashboardFinance(Integer year, Integer month) {
+		return new AdminDashboardFinances();
 	}
 }
