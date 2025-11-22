@@ -88,16 +88,34 @@ public class MainController extends AbstractController{
 	public void displayDashboardFeedbacks() {
 		
 	}
+	
+	// functionalities of admin-dashboard feedback categories
+	@GetMapping("/dashboard/feedback-categories")
+	public void displayDashboardFeedbackCategories() {
+		
+	}
 
-	// functionalities of admin-dashboard bookings
+	// functionalities of admin-dashboard Accounts
+	@GetMapping("/dashboard/accounts")
+	public void displayDashboardAccounts() {
+		
+	}
+
+	// functionalities of admin-dashboard tour packages and package inclusions
 	@GetMapping("/dashboard/packages")
 	public void displayDashboardPackages() {
 		
 	}
 
-	// functionalities of admin-dashboard bookings
+	// functionalities of admin-dashboard attractions
 	@GetMapping("/dashboard/attractions")
 	public void displayDashboardAttractions() {
+		
+	}
+
+	// functionalities of admin-dashboard frequently asked questions
+	@GetMapping("/dashboard/faq")
+	public void displayDashboardFaq() {
 		
 	}
 }

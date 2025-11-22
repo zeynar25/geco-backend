@@ -7,22 +7,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.geco.domains.Account;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.BookingInclusion;
-import com.example.geco.dto.AdminBookingRequest;
-import com.example.geco.dto.AdminDashboardFinances;
 import com.example.geco.dto.CalendarDay;
 import com.example.geco.dto.BookingRevenue;
-import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
 
 import jakarta.persistence.EntityNotFoundException;
