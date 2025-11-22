@@ -68,8 +68,8 @@ public class DataUtil {
 	public static Attraction createAttractionA() {
 		Attraction attraction = new Attraction();
 		attraction.setAttractionId(0);
-		attraction.setName("Inang Kalikasan");
-		attraction.setDescription("A special statue.");
+		attraction.setName("Hanging bridge");
+		attraction.setDescription("A bridge that is hanging.");
 		
 		return attraction;
 	}
@@ -77,8 +77,8 @@ public class DataUtil {
 	public static Attraction createAttractionB() {
 		Attraction attraction = new Attraction();
 		attraction.setAttractionId(1);
-		attraction.setName("Hanging bridge");
-		attraction.setDescription("A bridge that is hanging.");
+		attraction.setName("Inang Kalikasan");
+		attraction.setDescription("A special statue.");
 		
 		return attraction;
 	}

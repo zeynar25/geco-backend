@@ -122,7 +122,7 @@ public class MainController extends AbstractController{
 
 	// functionalities of admin-dashboard tour packages and package inclusions
 	// call GET /package for tour packages
-	// call GET /
+	// call GET /package-inclusion
 	
 	// functionalities of admin-dashboard attractions
 

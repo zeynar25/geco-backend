@@ -52,7 +52,7 @@ public class AttractionService {
 	}
 	
 	public List<AttractionResponse> getAllAttractions() {
-		return attractionRepository.findAll()
+		return attractionRepository.findAllByOrderByName()
 	            .stream()
 	            .map(this::toResponse)
 	            .collect(Collectors.toList());
