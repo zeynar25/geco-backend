@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Faq;
+import com.example.geco.dto.FaqOrderRequest;
 
 @RestController
 @RequestMapping("/faq")
@@ -41,6 +42,12 @@ public class FaqController extends AbstractController {
 		faq.setFaqId(id);
 		Faq updatedFaq = faqService.updateFaq(faq);
         return new ResponseEntity<>(updatedFaq, HttpStatus.OK);
+	}
+	
+	@PostMapping("/reorder")
+	public ResponseEntity<List<Faq>> reorderFaqs(@RequestBody List<FaqOrderRequest> orderList) {
+	    faqService.updateOrder(orderList);
+	    return ResponseEntity.ok(faqService.getAllFaqs());
 	}
 
 	@DeleteMapping("/{id}")

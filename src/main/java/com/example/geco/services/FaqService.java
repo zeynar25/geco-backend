@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Faq;
+import com.example.geco.dto.FaqOrderRequest;
 import com.example.geco.repositories.FaqRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -22,22 +23,23 @@ public class FaqService {
 	        throw new IllegalArgumentException("Question is missing.");
 	    }
 		
+		if (faq.getAnswer() == null || faq.getAnswer().isBlank()) {
+	        throw new IllegalArgumentException("Answer is missing.");
+		}
+
+		faq.setQuestion(faq.getQuestion().trim());
 		if (faq.getQuestion().length() < 10) {
 	        throw new IllegalArgumentException("Question must have at least 10 characters.");
 	    }
 		
-		if (faq.getAnswer() == null || faq.getAnswer().isBlank()) {
-	        throw new IllegalArgumentException("Answer is missing.");
-		}
-		
-		if (faq.getAnswer().length() < 10) {
-	        throw new IllegalArgumentException("Answer must have at least 10 characters.");
-	    }
-		
-		faq.setQuestion(faq.getQuestion().trim());
 		if (faqRepository.existsByQuestionIgnoreCase(faq.getQuestion())) {
 			throw new IllegalArgumentException("Question \"" + faq.getQuestion() + "\" already exists.");
 		}
+
+		faq.setAnswer(faq.getAnswer().trim());
+		if (faq.getAnswer().length() < 10) {
+	        throw new IllegalArgumentException("Answer must have at least 10 characters.");
+	    }
 		
 		return faqRepository.save(faq);
 	}
@@ -48,7 +50,7 @@ public class FaqService {
 	}
 	
 	public List<Faq> getAllFaqs() {
-		return faqRepository.findAll();
+		return faqRepository.findAllByOrderByDisplayOrder();
 	}
 	
 	public Faq updateFaq(Faq faq) {
@@ -85,5 +87,14 @@ public class FaqService {
 	            .orElseThrow(() -> new EntityNotFoundException("FAQ with ID \"" + id + "\" not found."));
 	    
 		faqRepository.delete(faq);
+	}
+
+	@Transactional
+	public void updateOrder(List<FaqOrderRequest> orderList) {
+		for (FaqOrderRequest item : orderList) {
+	        Faq faq = faqRepository.findById(item.getFaqId())
+	                .orElseThrow(() -> new EntityNotFoundException("FAQ with ID \"" + item.getFaqId() + "\" not found."));
+	        faq.setDisplayOrder(item.getDisplayOrder());
+	    }
 	}
 }

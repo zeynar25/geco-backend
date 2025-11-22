@@ -3,12 +3,11 @@ package com.example.geco.domains;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.persistence.Id;
 
 @Entity
 @Data
@@ -21,4 +20,6 @@ public class Faq {
 	private Integer faqId;
 	private String question;
 	private String answer;
+	
+	private Integer displayOrder;
 }

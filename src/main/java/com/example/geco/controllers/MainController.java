@@ -33,9 +33,15 @@ public class MainController extends AbstractController{
 		return ResponseEntity.ok(homepageService.getHomeStats());
     }
 	
-	// to implement
-	// logging to track changes made by everyone? admin
+	// to implement:
+	// logging for audit trail
+	// configure access (secure endpoints)
 	// payment function, either through gcash api or saving a screenshot of proof of payment
+	
+	// Add test/s for:
+	// GET account
+	// reordering faq
+	// Dashboard bookings, finances and trends
 	
 	@GetMapping("/calendar/{year}/{month}")
 	public ResponseEntity<?> displayCalendar(@PathVariable int year, @PathVariable int month) {
@@ -49,7 +55,8 @@ public class MainController extends AbstractController{
 		AdminDashboardStats stats = adminDashboardService.getDashboardStats(now);
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
-	
+
+	// functionalities of admin-dashboard bookings
 	@PostMapping("/dashboard/bookings")
 	public ResponseEntity<List<Booking>> displayDashboardBookings(@RequestBody AdminBookingRequest request) {
 		List<Booking> bookings = adminDashboardService.getBookingByAdmin(request);
@@ -125,6 +132,8 @@ public class MainController extends AbstractController{
 	// call GET /package-inclusion
 	
 	// functionalities of admin-dashboard attractions
+	// call GET /attraction
 
 	// functionalities of admin-dashboard frequently asked questions
+	// call GET /faq
 }
