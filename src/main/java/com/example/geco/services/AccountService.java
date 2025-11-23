@@ -3,8 +3,6 @@ package com.example.geco.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,12 +28,9 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class AccountService implements UserDetailsService{
+public class AccountService extends BaseService implements UserDetailsService{
 	@Autowired
 	private AccountRepository accountRepository;
-	
-	@Autowired
-	private AuditLogService auditLogService;
 	
 	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 	
@@ -46,59 +41,6 @@ public class AccountService implements UserDetailsService{
 		        .orElseThrow(() -> new UsernameNotFoundException("Account with Email \"" + username + "\" not found."));
 		
         return account;
-	}
-	
-	private Account getLoggedAccount() {
-	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    if (auth == null || !(auth.getPrincipal() instanceof Account)) {
-	        throw new AccessDeniedException("No authenticated user found.");
-	    }
-	    return (Account) auth.getPrincipal();
-	}
-
-	private String getLoggedAccountEmail() {
-	    return getLoggedAccount().getDetail().getEmail();
-	}
-
-	private Role getLoggedAccountRole() {
-	    return getLoggedAccount().getRole();
-	}
-	
-	// Check if logged-in user is the same as the account provided.
-	private void checkAuth(Account account) {
-	    if (account.getDetail() == null || 
-	    		account.getDetail().getEmail() == null || 
-	    		!account.getDetail().getEmail().equals(getLoggedAccountEmail())) {
-	        throw new AccessDeniedException("You are not authorized to update this account.");
-	    }
-	}
-	
-	private void logIfStaffOrAdmin(String entity, 
-			Long entityId, 
-			String action, 
-			Object prevVal, 
-			Object currVal) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-	    // Return early if no authenticated user
-	    if (auth == null || !(auth.getPrincipal() instanceof Account)) {
-	        return;
-	    }
-	    
-		Role role = getLoggedAccountRole();
-		
-		if (role.equals(Role.GUEST)) {
-			return;
-		}
-		
-		auditLogService.logAction(
-				entity,
-				(long) entityId,
-				action,
-				prevVal,
-				currVal,
-				getLoggedAccountEmail(),
-				role);
 	}
 	
 	private AccountResponse toResponse(Account account, AccountResponse.PasswordStatus status) {
@@ -115,6 +57,15 @@ public class AccountService implements UserDetailsService{
 	            .contactNumber(detail != null ? detail.getContactNumber() : null)
 	            .build();
 	}
+	
+	// Check if logged-in user is the same as the account provided.
+		private void checkAuth(Account account) {
+		    if (account.getDetail() == null || 
+		    		account.getDetail().getEmail() == null || 
+		    		!account.getDetail().getEmail().equals(getLoggedAccountEmail())) {
+		        throw new AccessDeniedException("You are not authorized to update this account.");
+		    }
+		}
 	
 	public Account createAccountCopy(Account account) {
 		return Account.builder()
@@ -167,7 +118,7 @@ public class AccountService implements UserDetailsService{
 		
 		Account savedAccount = accountRepository.save(account);
 		
-		logIfStaffOrAdmin("Account", (long)savedAccount.getAccountId(), "CREATE", null, savedAccount);
+		logIfAuthenticatedStaffOrAdmin("Account", (long)savedAccount.getAccountId(), "CREATE", null, savedAccount);
 		
 		return toResponse(savedAccount, AccountResponse.PasswordStatus.UNCHANGED);
 	}
