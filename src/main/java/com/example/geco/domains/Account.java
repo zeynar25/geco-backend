@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -50,6 +51,7 @@ public class Account implements UserDetails {
 	
 	private String password;
 	
+	@Builder.Default
 	private boolean isActive = true;
 	
 	@JsonIgnore
@@ -57,7 +59,7 @@ public class Account implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
 		if (role == null) return List.of();
 		
-		return List.of(new SimpleGrantedAuthority(role.name()));
+		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 	
 	@Override

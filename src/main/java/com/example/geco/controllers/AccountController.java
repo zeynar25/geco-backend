@@ -29,52 +29,12 @@ public class AccountController extends AbstractController{
 		AccountResponse savedAccount  = accountService.addTouristAccount(request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
 	}
-	
-	@PostMapping("/admin")
-	public ResponseEntity<AccountResponse> addAccountByAdmin(@RequestBody @Valid SignupRequest request) {
-		AccountResponse savedAccount  = accountService.addAccountByAdmin(request);
-		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
-	}
-	
-	@GetMapping("/list/admin")
-	public ResponseEntity<List<AccountResponse>> getAllAdmins() {
-		List<AccountResponse> accounts  = accountService.getAllAdmin();
-		return ResponseEntity.ok(accounts);
-	}
-	
-	@GetMapping("/list/staff")
-	public ResponseEntity<List<AccountResponse>> getAllStaffs() {
-		List<AccountResponse> accounts  = accountService.getAllStaffs();
-		return ResponseEntity.ok(accounts);
-	}
-	
-	@GetMapping("/list/guest")
-	public ResponseEntity<List<AccountResponse>> getAllGuests() {
-		List<AccountResponse> accounts  = accountService.getAllGuests();
-		return ResponseEntity.ok(accounts);
-	}
 
-	@PatchMapping("/update-account/{id}")
+	@PatchMapping("/update-password/{id}")
 	public ResponseEntity<AccountResponse> updatePassword(
 			@PathVariable int id, 
 			@RequestBody @Valid PasswordUpdateRequest request) {
 		AccountResponse savedAccount  = accountService.updatePassword(id, request);
-		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
-	}
-	
-	@PatchMapping("/admin/update-account/role/{id}")
-	public ResponseEntity<AccountResponse> updateAccountRoleByAdmin(
-			@PathVariable int id, 
-			@RequestBody RoleUpdateRequest request) {
-		AccountResponse savedAccount  = accountService.updateRoleByAdmin(id, request);
-		
-		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
-	}
-	
-	@PatchMapping("/admin/update-account/password/{id}")
-	public ResponseEntity<AccountResponse> resetPasswordByAdmin(
-			@PathVariable int id) {
-		AccountResponse savedAccount  = accountService.resetPasswordByAdmin(id);
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
 	}
 	
@@ -86,10 +46,58 @@ public class AccountController extends AbstractController{
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
 	}
 	
+	
+	@GetMapping("staff/list/admin")
+	public ResponseEntity<List<AccountResponse>> getAllAdmins() {
+		List<AccountResponse> accounts  = accountService.getAllAdmin();
+		return ResponseEntity.ok(accounts);
+	}
+	
+	@GetMapping("staff/list/staff")
+	public ResponseEntity<List<AccountResponse>> getAllStaffs() {
+		List<AccountResponse> accounts  = accountService.getAllStaffs();
+		return ResponseEntity.ok(accounts);
+	}
+	
+	@GetMapping("staff/list/guest")
+	public ResponseEntity<List<AccountResponse>> getAllGuests() {
+		List<AccountResponse> accounts  = accountService.getAllGuests();
+		return ResponseEntity.ok(accounts);
+	}
+	
+	@PatchMapping("/staff/update-account/password/{id}")
+	public ResponseEntity<AccountResponse> resetPasswordByStaff(
+			@PathVariable int id) {
+		AccountResponse savedAccount  = accountService.resetPasswordByStaff(id);
+		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
+	}
+	
+	
+	@PostMapping("/admin")
+	public ResponseEntity<AccountResponse> addAccountByAdmin(@RequestBody @Valid SignupRequest request) {
+		AccountResponse savedAccount  = accountService.addAccountByAdmin(request);
+		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
+	}
+	
+	@PatchMapping("/admin/update-account/role/{id}")
+	public ResponseEntity<AccountResponse> updateAccountRoleByAdmin(
+			@PathVariable int id, 
+			@RequestBody RoleUpdateRequest request) {
+		AccountResponse savedAccount  = accountService.updateRoleByAdmin(id, request);
+		
+		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
+	}
+	
 	@DeleteMapping("/admin/{id}")
-	public ResponseEntity<Void> updateDetails(
+	public ResponseEntity<Void> deleteAccount(
 			@PathVariable int id) {
 		accountService.softDeleteAccount(id);
 		return ResponseEntity.noContent().build();
+	}
+	
+	@PatchMapping("/admin/restore/{id}")
+	public ResponseEntity<Void> restoreAccount(@PathVariable int id) {
+	    accountService.restoreAccount(id);
+	    return ResponseEntity.noContent().build();
 	}
 }

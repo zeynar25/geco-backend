@@ -78,6 +78,13 @@ public class AccountService implements UserDetailsService{
 			String action, 
 			Object prevVal, 
 			Object currVal) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+	    // Return early if no authenticated user
+	    if (auth == null || !(auth.getPrincipal() instanceof Account)) {
+	        return;
+	    }
+	    
 		Role role = getLoggedAccountRole();
 		
 		if (role.equals(Role.GUEST)) {
@@ -140,7 +147,7 @@ public class AccountService implements UserDetailsService{
 		Role role = request.getRole();
 		
 		if (accountRepository.existsByDetailEmail(email)) {
-		    throw new IllegalArgumentException("Email \"" + email + "\" is already registered.");
+		    throw new IllegalArgumentException("Email '" + email + "' is already registered.");
 		}
 		
 		if (role == null) {
@@ -325,7 +332,7 @@ public class AccountService implements UserDetailsService{
 	    return toResponse(saved, PasswordStatus.UNCHANGED);
 	}
 
-	public AccountResponse resetPasswordByAdmin(int id) {
+	public AccountResponse resetPasswordByStaff(int id) {
 		Account existingAccount = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
 		
@@ -362,6 +369,20 @@ public class AccountService implements UserDetailsService{
 	    accountRepository.save(existingAccount);
 	
 	    logIfStaffOrAdmin("Account", (long) id, "DELETE", prevAccount, null);
+	}
+
+	public void restoreAccount(int id) {
+		Account account = accountRepository.findById(id)
+		        .orElseThrow(() -> new EntityNotFoundException("Account ID \"" + id + "\" not found."));
+
+	    if (account.isActive()) {
+	        throw new IllegalStateException("Account is already active.");
+	    }
+
+	    account.setActive(true);
+	    accountRepository.save(account);
+	    
+	    logIfStaffOrAdmin("Account", (long) id, "RESTORE", null, account);
 	}
 
 }
