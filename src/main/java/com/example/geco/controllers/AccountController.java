@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,63 +13,83 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.geco.domains.Account;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
+import com.example.geco.dto.PasswordUpdateRequest;
+import com.example.geco.dto.RoleUpdateRequest;
+import com.example.geco.dto.SignupRequest;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/account")
 public class AccountController extends AbstractController{
 	@PostMapping
-	public ResponseEntity<AccountResponse> addAccount(@RequestBody Account account) {
-		AccountResponse savedAccount  = accountService.addTouristAccount(account);
+	public ResponseEntity<AccountResponse> addAccount(@RequestBody @Valid SignupRequest request) {
+		AccountResponse savedAccount  = accountService.addTouristAccount(request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/admin")
-	public ResponseEntity<AccountResponse> addAccountByAdmin(@RequestBody Account account) {
-		AccountResponse savedAccount  = accountService.addAccountByAdmin(account);
+	public ResponseEntity<AccountResponse> addAccountByAdmin(@RequestBody @Valid SignupRequest request) {
+		AccountResponse savedAccount  = accountService.addAccountByAdmin(request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
 	}
 	
 	@GetMapping("/list/admin")
-	public ResponseEntity<List<AccountResponse>> getAllAdmins(@RequestBody Account account) {
-		List<AccountResponse> accounts  = accountService.getAllAdmin(account);
+	public ResponseEntity<List<AccountResponse>> getAllAdmins() {
+		List<AccountResponse> accounts  = accountService.getAllAdmin();
 		return ResponseEntity.ok(accounts);
 	}
 	
 	@GetMapping("/list/staff")
-	public ResponseEntity<List<AccountResponse>> getAllStaffs(@RequestBody Account account) {
-		List<AccountResponse> accounts  = accountService.getAllStaffs(account);
+	public ResponseEntity<List<AccountResponse>> getAllStaffs() {
+		List<AccountResponse> accounts  = accountService.getAllStaffs();
 		return ResponseEntity.ok(accounts);
 	}
 	
 	@GetMapping("/list/guest")
-	public ResponseEntity<List<AccountResponse>> getAllGuests(@RequestBody Account account) {
-		List<AccountResponse> accounts  = accountService.getAllGuests(account);
+	public ResponseEntity<List<AccountResponse>> getAllGuests() {
+		List<AccountResponse> accounts  = accountService.getAllGuests();
 		return ResponseEntity.ok(accounts);
 	}
 
-	// Can only update account's password.
 	@PatchMapping("/update-account/{id}")
-	public ResponseEntity<AccountResponse> updateAccount(@PathVariable int id, @RequestBody Account account) {
-		account.setAccountId(id);
-		AccountResponse savedAccount  = accountService.updatePassword(account);
+	public ResponseEntity<AccountResponse> updatePassword(
+			@PathVariable int id, 
+			@RequestBody @Valid PasswordUpdateRequest request) {
+		AccountResponse savedAccount  = accountService.updatePassword(id, request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
 	}
-
-	// Can update the password and role.
-	@PatchMapping("/admin/update-account/{id}")
-	public ResponseEntity<AccountResponse> updateAccountByAdmin(@PathVariable int id, @RequestBody Account account) {
-		account.setAccountId(id);
-		AccountResponse savedAccount  = accountService.updatePassword(account);
+	
+	@PatchMapping("/admin/update-account/role/{id}")
+	public ResponseEntity<AccountResponse> updateAccountRoleByAdmin(
+			@PathVariable int id, 
+			@RequestBody RoleUpdateRequest request) {
+		AccountResponse savedAccount  = accountService.updateRoleByAdmin(id, request);
+		
+		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
+	}
+	
+	@PatchMapping("/admin/update-account/password/{id}")
+	public ResponseEntity<AccountResponse> resetPasswordByAdmin(
+			@PathVariable int id) {
+		AccountResponse savedAccount  = accountService.resetPasswordByAdmin(id);
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
 	}
 	
 	@PatchMapping("/update-details/{id}")
-	public ResponseEntity<AccountResponse> updateDetail(@PathVariable int id, @RequestBody DetailRequest request) {
-		request.setAccountId(id);
-		AccountResponse savedAccount  = accountService.updateDetails(request);
+	public ResponseEntity<AccountResponse> updateDetails(
+			@PathVariable int id, 
+			@RequestBody DetailRequest request) {
+		AccountResponse savedAccount  = accountService.updateDetails(id, request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/admin/{id}")
+	public ResponseEntity<Void> updateDetails(
+			@PathVariable int id) {
+		accountService.softDeleteAccount(id);
+		return ResponseEntity.noContent().build();
 	}
 }

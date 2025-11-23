@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Account;
@@ -63,10 +64,8 @@ public class AdminDashboardService {
 			return bookingRepository.findByStatusOrderByVisitDateAscVisitTimeAsc(status);
 		}
 		
-		Account account = accountRepository.findByDetailEmail(email.strip()); 
-		if (account == null) {
-		    throw new EntityNotFoundException("Account with Email \"" + email + "\" not found.");
-		}
+		Account account = accountRepository.findByDetailEmail(email.strip())
+			.orElseThrow(() -> new UsernameNotFoundException("Account with Email \"" + email + "\" not found."));
 		
 		if (status == null) {
 			return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(account.getAccountId());

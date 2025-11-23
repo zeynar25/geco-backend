@@ -20,6 +20,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,6 +28,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name="user_account")
 public class Account implements UserDetails {
 	public enum Role {
@@ -47,6 +49,8 @@ public class Account implements UserDetails {
     private UserDetail detail;
 	
 	private String password;
+	
+	private boolean isActive = true;
 	
 	@JsonIgnore
 	@Override
@@ -85,6 +89,6 @@ public class Account implements UserDetails {
 	@JsonIgnore
     @Override 
     public boolean isEnabled() { 
-    	return true; 
+    	return isActive; 
 	}
 }
