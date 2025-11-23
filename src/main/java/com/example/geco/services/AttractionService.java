@@ -4,16 +4,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.example.geco.domains.Account;
+import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.Attraction;
 import com.example.geco.dto.AttractionResponse;
+import com.example.geco.exceptions.AccessDeniedException;
 import com.example.geco.repositories.AttractionRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class AttractionService {
+public class AttractionService extends BaseService{
 	@Autowired
 	AttractionRepository attractionRepository;
 	
@@ -31,6 +36,14 @@ public class AttractionService {
 		}
 	}
 	
+	public Attraction createAttractionCopy(Attraction a) {
+		return Attraction.builder()
+				.attractionId(a.getAttractionId())
+				.name(a.getName())
+				.description(a.getDescription())
+			    .build();
+	}
+	
 	private AttractionResponse toResponse(Attraction a) {
 		return new AttractionResponse(
 				a.getAttractionId(),
@@ -42,6 +55,9 @@ public class AttractionService {
 	public AttractionResponse addAttraction(Attraction attraction) {
 		validateAttraction(attraction);
 		Attraction a = attractionRepository.save(attraction);
+		
+		logIfStaffOrAdmin("Attraction", (long) a.getAttractionId(), "CREATE", null, a);
+		
 	    return toResponse(a);
 	}
 	
@@ -57,24 +73,67 @@ public class AttractionService {
 	            .map(this::toResponse)
 	            .collect(Collectors.toList());
 	}
+
+	public List<AttractionResponse> getAllActiveAttractions() {
+		return attractionRepository.findAllByIsActiveOrderByName(true)
+	            .stream()
+	            .map(this::toResponse)
+	            .collect(Collectors.toList());
+	}
+
+	public List<AttractionResponse> getAllInactiveAttractions() {
+		return attractionRepository.findAllByIsActiveOrderByName(false)
+	            .stream()
+	            .map(this::toResponse)
+	            .collect(Collectors.toList());
+	}
 	
-	public AttractionResponse updateAttraction(Attraction attraction) {
+	public AttractionResponse updateAttraction(int id, Attraction attraction) {
 		Attraction existingAttraction = attractionRepository.findById(attraction.getAttractionId())
 				.orElseThrow(() -> new EntityNotFoundException("Attraction not found."));
 		
-		validateAttraction(attraction);
-		existingAttraction.setName(attraction.getName());
-		existingAttraction.setDescription(attraction.getDescription());
+		String name = attraction.getName() != null ? attraction.getName().trim() : "";
+		String description = attraction.getDescription() != null ? attraction.getDescription().trim() : "";
+		
+		if ((name.isBlank() || existingAttraction.getName().equals(name)) &&
+			    (description.isBlank() || existingAttraction.getDescription().equals(description))) {
+			    throw new IllegalArgumentException("No changes detected for the attraction.");
+		}
+		
+		Attraction prevAttraction = createAttractionCopy(existingAttraction);
+		
+		if (!name.isBlank()) {
+			existingAttraction.setName(name);
+		}
+		
+		if (!description.isBlank()) {
+			existingAttraction.setDescription(description);
+		}
 
 		Attraction updated = attractionRepository.save(existingAttraction);
+
+		logIfStaffOrAdmin("Attraction", (long) updated.getAttractionId(), "UPDATE", prevAttraction, updated);
 		
         return toResponse(updated);
 	}
 	
-	public void deleteAttraction(int id) {
+	public void softDeleteAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID \""+ id + "\" not found."));
 		
+		Attraction prevAttraction = createAttractionCopy(attraction);
+
+		attraction.setActive(false);
+		attractionRepository.save(attraction);
+		
+		logIfStaffOrAdmin("Attraction", (long) id, "UPDATE", prevAttraction, attraction);
+	}
+	
+	public void hardDeleteAttraction(int id) {
+		Attraction attraction = attractionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID \""+ id + "\" not found."));
+		
+		logIfStaffOrAdmin("Attraction", (long) id, "UPDATE", attraction, null);
 		attractionRepository.delete(attraction);
 	}
 }

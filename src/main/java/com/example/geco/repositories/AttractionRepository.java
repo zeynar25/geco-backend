@@ -1,6 +1,7 @@
 package com.example.geco.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,4 +12,6 @@ import com.example.geco.domains.Attraction;
 public interface AttractionRepository  extends JpaRepository<Attraction, Integer>{
 
 	List<Attraction> findAllByOrderByName();
+
+	List<Attraction> findAllByIsActiveOrderByName(boolean isActive);
 }
