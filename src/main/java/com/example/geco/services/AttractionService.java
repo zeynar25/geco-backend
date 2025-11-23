@@ -89,32 +89,35 @@ public class AttractionService extends BaseService{
 	}
 	
 	public AttractionResponse updateAttraction(int id, Attraction attraction) {
-		Attraction existingAttraction = attractionRepository.findById(attraction.getAttractionId())
-				.orElseThrow(() -> new EntityNotFoundException("Attraction not found."));
-		
-		String name = attraction.getName() != null ? attraction.getName().trim() : "";
-		String description = attraction.getDescription() != null ? attraction.getDescription().trim() : "";
-		
-		if ((name.isBlank() || existingAttraction.getName().equals(name)) &&
-			    (description.isBlank() || existingAttraction.getDescription().equals(description))) {
-			    throw new IllegalArgumentException("No changes detected for the attraction.");
-		}
-		
-		Attraction prevAttraction = createAttractionCopy(existingAttraction);
-		
-		if (!name.isBlank()) {
-			existingAttraction.setName(name);
-		}
-		
-		if (!description.isBlank()) {
-			existingAttraction.setDescription(description);
-		}
+		Attraction existingAttraction = attractionRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("Attraction not found."));
 
-		Attraction updated = attractionRepository.save(existingAttraction);
+		if (attraction.getName() != null && attraction.getName().trim().length() < 1) {
+	        throw new IllegalArgumentException("Attraction name must have at least 1 character.");
+	    }
 
-		logIfStaffOrAdmin("Attraction", (long) updated.getAttractionId(), "UPDATE", prevAttraction, updated);
-		
-        return toResponse(updated);
+	    if (attraction.getDescription() != null && attraction.getDescription().trim().length() < 10) {
+	        throw new IllegalArgumentException("Attraction description must be at least 10 characters long.");
+	    }
+
+	    String name = attraction.getName() != null ? attraction.getName().trim() : null;
+	    String description = attraction.getDescription() != null ? attraction.getDescription().trim() : null;
+
+	    if ((name == null || existingAttraction.getName().equals(name)) &&
+	        (description == null || existingAttraction.getDescription().equals(description))) {
+	        throw new IllegalArgumentException("No changes detected for the attraction.");
+	    }
+
+	    Attraction prevAttraction = createAttractionCopy(existingAttraction);
+
+	    if (name != null) existingAttraction.setName(name);
+	    if (description != null) existingAttraction.setDescription(description);
+
+	    Attraction updated = attractionRepository.save(existingAttraction);
+
+	    logIfStaffOrAdmin("Attraction", (long) updated.getAttractionId(), "UPDATE", prevAttraction, updated);
+
+	    return toResponse(updated);
 	}
 	
 	public void softDeleteAttraction(int id) {

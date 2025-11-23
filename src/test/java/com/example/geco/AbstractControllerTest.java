@@ -3,8 +3,12 @@ package com.example.geco;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.geco.domains.Account;
+import com.example.geco.domains.UserDetail;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.AttractionRepository;
 import com.example.geco.repositories.FaqRepository;
@@ -79,4 +83,46 @@ public abstract class AbstractControllerTest {
 
 	@Autowired
 	protected PackageInclusionRepository packageInclusionRepository;
+	
+	protected void mockAdminAuthentication(String email) {
+	    Account mockAccount = new Account();
+	    mockAccount.setRole(Account.Role.ADMIN);
+	    mockAccount.setDetail(UserDetail.builder().email(email).build());
+
+	    SecurityContextHolder.getContext().setAuthentication(
+	        new UsernamePasswordAuthenticationToken(
+	            mockAccount, // principal
+	            null,        // credentials
+	            mockAccount.getAuthorities() // roles
+	        )
+	    );
+	}
+	
+	protected void mockStaffAuthentication(String email) {
+	    Account mockAccount = new Account();
+	    mockAccount.setRole(Account.Role.STAFF);
+	    mockAccount.setDetail(UserDetail.builder().email(email).build());
+
+	    SecurityContextHolder.getContext().setAuthentication(
+	        new UsernamePasswordAuthenticationToken(
+	            mockAccount, 
+	            null,        
+	            mockAccount.getAuthorities() 
+	        )
+	    );
+	}
+	
+	protected void mockGuestAuthentication(String email) {
+	    Account mockAccount = new Account();
+	    mockAccount.setRole(Account.Role.GUEST);
+	    mockAccount.setDetail(UserDetail.builder().email(email).build());
+
+	    SecurityContextHolder.getContext().setAuthentication(
+	        new UsernamePasswordAuthenticationToken(
+	            mockAccount,
+	            null,       
+	            mockAccount.getAuthorities() 
+	        )
+	    );
+	}
 }

@@ -21,48 +21,6 @@ import com.example.geco.dto.SignupRequest;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AccountControllerTests extends AbstractControllerTest {
-	private void mockAdminAuthentication(String email) {
-	    Account mockAccount = new Account();
-	    mockAccount.setRole(Account.Role.ADMIN);
-	    mockAccount.setDetail(UserDetail.builder().email(email).build());
-
-	    SecurityContextHolder.getContext().setAuthentication(
-	        new UsernamePasswordAuthenticationToken(
-	            mockAccount, // principal
-	            null,        // credentials
-	            mockAccount.getAuthorities() // roles
-	        )
-	    );
-	}
-	
-	private void mockStaffAuthentication(String email) {
-	    Account mockAccount = new Account();
-	    mockAccount.setRole(Account.Role.STAFF);
-	    mockAccount.setDetail(UserDetail.builder().email(email).build());
-
-	    SecurityContextHolder.getContext().setAuthentication(
-	        new UsernamePasswordAuthenticationToken(
-	            mockAccount, 
-	            null,        
-	            mockAccount.getAuthorities() 
-	        )
-	    );
-	}
-	
-	private void mockGuestAuthentication(String email) {
-	    Account mockAccount = new Account();
-	    mockAccount.setRole(Account.Role.GUEST);
-	    mockAccount.setDetail(UserDetail.builder().email(email).build());
-
-	    SecurityContextHolder.getContext().setAuthentication(
-	        new UsernamePasswordAuthenticationToken(
-	            mockAccount,
-	            null,       
-	            mockAccount.getAuthorities() 
-	        )
-	    );
-	}
-
 	@Nested
     class SuccessTests {
 		@Test
