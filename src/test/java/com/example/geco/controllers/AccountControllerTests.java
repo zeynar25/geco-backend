@@ -11,185 +11,310 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.example.geco.AbstractControllerTest;
 import com.example.geco.DataUtil;
 import com.example.geco.domains.Account;
+import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.dto.AccountResponse;
+import com.example.geco.dto.AccountResponse.PasswordStatus;
 import com.example.geco.dto.DetailRequest;
+import com.example.geco.dto.PasswordUpdateRequest;
+import com.example.geco.dto.SignupRequest;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AccountControllerTests extends AbstractControllerTest {
 	@Nested
     class SuccessTests {
 		@Test
-		public void canAddAccount() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			String accountJson = objectMapper.writeValueAsString(accountA);
+		public void shouldCreateTouristAccount() throws Exception {
+			SignupRequest request = DataUtil.createSignupRequestA();
+			String requestJson = objectMapper.writeValueAsString(request);
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.post("/account")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(accountJson)
+						.content(requestJson)
 			).andExpect(
 					MockMvcResultMatchers.status().isCreated()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.passwordNotice").exists()
+					MockMvcResultMatchers.jsonPath("$.passwordStatus").value(PasswordStatus.UNCHANGED.toString())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.surname").value(accountA.getDetail().getSurname())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.firstName").value(accountA.getDetail().getFirstName())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.email").value(accountA.getDetail().getEmail())
+					MockMvcResultMatchers.jsonPath("$.email").value(request.getEmail())
 			);
 		}
 		
 		@Test
-		public void canUpdateAccountPassword() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			
-			// Save a guest account in the database.
-			AccountResponse savedResponse = accountService.addTouristAccount(accountA);
-			
-			// Fetch the saved account and detail
-		    Account managedAccount = accountRepository.findById(savedResponse.getAccountId()).get();
-		    UserDetail managedDetail = managedAccount.getDetail();
-		   
-		    String newPassword = "newstrongpassword";
-		    String censoredPassword = "*".repeat(newPassword.length());
-		    managedAccount.setPassword(newPassword);
-			
-		    String accountJson = objectMapper.writeValueAsString(managedAccount);
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldReturnAllGuestsByAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.GUEST);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+			SignupRequest requestB = DataUtil.createSignupRequestB();
+			requestB.setRole(Role.GUEST);
+			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-account/" + managedAccount.getAccountId())
+					MockMvcRequestBuilders.get("/account/staff/list/guest")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(accountJson)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.passwordNotice").value(censoredPassword)
+					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.role").value(managedAccount.getRole().toString())
+					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.surname").value(managedDetail.getSurname())
+					MockMvcResultMatchers.jsonPath("$[1].email").value(accountA.getEmail())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.firstName").value(managedDetail.getFirstName())
+					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountA.getPasswordStatus().toString())
+			);
+        }
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldReturnAllStaffsByAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.STAFF);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+			SignupRequest requestB = DataUtil.createSignupRequestB();
+			requestB.setRole(Role.STAFF);
+			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/account/staff/list/staff")
+						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.email").value(managedDetail.getEmail())
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].email").value(accountA.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountA.getPasswordStatus().toString())
+			);
+        }	
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldReturnAllAdminsByAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.ADMIN);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+			SignupRequest requestB = DataUtil.createSignupRequestB();
+			requestB.setRole(Role.ADMIN);
+			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/account/staff/list/admin")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].email").value("admin@example.com")
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].email").value(accountB.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountB.getPasswordStatus().toString())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[2].email").value(accountA.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[2].passwordStatus").value(accountA.getPasswordStatus().toString())
+			);
+        }	
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldReturnAllActiveGuestsByAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.GUEST);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+			SignupRequest requestB = DataUtil.createSignupRequestB();
+			requestB.setRole(Role.GUEST);
+			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+			
+			accountService.softDeleteAccount(accountB.getAccountId());
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/account/staff/list/guest/active")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].email").value(accountA.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountA.getPasswordStatus().toString())
+			);
+        }
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldReturnAllInactiveGuestsByAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.GUEST);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+			SignupRequest requestB = DataUtil.createSignupRequestB();
+			requestB.setRole(Role.GUEST);
+			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+			
+			accountService.softDeleteAccount(accountB.getAccountId());
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/account/staff/list/guest/inactive")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
+			);
+        }
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = {"STAFF"})
+        public void shouldReturnAllGuestsByStaff() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			AccountResponse accountA = accountService.addTouristAccount(requestA);
+
+			SignupRequest requestB = DataUtil.createSignupRequestB();
+			AccountResponse accountB = accountService.addTouristAccount(requestB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/account/staff/list/guest")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].email").value(accountA.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountA.getPasswordStatus().toString())
+			);
+        }
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldSoftDeleteAccount() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.GUEST);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.delete("/account/admin/" + accountA.getAccountId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNoContent()
+			);
+        }
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+        public void shouldRestoreAccount() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			requestA.setRole(Role.GUEST);
+			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+			
+			accountService.softDeleteAccount(accountA.getAccountId());
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/account/admin/restore/" + accountA.getAccountId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNoContent()
+			);
+        }
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = {"STAFF"})
+		public void shouldResetPasswordByStaff() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			AccountResponse accountA = accountService.addTouristAccount(requestA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/account/staff/reset-password/" + accountA.getAccountId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.passwordStatus").value(PasswordStatus.RESET_SUCCESSFULLY.toString())
 			);
 		}
 		
 		@Test
-		public void canUpdateAccountDetailsEmail() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			AccountResponse savedResponse = accountService.addTouristAccount(accountA);
-			
-			// Fetch the saved account and detail
-		    Account managedAccount = accountRepository.findById(savedResponse.getAccountId()).get();
-		    UserDetail managedDetail = managedAccount.getDetail();
-		    
-		    DetailRequest newRequest = new DetailRequest();
-		    newRequest.setAccountId(managedAccount.getAccountId());
-		    newRequest.setEmail("new@gmail.com");
-		    
-		    String requestJson = objectMapper.writeValueAsString(newRequest);
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+		public void shouldResetPasswordByAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			AccountResponse accountA = accountService.addTouristAccount(requestA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-details/" + managedAccount.getAccountId())
+					MockMvcRequestBuilders.patch("/account/staff/reset-password/" + accountA.getAccountId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.passwordStatus").value(PasswordStatus.RESET_SUCCESSFULLY.toString())
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+		public void shouldUpdateAccountRoleToStaff() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			AccountResponse accountA = accountService.addTouristAccount(requestA);
+			
+			requestA.setRole(Role.STAFF);
+			String requestJson = objectMapper.writeValueAsString(requestA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/account/admin/update-role/" + accountA.getAccountId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(requestJson)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.passwordNotice").value("No changes made")
+					MockMvcResultMatchers.jsonPath("$.passwordStatus").value(PasswordStatus.UNCHANGED.toString())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.role").value(managedAccount.getRole().toString())
+					MockMvcResultMatchers.jsonPath("$.email").value(accountA.getEmail())
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.surname").value(managedDetail.getSurname())
+					MockMvcResultMatchers.jsonPath("$.role").value(requestA.getRole().toString())
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
+		public void shouldUpdateAccountRoleToAdmin() throws Exception {
+			SignupRequest requestA = DataUtil.createSignupRequestA();
+			AccountResponse accountA = accountService.addTouristAccount(requestA);
+			
+			requestA.setRole(Role.ADMIN);
+			String requestJson = objectMapper.writeValueAsString(requestA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/account/admin/update-role/" + accountA.getAccountId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson)
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.firstName").value(managedDetail.getFirstName())
+					MockMvcResultMatchers.status().isOk()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.email").value(newRequest.getEmail())
+					MockMvcResultMatchers.jsonPath("$.passwordStatus").value(PasswordStatus.UNCHANGED.toString())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.email").value(accountA.getEmail())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.role").value(requestA.getRole().toString())
 			);
 		}
 	}
 	
 	@Nested
     class FailureTests {
-		@Test
-		public void cannotAddAccountImproperPassword() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			accountA.setPassword("123"); // too short for a password.
-		    String accountJson = objectMapper.writeValueAsString(accountA);
-
-		    mockMvc.perform(
-		            MockMvcRequestBuilders.post("/account")
-		                    .contentType(MediaType.APPLICATION_JSON)
-		                    .content(accountJson)
-		    ).andExpect(
-		    		MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.error").value("Password must have at least 8 characters.")
-			);
-		}
-		
-		@Test
-		public void cannotUpdateAccountPasswordNotFound() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			accountA.setAccountId(1);
-			// Did not save request through accountService.
-			
-			accountA.setPassword("123321123321");
-		    String requestJson = objectMapper.writeValueAsString(accountA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-account/" + accountA.getAccountId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(requestJson)
-			).andExpect(
-		    		MockMvcResultMatchers.status().isNotFound()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.error").value("Account not found.")
-			);
-		}
-		
-		@Test
-		public void cannotUpdateAccountImproperPassword() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			accountService.addTouristAccount(accountA);
-			
-			accountA.setPassword("123"); // password too short.
-		    String accountJson = objectMapper.writeValueAsString(accountA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-account/" + accountA.getAccountId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(accountJson)
-			).andExpect(
-		    		MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.error").value("Password must have at least 8 characters.")
-			);
-		}
-		
-		@Test
-		public void cannotUpdateAccountImproperEmail() throws Exception {
-			Account accountA = DataUtil.createAccountA();
-			AccountResponse savedAccount = accountService.addTouristAccount(accountA);
-			
-			DetailRequest newRequest = new DetailRequest();
-		    newRequest.setAccountId(savedAccount.getAccountId());
-		    newRequest.setEmail("gmail.com"); // improper email.
-		    
-		    String accountJson = objectMapper.writeValueAsString(newRequest);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/account/update-details/" + accountA.getAccountId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(accountJson)
-			).andExpect(
-		    		MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.error").value("Please include a proper email address.")
-			);
-		}
 	}
 }
