@@ -214,7 +214,7 @@ public class AccountService implements UserDetailsService{
 		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.ADMIN);
 		
 		return admins.stream()
-	            .map(a -> toResponse(a, null))
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
 
@@ -223,16 +223,47 @@ public class AccountService implements UserDetailsService{
 		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.STAFF);
 		
 		return admins.stream()
-	            .map(a -> toResponse(a, null))
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
-
+	
+	public List<AccountResponse> getAllActiveStaffs() {
+		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.STAFF, true);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
+	            .toList();
+	}
+	
+	public List<AccountResponse> getAllInactiveStaffs() {
+		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.STAFF, false);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
+	            .toList();
+	}
 
 	public List<AccountResponse> getAllGuests() {
 		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.GUEST);
 		
 		return admins.stream()
-	            .map(a -> toResponse(a, null))
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
+	            .toList();
+	}
+
+	public List<AccountResponse> getAllActiveGuests() {
+		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.GUEST, true);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
+	            .toList();
+	}
+
+	public List<AccountResponse> getAllInactiveGuests() {
+		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.GUEST, false);
+		
+		return admins.stream()
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
 	

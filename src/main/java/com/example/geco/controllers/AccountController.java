@@ -59,13 +59,37 @@ public class AccountController extends AbstractController{
 		return ResponseEntity.ok(accounts);
 	}
 	
+	@GetMapping("staff/list/staff/active")
+	public ResponseEntity<List<AccountResponse>> getAllActiveStaffs() {
+		List<AccountResponse> accounts  = accountService.getAllActiveStaffs();
+		return ResponseEntity.ok(accounts);
+	}
+	
+	@GetMapping("staff/list/staff/inactive")
+	public ResponseEntity<List<AccountResponse>> getAllInactiveStaffs() {
+		List<AccountResponse> accounts  = accountService.getAllInactiveStaffs();
+		return ResponseEntity.ok(accounts);
+	}
+	
 	@GetMapping("staff/list/guest")
 	public ResponseEntity<List<AccountResponse>> getAllGuests() {
 		List<AccountResponse> accounts  = accountService.getAllGuests();
 		return ResponseEntity.ok(accounts);
 	}
 	
-	@PatchMapping("/staff/update-account/password/{id}")
+	@GetMapping("staff/list/guest/active")
+	public ResponseEntity<List<AccountResponse>> getAllActiveGuests() {
+		List<AccountResponse> accounts  = accountService.getAllActiveGuests();
+		return ResponseEntity.ok(accounts);
+	}
+	
+	@GetMapping("staff/list/guest/inactive")
+	public ResponseEntity<List<AccountResponse>> getAllInactiveGuests() {
+		List<AccountResponse> accounts  = accountService.getAllInactiveGuests();
+		return ResponseEntity.ok(accounts);
+	}
+	
+	@PatchMapping("/staff/reset-password/{id}")
 	public ResponseEntity<AccountResponse> resetPasswordByStaff(
 			@PathVariable int id) {
 		AccountResponse savedAccount  = accountService.resetPasswordByStaff(id);
@@ -79,7 +103,7 @@ public class AccountController extends AbstractController{
 		return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
 	}
 	
-	@PatchMapping("/admin/update-account/role/{id}")
+	@PatchMapping("/admin/update-role/{id}")
 	public ResponseEntity<AccountResponse> updateAccountRoleByAdmin(
 			@PathVariable int id, 
 			@RequestBody RoleUpdateRequest request) {

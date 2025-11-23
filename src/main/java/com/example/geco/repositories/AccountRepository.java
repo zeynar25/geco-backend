@@ -18,4 +18,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer>{
 
 	List<Account> findAllByRoleOrderByDetail_Email(Role role);
 
+	List<Account> findAllByRoleAndIsActiveOrderByDetail_Email(Role staff, boolean isActive);
+
 }
