@@ -6,6 +6,8 @@ import com.example.geco.domains.Account.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +25,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "audit_log")
 public class AuditLog {
-
+	public enum LogAction {
+	    CREATE,
+	    UPDATE,
+	    DISABLE,
+	    DELETE,
+	    RESTORE
+	}
+	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,7 +40,9 @@ public class AuditLog {
     private String entityName;    
     private Long entityId;         
 
-    private String action;         // e.g., "CREATE", "UPDATE", "DISABLE", "DELETE"
+    @Enumerated(EnumType.STRING)
+    private LogAction action;         // e.g., "CREATE", "UPDATE", "DISABLE", "DELETE"
+    
     private String email;       
     private Role performedByRole; 
 

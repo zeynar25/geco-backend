@@ -1,12 +1,11 @@
 package com.example.geco.services;
 
-import java.time.LocalDateTime;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.AuditLog;
+import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.repositories.AuditLogRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,7 +29,7 @@ public class AuditLogService {
     public void logAction(
             String entityName,
             Long entityId,
-            String action,
+            LogAction action,
             Object oldValue,
             Object newValue,
             String email,

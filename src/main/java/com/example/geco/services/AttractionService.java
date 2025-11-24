@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Account.Role;
+import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.domains.Attraction;
 import com.example.geco.dto.AttractionResponse;
 import com.example.geco.exceptions.AccessDeniedException;
@@ -56,7 +57,7 @@ public class AttractionService extends BaseService{
 		validateAttraction(attraction);
 		Attraction a = attractionRepository.save(attraction);
 		
-		logIfStaffOrAdmin("Attraction", (long) a.getAttractionId(), "CREATE", null, a);
+		logIfStaffOrAdmin("Attraction", (long) a.getAttractionId(), LogAction.CREATE, null, a);
 		
 	    return toResponse(a);
 	}
@@ -115,7 +116,7 @@ public class AttractionService extends BaseService{
 
 	    Attraction updated = attractionRepository.save(existingAttraction);
 
-	    logIfStaffOrAdmin("Attraction", (long) updated.getAttractionId(), "UPDATE", prevAttraction, updated);
+	    logIfStaffOrAdmin("Attraction", (long) updated.getAttractionId(), LogAction.UPDATE, prevAttraction, updated);
 
 	    return toResponse(updated);
 	}
@@ -129,14 +130,14 @@ public class AttractionService extends BaseService{
 		attraction.setActive(false);
 		attractionRepository.save(attraction);
 		
-		logIfStaffOrAdmin("Attraction", (long) id, "UPDATE", prevAttraction, attraction);
+		logIfStaffOrAdmin("Attraction", (long) id, LogAction.DISABLE, prevAttraction, attraction);
 	}
 	
 	public void hardDeleteAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID \""+ id + "\" not found."));
 		
-		logIfStaffOrAdmin("Attraction", (long) id, "UPDATE", attraction, null);
+		logIfStaffOrAdmin("Attraction", (long) id, LogAction.DELETE, attraction, null);
 		attractionRepository.delete(attraction);
 	}
 }

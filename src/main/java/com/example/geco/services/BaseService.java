@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Account.Role;
+import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.exceptions.AccessDeniedException;
 
 public abstract class BaseService {
@@ -32,7 +33,7 @@ public abstract class BaseService {
 	
 	protected void logIfAuthenticatedStaffOrAdmin(String entity, 
 			Long entityId, 
-			String action, 
+			LogAction action, 
 			Object prevVal, 
 			Object currVal) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -60,7 +61,7 @@ public abstract class BaseService {
 	
 	protected void logIfStaffOrAdmin(String entity, 
 			Long entityId, 
-			String action, 
+			LogAction action, 
 			Object prevVal, 
 			Object currVal) {
 		Role role = getLoggedAccountRole();
