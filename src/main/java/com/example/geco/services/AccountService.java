@@ -73,6 +73,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 				.role(account.getRole())
 				.detail(account.getDetail())
 				.password(account.getPassword())
+				.isActive(account.isActive())
 			    .build();
 	}
 	
@@ -343,6 +344,10 @@ public class AccountService extends BaseService implements UserDetailsService{
 	    if (existingAccount.getRole() == Role.ADMIN) {
 	        throw new IllegalArgumentException("Cannot delete an admin account.");
 	    }
+
+	    if (!existingAccount.isActive()) {
+	        throw new IllegalStateException("Account is already inactive.");
+	    }
 	    
 	    Account prevAccount = createAccountCopy(existingAccount);
 	
@@ -350,7 +355,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	    existingAccount.setActive(false);
 	    accountRepository.save(existingAccount);
 	
-	    logIfStaffOrAdmin("Account", (long) id, LogAction.DISABLE, prevAccount, null);
+	    logIfStaffOrAdmin("Account", (long) id, LogAction.DISABLE, prevAccount, existingAccount);
 	}
 
 	public void restoreAccount(int id) {
@@ -360,11 +365,13 @@ public class AccountService extends BaseService implements UserDetailsService{
 	    if (account.isActive()) {
 	        throw new IllegalStateException("Account is already active.");
 	    }
+	    
+	    Account prevAccount = createAccountCopy(account);
 
 	    account.setActive(true);
 	    accountRepository.save(account);
 	    
-	    logIfStaffOrAdmin("Account", (long) id, LogAction.RESTORE, null, account);
+	    logIfStaffOrAdmin("Account", (long) id, LogAction.RESTORE, prevAccount, account);
 	}
 
 }
