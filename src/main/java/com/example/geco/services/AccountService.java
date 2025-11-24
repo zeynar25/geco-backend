@@ -58,15 +58,6 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .build();
 	}
 	
-	// Check if logged-in user is the same as the account provided.
-		private void checkAuth(Account account) {
-		    if (account.getDetail() == null || 
-		    		account.getDetail().getEmail() == null || 
-		    		!account.getDetail().getEmail().equals(getLoggedAccountEmail())) {
-		        throw new AccessDeniedException("You are not authorized to update this account.");
-		    }
-		}
-	
 	public Account createAccountCopy(Account account) {
 		return Account.builder()
 				.accountId(account.getAccountId())
@@ -230,7 +221,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		Account existingAccount = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 
-		checkAuth(existingAccount);
+		checkAuth(id);
 	    
 	    String newPassword = request.getPassword().trim();
 	    String newConfirmPassword = request.getConfirmPassword().trim();
@@ -254,7 +245,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		Account existingAccount = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 		
-		checkAuth(existingAccount);
+		checkAuth(id);
 
 		UserDetail existingDetail = existingAccount.getDetail();
 		

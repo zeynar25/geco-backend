@@ -8,11 +8,11 @@ import com.example.geco.domains.Account;
 import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.exceptions.AccessDeniedException;
+import com.example.geco.repositories.AccountRepository;
 
 public abstract class BaseService {
 	@Autowired
 	AuditLogService auditLogService;
-	
 	
 	protected Account getLoggedAccount() {
 	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -26,9 +26,19 @@ public abstract class BaseService {
 		Account account = getLoggedAccount();
         return account.getDetail() != null ? account.getDetail().getEmail() : null;
 	}
+	
+	protected int getLoggedAccountId() {
+	    return getLoggedAccount().getAccountId();
+	}
 
 	protected Role getLoggedAccountRole() {
 	    return getLoggedAccount().getRole();
+	}
+	
+	protected void checkAuth(int accountId) {
+	    if (accountId != getLoggedAccountId()) {
+	        throw new AccessDeniedException("Not allowed.");
+	    }
 	}
 	
 	protected void logIfAuthenticatedStaffOrAdmin(String entity, 
