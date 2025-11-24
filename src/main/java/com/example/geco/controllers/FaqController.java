@@ -73,4 +73,12 @@ public class FaqController extends AbstractController {
 
         return ResponseEntity.noContent().build();
     }
+    
+    @Operation(summary = "Restore FAQ by ID", description = "Restore a previously soft-deleted FAQ")
+    @PatchMapping("/admin/restore/{id}")
+    public ResponseEntity<Void> restoreFAq(
+            @Parameter(description = "ID of the FAQ to restore") @PathVariable int id) {
+        faqService.restoreFaq(id);
+        return ResponseEntity.noContent().build();
+    }
 }

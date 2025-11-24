@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.geco.domains.Account;
 import com.example.geco.domains.Faq;
 import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.dto.FaqOrderRequest;
@@ -24,6 +25,7 @@ public class FaqService extends BaseService{
 				.faqId(faq.getFaqId())
 				.question(faq.getQuestion())
 				.answer(faq.getAnswer())
+				.isActive(faq.isActive())
 				.displayOrder(faq.getDisplayOrder())
 				.build();
 	}
@@ -139,5 +141,21 @@ public class FaqService extends BaseService{
 		logIfStaffOrAdmin("Faq", (long)faq.getFaqId(), LogAction.DELETE, faq, null);
 		
 		faqRepository.delete(faq);
+	}
+
+	public void restoreFaq(int id) {
+		Faq faq = faqRepository.findById(id)
+		        .orElseThrow(() -> new EntityNotFoundException("Faq ID '" + id + "' not found."));
+
+	    if (faq.isActive()) {
+	        throw new IllegalStateException("Account is already active.");
+	    }
+	    
+	    Faq prevFaq = createFaqCopy(faq);
+
+	    faq.setActive(true);
+	    faqRepository.save(faq);
+	    
+	    logIfStaffOrAdmin("Faq", (long) id, LogAction.RESTORE, prevFaq, faq);
 	}
 }

@@ -271,6 +271,32 @@ public class FaqControllerTests extends AbstractControllerTest{
 					MockMvcResultMatchers.status().isNotFound()
 			);
 		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canRestoreFaq() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			Faq faqA = DataUtil.createFaqA();
+			Faq savedFaqA = faqService.addFaq(faqA);
+			faqService.softDeleteFaq(savedFaqA.getFaqId());
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/faq/admin/restore/" + savedFaqA.getFaqId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNoContent()
+			);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/faq/" + savedFaqA.getFaqId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.active").value("true")
+			);
+		}
 	}
 	
 	@Nested
