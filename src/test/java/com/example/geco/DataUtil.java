@@ -23,14 +23,16 @@ public class DataUtil {
 	public static SignupRequest createSignupRequestA() {
 		return SignupRequest.builder()
 				.email("krysscoleen.creus@cvsu.edu.ph")
-				.password("12345678")
+				.password("Hello12345678")
+				.confirmPassword("Hello12345678")
 				.build();
 	}
 
 	public static SignupRequest createSignupRequestB() {
 		return SignupRequest.builder()
 				.email("daniellalyn.soliman@cvsu.edu.ph")
-				.password("12345678")
+				.password("Hi12345678")
+				.confirmPassword("Hi12345678")
 				.build();
 	}
 	

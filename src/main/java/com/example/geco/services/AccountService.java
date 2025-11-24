@@ -96,6 +96,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	public AccountResponse addAccount(SignupRequest request) {
 		String email = request.getEmail().trim();
 		String password = request.getPassword().trim();
+		String confirmPassword = request.getConfirmPassword().trim();
 		Role role = request.getRole();
 		
 		if (accountRepository.existsByDetailEmail(email)) {
@@ -104,6 +105,10 @@ public class AccountService extends BaseService implements UserDetailsService{
 		
 		if (role == null) {
 			throw new IllegalArgumentException("Role must be specified.");
+		}
+		
+		if (!password.equals(confirmPassword)) {
+			throw new IllegalArgumentException("Password and Confirm password must match.");
 		}
 		
 		// Hashing the plain text password.
@@ -128,6 +133,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		SignupRequest guestRequest = new SignupRequest(
 	            request.getEmail(),
 	            request.getPassword(),
+	            request.getConfirmPassword(),
 	            Role.GUEST
 	    );
 		
@@ -157,7 +163,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	
 	public Account getAccount(int id) {
 		Account account = accountRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+	            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
         return account;
 	}
 
@@ -222,13 +228,18 @@ public class AccountService extends BaseService implements UserDetailsService{
 	
 	public AccountResponse updatePassword(int id, PasswordUpdateRequest request) {
 		Account existingAccount = accountRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 
 		checkAuth(existingAccount);
 	    
 	    String newPassword = request.getPassword().trim();
+	    String newConfirmPassword = request.getConfirmPassword().trim();
 		if(passwordEncoder.matches(newPassword, existingAccount.getPassword())) {
             throw new IllegalArgumentException("This is already your password.");
+		}
+		
+		if (!newPassword.equals(newConfirmPassword)) {
+			throw new IllegalArgumentException("Password and Confirm password must match.");
 		}
 
 		String hashedPassword = passwordEncoder.encode(newPassword);
@@ -241,7 +252,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	
 	public AccountResponse updateDetails(int id, DetailRequest request) {
 		Account existingAccount = accountRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 		
 		checkAuth(existingAccount);
 
@@ -262,7 +273,7 @@ public class AccountService extends BaseService implements UserDetailsService{
             
             if (accountRepository.existsByDetailEmail(email) &&
         	    !existingDetail.getEmail().equals(email)) {
-        	    throw new IllegalArgumentException("Email \"" + email + "\" is already registered.");
+        	    throw new IllegalArgumentException("Email '" + email + "' is already registered.");
         	}
             
             existingDetail.setEmail(email);
@@ -297,7 +308,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		}
 		
 		Account existingAccount = accountRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 		
 		
 		if (existingAccount.getRole().equals(request.getRole())) {
@@ -317,7 +328,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 	public AccountResponse resetPasswordByStaff(int id) {
 		Account existingAccount = accountRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 		
 		String newPassword = "";
 		
@@ -339,7 +350,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 	public void softDeleteAccount(int id) {
 	    Account existingAccount = accountRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Account with ID \"" + id + "\" not found."));
+	            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 	
 	    if (existingAccount.getRole() == Role.ADMIN) {
 	        throw new IllegalArgumentException("Cannot delete an admin account.");
@@ -360,7 +371,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 	public void restoreAccount(int id) {
 		Account account = accountRepository.findById(id)
-		        .orElseThrow(() -> new EntityNotFoundException("Account ID \"" + id + "\" not found."));
+		        .orElseThrow(() -> new EntityNotFoundException("Account ID '" + id + "' not found."));
 
 	    if (account.isActive()) {
 	        throw new IllegalStateException("Account is already active.");
