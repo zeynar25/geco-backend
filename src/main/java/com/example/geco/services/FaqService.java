@@ -124,7 +124,11 @@ public class FaqService extends BaseService{
 	public void softDeleteFaq(int id) {
 		Faq faq = faqRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("FAQ with ID '" + id + "' not found."));
-	    
+		
+		if (!faq.isActive()) {
+	        throw new IllegalStateException("FAQ is already disabled.");
+	    }
+		
 		Faq prevFaq = createFaqCopy(faq);
 		
 		faq.setActive(false);
@@ -148,7 +152,7 @@ public class FaqService extends BaseService{
 		        .orElseThrow(() -> new EntityNotFoundException("Faq ID '" + id + "' not found."));
 
 	    if (faq.isActive()) {
-	        throw new IllegalStateException("Account is already active.");
+	        throw new IllegalStateException("FAQ is already active.");
 	    }
 	    
 	    Faq prevFaq = createFaqCopy(faq);

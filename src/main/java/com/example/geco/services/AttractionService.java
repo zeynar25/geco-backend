@@ -126,6 +126,10 @@ public class AttractionService extends BaseService{
 		Attraction attraction = attractionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
 		
+		if (!attraction.isActive()) {
+	        throw new IllegalStateException("Attraction is already disabled.");
+	    }
+		
 		Attraction prevAttraction = createAttractionCopy(attraction);
 
 		attraction.setActive(false);

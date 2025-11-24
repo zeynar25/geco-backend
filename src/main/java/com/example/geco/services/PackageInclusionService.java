@@ -110,6 +110,10 @@ public class PackageInclusionService extends BaseService{
 		PackageInclusion inclusion = packageInclusionRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Package Inclusion with ID '" + id + "' not found."));
 	    
+		if (!inclusion.isActive()) {
+	        throw new IllegalStateException("Inclusion is already disabled.");
+	    }
+		
 		PackageInclusion prevInclusion = createInclusionCopy(inclusion);
 
 		inclusion.setActive(false);
@@ -123,6 +127,10 @@ public class PackageInclusionService extends BaseService{
 		PackageInclusion inclusion = packageInclusionRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Package Inclusion with ID '" + id + "' not found."));
 	    
+		if (inclusion.isActive()) {
+	        throw new IllegalStateException("Inclusion is already active.");
+	    }
+		
 		PackageInclusion prevInclusion = createInclusionCopy(inclusion);
 
 		inclusion.setActive(true);
