@@ -4,55 +4,73 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.geco.domains.Faq;
 import com.example.geco.dto.FaqOrderRequest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/faq")
+@Tag(name = "FAQ Controller", description = "Manage FAQs, including adding, updating, reordering, and deleting")
 public class FaqController extends AbstractController {
-	@PostMapping
-	public ResponseEntity<Faq> addFaq(@RequestBody Faq faq) {
-		Faq savedFaq = faqService.addFaq(faq);
-        return new ResponseEntity<>(savedFaq, HttpStatus.CREATED);
-	}
-	
-	@GetMapping("/{id}")
-	public ResponseEntity<Faq> getFaq(@PathVariable int id) {
-		Faq faq = faqService.getFaq(id);
-        return new ResponseEntity<>(faq, HttpStatus.OK);
-	}
-	
-	@GetMapping
-	public ResponseEntity<List<Faq>> getAllFaqs() {
-		List<Faq> faqs = faqService.getAllFaqs();
-        return new ResponseEntity<>(faqs, HttpStatus.OK);
-	}
-	
-	@PatchMapping("/{id}")
-	public ResponseEntity<Faq> updateFaq(@PathVariable int id, @RequestBody Faq faq) {
-		faq.setFaqId(id);
-		Faq updatedFaq = faqService.updateFaq(faq);
-        return new ResponseEntity<>(updatedFaq, HttpStatus.OK);
-	}
-	
-	@PostMapping("/reorder")
-	public ResponseEntity<List<Faq>> reorderFaqs(@RequestBody List<FaqOrderRequest> orderList) {
-	    faqService.updateOrder(orderList);
-	    return ResponseEntity.ok(faqService.getAllFaqs());
-	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Faq> deleteFaq(@PathVariable int id) {
-		faqService.deleteFaq(id);
-	    return ResponseEntity.noContent().build();
-	}
+    @Operation(summary = "Add a new FAQ", description = "Create a new FAQ with a question and answer")
+    @PostMapping
+    public ResponseEntity<Faq> addFaq(@RequestBody Faq faq) {
+        Faq savedFaq = faqService.addFaq(faq);
+        return new ResponseEntity<>(savedFaq, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Get FAQ by ID", description = "Retrieve a single FAQ by its ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<Faq> getFaq(
+            @Parameter(description = "ID of the FAQ to retrieve") @PathVariable int id) {
+        Faq faq = faqService.getFaq(id);
+        return new ResponseEntity<>(faq, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get all FAQs", description = "Retrieve a list of all FAQs")
+    @GetMapping
+    public ResponseEntity<List<Faq>> getAllFaqs() {
+        List<Faq> faqs = faqService.getAllFaqs();
+        return new ResponseEntity<>(faqs, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Update FAQ by ID", description = "Update question and/or answer of a FAQ by ID")
+    @PatchMapping("/{id}")
+    public ResponseEntity<Faq> updateFaq(
+            @Parameter(description = "ID of the FAQ to update") @PathVariable int id,
+            @RequestBody Faq faq) {
+        faq.setFaqId(id);
+        Faq updatedFaq = faqService.updateFaq(faq);
+        return new ResponseEntity<>(updatedFaq, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Reorder FAQs", description = "Update the display order of multiple FAQs at once")
+    @PatchMapping("/reorder")
+    public ResponseEntity<List<Faq>> reorderFaqs(
+            @Parameter(description = "List of FAQ IDs with their new display orders") @RequestBody List<FaqOrderRequest> orderList) {
+        faqService.updateOrder(orderList);
+        return ResponseEntity.ok(faqService.getAllFaqs());
+    }
+
+    @Operation(summary = "Delete FAQ by ID", description = "Soft delete by default, hard delete if specified")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFaq(
+            @Parameter(description = "ID of the FAQ to delete") @PathVariable int id,
+            @Parameter(description = "Soft delete by default; set false for hard delete") 
+            @RequestParam(defaultValue = "true") boolean soft) {
+
+        if (soft) {
+            faqService.softDeleteFaq(id);
+        } else {
+            faqService.hardDeleteFaq(id);
+        }
+
+        return ResponseEntity.noContent().build();
+    }
 }

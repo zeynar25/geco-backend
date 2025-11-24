@@ -1,8 +1,12 @@
 package com.example.geco.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -16,7 +20,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 	@Nested
     class SuccessTests {
 		@Test
-		public void canAddFaq() throws Exception{
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canAddFaqByAdmin() throws Exception{
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			String faqJson = objectMapper.writeValueAsString(faqA);
 			
@@ -36,7 +43,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "guest@email.com", roles = "GUEST")
 		public void canGetFaq() throws Exception {
+			mockGuestAuthentication("guest@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqService.addFaq(faqA);
 			
@@ -57,10 +67,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		public void canGetAllFaqs() throws Exception {
 			Faq faqA = DataUtil.createFaqA();
-			faqService.addFaq(faqA);
+			faqRepository.save(faqA);
 			
 			Faq faqB = DataUtil.createFaqB();
-			faqService.addFaq(faqB);
+			faqRepository.save(faqB);
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/faq")
@@ -95,7 +105,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateFaq() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
 			
@@ -119,7 +132,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateFaqQuestionOnly() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
 			
@@ -143,7 +159,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateFaqAnswerOnly() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
 			
@@ -165,14 +184,81 @@ public class FaqControllerTests extends AbstractControllerTest{
 	        		MockMvcResultMatchers.jsonPath("$.answer").value(newFaq.getAnswer())
 			);
 		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canReorderFaqList() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			Faq faqA = DataUtil.createFaqA();
+			Faq savedFaqA = faqService.addFaq(faqA);
+		
+			Faq faqB = DataUtil.createFaqB();
+			Faq savedFaqB = faqService.addFaq(faqB);
+			
+			savedFaqA.setDisplayOrder(2);
+			savedFaqB.setDisplayOrder(1);
+			
+			List<Faq> faqList = new ArrayList<>();
+			faqList.add(savedFaqA);
+			faqList.add(savedFaqB);
+
+			String listJson = objectMapper.writeValueAsString(faqList);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/faq/reorder")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(listJson)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].faqId").value(savedFaqB.getFaqId())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[0].displayOrder").value(1)
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].faqId").value(savedFaqA.getFaqId())
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$[1].displayOrder").value(2)
+			);
+		}
 
 		@Test
-		public void canDeleteFaq() throws Exception {
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canSoftDeleteFaq() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.delete("/faq/" + savedFaqA.getFaqId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNoContent()
+			);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/faq/" + savedFaqA.getFaqId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.active").value("false")
+			);
+		}
+
+
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canHardDeleteFaq() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			Faq faqA = DataUtil.createFaqA();
+			Faq savedFaqA = faqService.addFaq(faqA);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.delete("/faq/" + savedFaqA.getFaqId())
+						.param("soft", "false")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNoContent()
@@ -190,7 +276,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 	@Nested
     class FailureTests {
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqMissingQuestion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setQuestion(null);
 			
@@ -208,7 +297,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqShortQuestion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setQuestion("what?");
 			
@@ -226,7 +318,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqMissingAnswer() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setAnswer(null);
 			
@@ -244,7 +339,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqShortAnswer() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setAnswer("what?");
 			
@@ -262,7 +360,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqQuestionAlreadyExist() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqRepository.save(faqA);
 			
@@ -288,12 +389,15 @@ public class FaqControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("FAQ with ID \"" + id + "\" not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("FAQ with ID '" + id + "' not found.")
 			);
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateFaqMissingQuestionAndAnswer() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);;
 
@@ -314,7 +418,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateFaqMissing() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setFaqId(0);
 			String faqJson = objectMapper.writeValueAsString(faqA);
@@ -331,7 +438,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateFaqQuestionAlreadyExist() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
 			
@@ -353,7 +463,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotDeleteFaq() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			int id = 0;
 			
 			mockMvc.perform(
@@ -362,7 +475,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("FAQ with ID \"" + id + "\" not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("FAQ with ID '" + id + "' not found.")
 			);
 		}
 	} 

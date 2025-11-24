@@ -105,17 +105,17 @@ public class DataUtil {
 	}
 	
 	public static Faq createFaqA() {
-		Faq faq = new Faq();
-		faq.setQuestion("Where is this park located?");
-		faq.setAnswer("It is located inside the Cavite State University Main Campus.");
-		return faq;
+		return Faq.builder()
+				.question("Where is this park located?")
+				.answer("It is located inside the Cavite State University Main Campus.")
+				.build();
 	}
 	
 	public static Faq createFaqB() {
-		Faq faq = new Faq();
-		faq.setQuestion("When does this park open and close?");
-		faq.setAnswer("It is usually open --:--am to 05:00pm every Monday to Thursday.");
-		return faq;
+		return Faq.builder()
+				.question("When does this park open and close?")
+				.answer("It is usually open --:--am to 05:00pm every Monday to Thursday.")
+				.build();
 	}
 	
 	public static PackageInclusion createPackageInclusionA() {

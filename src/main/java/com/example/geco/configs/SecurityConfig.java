@@ -38,6 +38,11 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.DELETE, "/attraction/**").hasRole("ADMIN")
 					.requestMatchers(HttpMethod.POST, "/attraction/**").hasAnyRole("STAFF", "ADMIN")
 					.requestMatchers(HttpMethod.PATCH, "/attraction/**").hasAnyRole("STAFF", "ADMIN")
+					
+					.requestMatchers(HttpMethod.GET, "/faq/**").permitAll()
+					.requestMatchers(HttpMethod.DELETE, "/faq/**").hasRole("ADMIN")
+					.requestMatchers(HttpMethod.POST, "/faq/**").hasAnyRole("STAFF", "ADMIN")
+					.requestMatchers(HttpMethod.PATCH, "/faq/**").hasAnyRole("STAFF", "ADMIN")
 
 					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")
 					.requestMatchers("/account/my-account").authenticated()
