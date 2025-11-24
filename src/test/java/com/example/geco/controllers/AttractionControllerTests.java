@@ -258,7 +258,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 	        .andExpect(
 	        		MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Attraction not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Attraction with ID '"+ attractionA.getAttractionId() + "' not found.")
 			);
 		}
 
@@ -322,7 +322,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-				MockMvcResultMatchers.jsonPath("$.error").value("Attraction not found.")
+				MockMvcResultMatchers.jsonPath("$.error").value("Attraction with ID '"+ attractionA.getAttractionId() + "' not found.")
 			);
 		}
 		
@@ -359,7 +359,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-					MockMvcResultMatchers.jsonPath("$.error").value("Attraction with ID \""+ id + "\" not found.")
+					MockMvcResultMatchers.jsonPath("$.error").value("Attraction with ID '"+ id + "' not found.")
 			);
 		}
 

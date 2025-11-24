@@ -104,4 +104,17 @@ public class AttractionController extends AbstractController {
         }
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/restore/{id}")
+    @Operation(
+        summary = "Restore an attraction",
+        description = "Restore an attraction by ID."
+    )
+    public ResponseEntity<Void> restoreAttraction(
+            @PathVariable int id,
+            @RequestParam(defaultValue = "true") boolean soft) {
+
+        attractionService.restoreAttraction(id);
+        return ResponseEntity.noContent().build();
+    }
 }

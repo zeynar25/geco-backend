@@ -42,6 +42,7 @@ public class AttractionService extends BaseService{
 				.attractionId(a.getAttractionId())
 				.name(a.getName())
 				.description(a.getDescription())
+				.isActive(a.isActive())
 			    .build();
 	}
 	
@@ -64,7 +65,7 @@ public class AttractionService extends BaseService{
 	
 	public AttractionResponse getAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Attraction not found."));
+	            .orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
         return toResponse(attraction);
 	}
 	
@@ -91,7 +92,7 @@ public class AttractionService extends BaseService{
 	
 	public AttractionResponse updateAttraction(int id, Attraction attraction) {
 		Attraction existingAttraction = attractionRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Attraction not found."));
+	            .orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
 
 		if (attraction.getName() != null && attraction.getName().trim().length() < 1) {
 	        throw new IllegalArgumentException("Attraction name must have at least 1 character.");
@@ -123,7 +124,7 @@ public class AttractionService extends BaseService{
 	
 	public void softDeleteAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID \""+ id + "\" not found."));
+				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
 		
 		Attraction prevAttraction = createAttractionCopy(attraction);
 
@@ -135,9 +136,25 @@ public class AttractionService extends BaseService{
 	
 	public void hardDeleteAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID \""+ id + "\" not found."));
+				.orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
 		
 		logIfStaffOrAdmin("Attraction", (long) id, LogAction.DELETE, attraction, null);
 		attractionRepository.delete(attraction);
+	}
+	
+	public void restoreAttraction(int id) {
+		Attraction attraction = attractionRepository.findById(id)
+		        .orElseThrow(() -> new EntityNotFoundException("Attraction ID '" + id + "' not found."));
+
+	    if (attraction.isActive()) {
+	        throw new IllegalStateException("Account is already active.");
+	    }
+	    
+	    Attraction prevAttraction = createAttractionCopy(attraction);
+
+	    attraction.setActive(true);
+	    attractionRepository.save(attraction);
+	    
+	    logIfStaffOrAdmin("Attraction", (long) id, LogAction.RESTORE, prevAttraction, attraction);
 	}
 }
