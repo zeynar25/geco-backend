@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Account.Role;
+import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.AccountResponse.PasswordStatus;
@@ -19,9 +20,8 @@ import com.example.geco.dto.DetailRequest;
 import com.example.geco.dto.PasswordUpdateRequest;
 import com.example.geco.dto.RoleUpdateRequest;
 import com.example.geco.dto.SignupRequest;
-import com.example.geco.repositories.AccountRepository;
-
 import com.example.geco.exceptions.AccessDeniedException;
+import com.example.geco.repositories.AccountRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -118,7 +118,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		
 		Account savedAccount = accountRepository.save(account);
 		
-		logIfAuthenticatedStaffOrAdmin("Account", (long)savedAccount.getAccountId(), "CREATE", null, savedAccount);
+		logIfAuthenticatedStaffOrAdmin("Account", (long)savedAccount.getAccountId(), LogAction.CREATE, null, savedAccount);
 		
 		return toResponse(savedAccount, AccountResponse.PasswordStatus.UNCHANGED);
 	}
@@ -284,7 +284,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 		accountRepository.save(existingAccount);
 
-		logIfStaffOrAdmin("UserDetail", (long) id, "UPDATE", prevDetail, existingDetail);
+		logIfStaffOrAdmin("UserDetail", (long) id, LogAction.UPDATE, prevDetail, existingDetail);
 
 		return toResponse(existingAccount, PasswordStatus.UNCHANGED);
 	}
@@ -309,7 +309,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 		Account saved = accountRepository.save(existingAccount);
 		
-		logIfStaffOrAdmin("Account", (long) id, "UPDATE", prevAccount, existingAccount);
+		logIfStaffOrAdmin("Account", (long) id, LogAction.UPDATE, prevAccount, existingAccount);
 
 	    return toResponse(saved, PasswordStatus.UNCHANGED);
 	}
@@ -331,7 +331,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 		Account saved = accountRepository.save(existingAccount);
 
-		logIfStaffOrAdmin("Account", (long) id, "UPDATE", prevAccount, existingAccount);
+		logIfStaffOrAdmin("Account", (long) id, LogAction.UPDATE, prevAccount, existingAccount);
 		
 	    return toResponse(saved, PasswordStatus.RESET_SUCCESSFULLY);
 	}
@@ -350,7 +350,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	    existingAccount.setActive(false);
 	    accountRepository.save(existingAccount);
 	
-	    logIfStaffOrAdmin("Account", (long) id, "DELETE", prevAccount, null);
+	    logIfStaffOrAdmin("Account", (long) id, LogAction.DISABLE, prevAccount, null);
 	}
 
 	public void restoreAccount(int id) {
@@ -364,7 +364,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	    account.setActive(true);
 	    accountRepository.save(account);
 	    
-	    logIfStaffOrAdmin("Account", (long) id, "RESTORE", null, account);
+	    logIfStaffOrAdmin("Account", (long) id, LogAction.RESTORE, null, account);
 	}
 
 }
