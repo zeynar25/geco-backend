@@ -12,4 +12,9 @@ public interface PackageInclusionRepository extends JpaRepository<PackageInclusi
 
 	List<PackageInclusion> findAllByOrderByInclusionName();
 
+	List<PackageInclusion> findAllByIsActiveOrderByInclusionName(boolean isActive);
+
+	boolean existsByInclusionNameIgnoreCase(String name);
+
+	boolean existsByInclusionNameIgnoreCaseAndInclusionIdNot(String newName, int id);
 }

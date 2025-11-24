@@ -3,6 +3,7 @@ package com.example.geco.controllers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -16,12 +17,15 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 	@Nested
     class SuccessTests {
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canAddInclusion() throws Exception{
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package-inclusion")
+					MockMvcRequestBuilders.post("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -36,12 +40,15 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetInclusion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.get("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -55,7 +62,10 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetAllInclusions() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 
@@ -63,7 +73,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 			PackageInclusion savedInclusionB = packageInclusionService.addInclusion(inclusionB);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package-inclusion")
+					MockMvcRequestBuilders.get("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -83,9 +93,35 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
-		public void canGetAllInclusionsEmpty() throws Exception {
+		public void canGetAllActiveInclusions() throws Exception {
+			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
+			inclusionA.setActive(false);
+			packageInclusionRepository.save(inclusionA);
+
+			PackageInclusion inclusionB = DataUtil.createPackageInclusionB();
+			packageInclusionRepository.save(inclusionB);
+			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package-inclusion")
+					MockMvcRequestBuilders.get("/package-inclusion/active")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].inclusionId").exists()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].inclusionName").value(inclusionB.getInclusionName())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].inclusionPricePerPerson").value(inclusionB.getInclusionPricePerPerson())
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canGetAllInclusionsEmpty() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -95,7 +131,10 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateInclusion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 			
@@ -104,7 +143,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.patch("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -119,7 +158,10 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateInclusionNameOnly() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 			
@@ -131,7 +173,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 			String inclusionJson = objectMapper.writeValueAsString(newInclusion);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.patch("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -146,7 +188,10 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateInclusionPriceOnly() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 			
@@ -157,7 +202,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 			String inclusionJson = objectMapper.writeValueAsString(newInclusion);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.patch("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -172,22 +217,53 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
-		public void canDeleteInclusion() throws Exception {
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canSoftDeleteInclusion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.delete("/package-inclusion/admin/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNoContent()
 			);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.get("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.active").value("false")
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canRestoreInclusion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
+			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
+			packageInclusionService.softDeleteInclusion(savedInclusionA.getInclusionId());
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/package-inclusion/admin/restore/" + savedInclusionA.getInclusionId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNoContent()
+			);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.active").value("true")
 			);
 		}
 	}
@@ -195,13 +271,16 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 	@Nested
     class FailureTests {
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionNullName() throws Exception{
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionName(null);
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package-inclusion")
+					MockMvcRequestBuilders.post("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -212,13 +291,16 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionEmptyName() throws Exception{
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionName("   ");
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package-inclusion")
+					MockMvcRequestBuilders.post("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -229,13 +311,16 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}		
 
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionNullPrice() throws Exception{
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionPricePerPerson(null);
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package-inclusion")
+					MockMvcRequestBuilders.post("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -244,14 +329,18 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 	        		MockMvcResultMatchers.jsonPath("$.error").value("Inclusion price per person is missing.")
 			);
 		}
+		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionInvalidPrice() throws Exception{
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionPricePerPerson(-1);
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package-inclusion")
+					MockMvcRequestBuilders.post("/package-inclusion/staff")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -262,21 +351,27 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotGetInclusion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			int id = 0;
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package-inclusion/" + id)
+					MockMvcRequestBuilders.get("/package-inclusion/staff/" + id)
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusion with ID \"" + id + "\" not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusion with ID '" + id + "' not found.")
 			);
 		}
 
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateInclusionNameAndPriceMissing() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
 			
@@ -285,7 +380,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package-inclusion/" + savedInclusionA.getInclusionId())
+					MockMvcRequestBuilders.patch("/package-inclusion/staff/" + savedInclusionA.getInclusionId())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
@@ -296,34 +391,40 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateInclusionIdNotFound() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
 
 			int id = 0;
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/package-inclusion/" + id)
+					MockMvcRequestBuilders.patch("/package-inclusion/staff/" + id)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(inclusionJson)
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusion with ID \"" + id + "\" not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusion with ID '" + id + "' not found.")
 			);
 		}
 
 		@Test
-		public void cannotDeleteInclusion() throws Exception {
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void cannotSoftDeleteInclusion() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			int id = 0;
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/package-inclusion/" + id)
+					MockMvcRequestBuilders.delete("/package-inclusion/admin/" + id)
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-    			MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusion with ID \"" + id + "\" not found.")
+    			MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusion with ID '" + id + "' not found.")
     		);
 		}
 	}

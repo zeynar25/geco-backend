@@ -43,6 +43,10 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.DELETE, "/faq/**").hasRole("ADMIN")
 					.requestMatchers(HttpMethod.POST, "/faq/**").hasAnyRole("STAFF", "ADMIN")
 					.requestMatchers(HttpMethod.PATCH, "/faq/**").hasAnyRole("STAFF", "ADMIN")
+					
+					.requestMatchers(HttpMethod.GET, "/package-inclusion/active").permitAll()
+					.requestMatchers("/package-inclusion/staff/**").hasAnyRole("STAFF", "ADMIN")
+					.requestMatchers("/package-inclusion/admin/**").hasRole("ADMIN")
 
 					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")
 					.requestMatchers("/account/my-account").authenticated()
