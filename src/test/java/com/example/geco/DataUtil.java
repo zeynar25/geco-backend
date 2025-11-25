@@ -1,11 +1,19 @@
 package com.example.geco;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.geco.domains.Account;
 import com.example.geco.domains.Attraction;
 import com.example.geco.domains.Faq;
-import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.domains.PackageInclusion;
+import com.example.geco.domains.UserDetail;
+import com.example.geco.domains.Account.Role;
 import com.example.geco.dto.FeedbackCategoryRequest;
 import com.example.geco.dto.SignupRequest;
+import com.example.geco.dto.TourPackageRequest;
+import com.example.geco.repositories.AccountRepository;
+import com.example.geco.repositories.PackageInclusionRepository;
 
 public class DataUtil {
 	public static SignupRequest createSignupRequestA() {
@@ -23,6 +31,21 @@ public class DataUtil {
 				.confirmPassword("Hi12345678")
 				.build();
 	}
+	
+//	public static Account createAccount(AccountRepository accountRepository) {
+//		String hashedPassword = passwordEncoder.encode(password);
+//		
+//		Account account = Account.builder()
+//				.role(Role.USER)
+//				.password(hashedPassword)
+//				.detail(
+//						UserDetail.builder()
+//						.email("krysscoleen.creus@cvsu.edu.ph")
+//						.build())
+//				.build();
+//		
+//		return accountRepository.save(account);
+//	}
 	
 	public static Attraction createAttractionA() {
 		Attraction attraction = new Attraction();
@@ -57,19 +80,24 @@ public class DataUtil {
 	}
 	
 	public static PackageInclusion createPackageInclusionA() {
-		PackageInclusion inclusion = new PackageInclusion();
-		inclusion.setInclusionName("Buffet Lunch");
-		inclusion.setInclusionPricePerPerson(500);
-		
-		return inclusion;
+		return PackageInclusion.builder()
+				.inclusionName("Buffet Lunch")
+				.inclusionPricePerPerson(500)
+				.build();
 	}
 	
 	public static PackageInclusion createPackageInclusionB() {
-		PackageInclusion inclusion = new PackageInclusion();
-		inclusion.setInclusionName("Horse Back Riding");
-		inclusion.setInclusionPricePerPerson(150);
-		
-		return inclusion;
+		return PackageInclusion.builder()
+				.inclusionName("Horse Back Riding")
+				.inclusionPricePerPerson(150)
+				.build();
+	}
+	
+	public static PackageInclusion createPackageInclusionC() {
+		return PackageInclusion.builder()
+				.inclusionName("Day Tour")
+				.inclusionPricePerPerson(100)
+				.build();
 	}
 	
 	public static FeedbackCategoryRequest createFeedbackCategoryRequestA() {
@@ -84,44 +112,42 @@ public class DataUtil {
 				.build();
 	}
 	
-//	public static TourPackage createPackageA(PackageInclusionService packageInclusionService) {
-//		PackageInclusion inclusion = DataUtil.createPackageInclusionA();
-//		packageInclusionService.addInclusion(inclusion);
-//		
-//		List<PackageInclusion> inclusions = new ArrayList<>();
-//		inclusions.add(inclusion);
-//		
-//		TourPackage tourPackage = new TourPackage();
-//		tourPackage.setName("The best");
-//		tourPackage.setDuration(60);
-//		tourPackage.setDescription("Detailed description about this package.");
-//		tourPackage.setBasePrice(500);
-//		tourPackage.setInclusions(inclusions);
-//		
-//		return tourPackage;
-//	}
-//	
-//	public static TourPackage createPackageB(PackageInclusionService packageInclusionService) {
-//		PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
-//		packageInclusionService.addInclusion(inclusionA);
-//		
-//		PackageInclusion inclusionB = DataUtil.createPackageInclusionB();
-//		packageInclusionService.addInclusion(inclusionB);
-//		
-//		List<PackageInclusion> inclusions = new ArrayList<>();
-//		inclusions.add(inclusionA);
-//		inclusions.add(inclusionB);
-//		
-//		TourPackage tourPackage = new TourPackage();
-//		tourPackage.setName("The double best");
-//		tourPackage.setDuration(120);
-//		tourPackage.setDescription("Detailed description about this package but more pricey.");
-//		tourPackage.setBasePrice(1000);
-//		tourPackage.setInclusions(inclusions);
-//		
-//		return tourPackage;
-//	}
-//	
+	public static TourPackageRequest createTourPackageRequestA(PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
+		packageInclusionRepository.save(inclusionA);
+		
+		List<Integer> inclusionIds = new ArrayList<>();
+		inclusionIds.add(inclusionA.getInclusionId());
+		
+		return TourPackageRequest.builder()
+				.name("The best")
+				.description("Detailed description about this package")
+				.duration(60)
+				.basePrice(500)
+				.inclusionIds(inclusionIds)
+				.build();
+	}
+	
+	public static TourPackageRequest createTourPackageRequestB(PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusionA = DataUtil.createPackageInclusionB();
+		packageInclusionRepository.save(inclusionA);
+		
+		PackageInclusion inclusionB = DataUtil.createPackageInclusionC();
+		packageInclusionRepository.save(inclusionB);
+		
+		List<Integer> inclusionIds = new ArrayList<>();
+		inclusionIds.add(inclusionA.getInclusionId());
+		inclusionIds.add(inclusionB.getInclusionId());
+		
+		return TourPackageRequest.builder()
+				.name("The double best")
+				.description("Detailed description about this package")
+				.duration(120)
+				.basePrice(100)
+				.inclusionIds(inclusionIds)
+				.build();
+	}
+	
 //	public static BookingInclusion createBookingInclusionA(PackageInclusionService packageInclusionService, Booking booking) {
 //		PackageInclusion inclusion = DataUtil.createPackageInclusionA();
 //		PackageInclusion savedInclusion = packageInclusionService.addInclusion(inclusion);

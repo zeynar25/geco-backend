@@ -38,6 +38,7 @@ public class TourPackage {
         joinColumns = @JoinColumn(name = "package_id"),
         inverseJoinColumns = @JoinColumn(name = "inclusion_id")
     )
+	@Builder.Default
     private List<PackageInclusion> inclusions = new ArrayList<>();
 	
 	@Builder.Default

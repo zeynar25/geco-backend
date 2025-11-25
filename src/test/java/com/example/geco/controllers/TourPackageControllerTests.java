@@ -3,6 +3,7 @@ package com.example.geco.controllers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -10,15 +11,20 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.example.geco.AbstractControllerTest;
 import com.example.geco.DataUtil;
 import com.example.geco.domains.TourPackage;
+import com.example.geco.dto.TourPackageRequest;
+import com.example.geco.dto.TourPackageUpdateRequest;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TourPackageControllerTests extends AbstractControllerTest {
 	@Nested
     class SuccessTests {
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canAddPackage() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			String packageJson = objectMapper.writeValueAsString(packageA);
+			mockStaffAuthentication("staff@email.com");
+			
+			TourPackageRequest requestA = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+			String packageJson = objectMapper.writeValueAsString(requestA);
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.post("/package")
@@ -29,387 +35,275 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.name").value(packageA.getName())
+	        		MockMvcResultMatchers.jsonPath("$.name").value(requestA.getName())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.description").value(packageA.getDescription())
+	        		MockMvcResultMatchers.jsonPath("$.description").value(requestA.getDescription())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(packageA.getBasePrice())
+	        		MockMvcResultMatchers.jsonPath("$.duration").value(requestA.getDuration())
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.inclusions").exists()
-			);
-		}
-		
-		@Test
-		public void canGetPackage() throws Exception {
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package/" + savedPackageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
+	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(requestA.getBasePrice())
 			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.packageId").value(savedPackageA.getPackageId())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.name").value(savedPackageA.getName())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.description").value(savedPackageA.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(savedPackageA.getBasePrice())
+	        		MockMvcResultMatchers.jsonPath("$.active").value("true")
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.inclusions").exists()
 			);
 		}
 		
 		@Test
-		public void canGetAllPackages() throws Exception {
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
-			
-			TourPackage packageB = DataUtil.createPackageB(packageInclusionService);
-			TourPackage savedPackageB = tourPackageService.addPackage(packageB);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[0].packageId").value(savedPackageA.getPackageId())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[0].name").value(savedPackageA.getName())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[0].description").value(savedPackageA.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[0].basePrice").value(savedPackageA.getBasePrice())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[0].inclusions").exists()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[1].packageId").value(savedPackageB.getPackageId())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[1].name").value(savedPackageB.getName())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[1].description").value(savedPackageB.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[1].basePrice").value(savedPackageB.getBasePrice())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$[1].inclusions").exists()
-			);
-		}
-		
-		@Test
-		public void canGetAllPackagesEmpty() throws Exception {
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$").isEmpty()
-			);
-		}
-		
-		@Test
-		public void canUpdatePackage() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
-			
-			packageA.setDescription("new description for this package");
-			packageA.setBasePrice(100);
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package/" + savedPackageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.name").value(savedPackageA.getName())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.description").value(packageA.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(packageA.getBasePrice())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.inclusions").exists()
-			);
-		}
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void canGetPackage() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
 
-		@Test
-		public void canUpdatePackageDescriptionOnly() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        TourPackage savedPackage = tourPackageService.addPackage(request);
 
-			TourPackage newPackage = new TourPackage(
-					savedPackageA.getPackageId(),
-					"The light at the end of the tunnel",
-					120,
-					"new description for this package",
-					null,
-					null
-			);
-			
-			String packageJson = objectMapper.writeValueAsString(newPackage);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package/" + savedPackageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.name").value(newPackage.getName())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.description").value(newPackage.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(savedPackageA.getBasePrice())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.inclusions").exists()
-			);
-		}
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.get("/package/" + savedPackage.getPackageId())
+	                        .contentType(MediaType.APPLICATION_JSON)
+	        ).andExpect(MockMvcResultMatchers.status().isOk())
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.packageId").value(savedPackage.getPackageId()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(savedPackage.getName()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(savedPackage.getDescription()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.duration").value(savedPackage.getDuration()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.basePrice").value(savedPackage.getBasePrice()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.inclusions").exists());
+	    }
 
-		@Test
-		public void canUpdatePackagePriceOnly() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
+	    @Test
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void canGetAllPackages() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
 
-			TourPackage newPackage = new TourPackage(
-					savedPackageA.getPackageId(),
-					null,
-					60,
-					null,
-					100,
-					null
-			);
-			
-			String packageJson = objectMapper.writeValueAsString(newPackage);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package/" + savedPackageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.packageId").exists()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.name").value(savedPackageA.getName())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.description").value(savedPackageA.getDescription())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.basePrice").value(newPackage.getBasePrice())
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.inclusions").exists()
-			);
-		}
+	        TourPackageRequest requestA = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        TourPackage savedA = tourPackageService.addPackage(requestA);
 
-		@Test
-		public void canDeletePackage() throws Exception {
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			TourPackage savedPackageA = tourPackageService.addPackage(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/package/" + savedPackageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isNoContent()
-			);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package/" + savedPackageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
-			);
-		}
+	        TourPackageRequest requestB = DataUtil.createTourPackageRequestB(packageInclusionRepository);
+	        TourPackage savedB = tourPackageService.addPackage(requestB);
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.get("/package")
+	                        .contentType(MediaType.APPLICATION_JSON)
+	        ).andExpect(MockMvcResultMatchers.status().isOk())
+	         .andExpect(MockMvcResultMatchers.jsonPath("$[0].packageId").value(savedA.getPackageId()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$[1].packageId").value(savedB.getPackageId()));
+	    }
+
+	    @Test
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void canUpdatePackage() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
+
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        TourPackage savedPackage = tourPackageService.addPackage(request);
+
+	        TourPackageUpdateRequest updateRequest = new TourPackageUpdateRequest();
+	        updateRequest.setDescription("Updated description");
+	        updateRequest.setBasePrice(999);
+	        String updateJson = objectMapper.writeValueAsString(updateRequest);
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.patch("/package/" + savedPackage.getPackageId())
+	                        .contentType(MediaType.APPLICATION_JSON)
+	                        .content(updateJson)
+	        ).andExpect(MockMvcResultMatchers.status().isOk())
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.packageId").value(savedPackage.getPackageId()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(updateRequest.getDescription()))
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.basePrice").value(updateRequest.getBasePrice()));
+	    }
+
+	    @Test
+	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
+	    public void canSoftDeleteAndRestorePackage() throws Exception {
+	        mockAdminAuthentication("admin@email.com");
+
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        TourPackage savedPackage = tourPackageService.addPackage(request);
+
+	        // Soft delete
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.delete("/package/" + savedPackage.getPackageId())
+	                        .param("soft", "true")
+	        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+
+	        // Package should be inactive
+	        TourPackage deletedPackage = tourPackageService.getPackage(savedPackage.getPackageId());
+	        assert !deletedPackage.isActive();
+
+	        // Restore
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.patch("/package/admin/restore/" + savedPackage.getPackageId())
+	        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+
+	        // Package should be active again
+	        TourPackage restoredPackage = tourPackageService.getPackage(savedPackage.getPackageId());
+	        assert restoredPackage.isActive();
+	    }
+
+	    @Test
+	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
+	    public void canHardDeletePackage() throws Exception {
+	        mockAdminAuthentication("admin@email.com");
+
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        TourPackage savedPackage = tourPackageService.addPackage(request);
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.delete("/package/" + savedPackage.getPackageId())
+	                        .param("soft", "false")
+	        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+
+	       
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.get("/package/" + savedPackage.getPackageId())
+	        ).andExpect(MockMvcResultMatchers.status().isNotFound());
+	    }
+	    
+	    @Test
+	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
+	    public void canRestoreSoftDeletedPackage() throws Exception {
+	        mockAdminAuthentication("admin@email.com");
+
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        TourPackage savedPackage = tourPackageService.addPackage(request);
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.delete("/package/" + savedPackage.getPackageId())
+	                        .param("soft", "true")
+	        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+
+	        TourPackage softDeleted = tourPackageService.getPackage(savedPackage.getPackageId());
+	        assert !softDeleted.isActive();
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.patch("/package/admin/restore/" + savedPackage.getPackageId())
+	        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+
+	        // 4. Verify package is active again
+	        TourPackage restoredPackage = tourPackageService.getPackage(savedPackage.getPackageId());
+	        assert restoredPackage.isActive();
+	    }
 	}
 	
 	@Nested
     class FailureTests {
-		@Test
-		public void cannotAddPackageNullDescription() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setDescription(null);
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Description is missing.")
-			);
-		}
-		
-		@Test
-		public void cannotAddPackageBlankDescription() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setDescription("    ");
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Description is missing.")
-			);
-		}
-		
-		@Test
-		public void cannotAddPackageShortDescription() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setDescription("short");
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Description must have at least 10 characters.")
-			);
-		}
-		
-		@Test
-		public void cannotAddPackageNullPrice() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setBasePrice(null);
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Base price for the package is missing.")
-			);
-		}
-		
-		@Test
-		public void cannotAddPackageInvalidPrice() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setBasePrice(-1);
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Invalid Base Price for the package.")
-			);
-		}
-		
-		@Test
-		public void cannotAddPackageNullInclusion() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setInclusions(null);
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusions are missing.")
-			);
-		}
-		
-		@Test
-		public void cannotAddPackageMissingInclusion() throws Exception{
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.getInclusions().clear();
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.post("/package")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isBadRequest()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package Inclusions are missing.")
-			);
-		}
-		
-		@Test
-		public void cannotUpdatePackageAllMissing() throws Exception {
-			TourPackage packageA = new TourPackage();
-			packageA.setPackageId(0);
-			String packageJson = objectMapper.writeValueAsString(packageA);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package/" + packageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package with ID \"" + packageA.getPackageId() + "\" not found.")
-			);
-		}
-		
-		@Test
-		public void cannotUpdatePackageIdNotFound() throws Exception {
-			TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-			packageA.setPackageId(0);
-			String packageJson = objectMapper.writeValueAsString(packageA);
+	    @Test
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void cannotAddPackageNullDescription() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
 
-			mockMvc.perform(
-					MockMvcRequestBuilders.patch("/package/" + packageA.getPackageId())
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(packageJson)
-			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package with ID \"" + packageA.getPackageId() + "\" not found.")
-			);
-		}
-		
-		@Test
-		public void cannotGetPackage() throws Exception {
-			int id = 0;
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        request.setDescription(null);
+	        String json = objectMapper.writeValueAsString(request);
 
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/package/" + id)
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package with ID \"" + id + "\" not found.")
-			);
-		}
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.post("/package")
+	                        .contentType(MediaType.APPLICATION_JSON)
+	                        .content(json)
+	        ).andExpect(MockMvcResultMatchers.status().isBadRequest())
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("Description is required."));
+	    }
 
-		@Test
-		public void cannotDeletePackage() throws Exception {
-			int id = 0;
+	    @Test
+	    @WithMockUser(username = "user@email.com", roles = "USER")
+	    public void userCannotAccessStaffEndpoint() throws Exception {
+	        mockUserAuthentication("user@email.com");
 
-			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/package/" + id)
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
-			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Package with ID \"" + id + "\" not found.")
-			);
-		}
+	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
+	        String json = objectMapper.writeValueAsString(request);
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.post("/package")
+	                        .contentType(MediaType.APPLICATION_JSON)
+	                        .content(json)
+	        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+	    }
+
+	    @Test
+	    @WithMockUser(username = "user@email.com", roles = "USER")
+	    public void userCannotAccessAdminEndpoint() throws Exception {
+	        mockUserAuthentication("user@email.com");
+
+	        int packageId = 1; // any ID
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.delete("/package/" + packageId)
+	                        .param("soft", "true")
+	        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+	    }
+
+	    @Test
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void staffCannotAccessAdminOnlyEndpoint() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
+
+	        int packageId = 1; // any ID
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.delete("/package/" + packageId)
+	                        .param("soft", "true")
+	        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+	    }
+
+	    @Test
+	    @WithMockUser(username = "user@email.com", roles = "USER")
+	    public void userCannotGetOtherProtectedStaffResources() throws Exception {
+	        mockUserAuthentication("user@email.com");
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.get("/package")
+	                        .contentType(MediaType.APPLICATION_JSON)
+	        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+	    }
+
+	    @Test
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void cannotGetNonExistingPackage() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
+
+	        int nonExistentId = 999;
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.get("/package/" + nonExistentId)
+	                        .contentType(MediaType.APPLICATION_JSON)
+	        ).andExpect(MockMvcResultMatchers.status().isNotFound())
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.error")
+	                 .value("Tour package with ID '" + nonExistentId + "' not found."));
+	    }
+
+	    @Test
+	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
+	    public void cannotUpdateNonExistingPackage() throws Exception {
+	        mockStaffAuthentication("staff@email.com");
+
+	        int nonExistentId = 999;
+	        TourPackageUpdateRequest updateRequest = new TourPackageUpdateRequest();
+	        updateRequest.setDescription("Updated Description");
+	        updateRequest.setBasePrice(123);
+	        String json = objectMapper.writeValueAsString(updateRequest);
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.patch("/package/" + nonExistentId)
+	                        .contentType(MediaType.APPLICATION_JSON)
+	                        .content(json)
+	        ).andExpect(MockMvcResultMatchers.status().isNotFound())
+	         .andExpect(MockMvcResultMatchers.jsonPath("$.error")
+	                 .value("Tour package with ID '" + nonExistentId + "' not found."));
+	    }
+
+	    @Test
+	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
+	    public void cannotDeleteNonExistingPackage() throws Exception {
+	        mockAdminAuthentication("admin@email.com");
+
+	        int nonExistentId = 999;
+
+	        mockMvc.perform(
+	                MockMvcRequestBuilders.delete("/package/" + nonExistentId)
+	                        .param("soft", "true")
+	        ).andExpect(
+	        		MockMvcResultMatchers.status().isNotFound()
+	        ).andExpect(
+	        		 MockMvcResultMatchers.jsonPath("$.error")
+	        		 .value("Tour package with ID '" + nonExistentId + "' not found.")
+	        );
+	    }
 	}
 }

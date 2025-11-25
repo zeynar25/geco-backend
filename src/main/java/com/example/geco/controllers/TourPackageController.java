@@ -4,13 +4,24 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.TourPackage;
+import com.example.geco.dto.TourPackageRequest;
+import com.example.geco.dto.TourPackageUpdateRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/package")
@@ -23,9 +34,9 @@ public class TourPackageController extends AbstractController {
     )
     @PostMapping
     public ResponseEntity<TourPackage> addPackage(
-        @Parameter(description = "Tour package object to create") @RequestBody TourPackage tourPackage
+        @Parameter(description = "Tour package object to create") @RequestBody @Valid TourPackageRequest request
     ) {
-        TourPackage savedPackage = tourPackageService.addPackage(tourPackage);
+        TourPackage savedPackage = tourPackageService.addPackage(request);
         return new ResponseEntity<>(savedPackage, HttpStatus.CREATED);
     }
 
@@ -78,9 +89,9 @@ public class TourPackageController extends AbstractController {
     @PatchMapping("/{id}")
     public ResponseEntity<TourPackage> updatePackage(
         @Parameter(description = "ID of the tour package to update") @PathVariable int id,
-        @Parameter(description = "Tour package object with updated fields") @RequestBody TourPackage tourPackage
+        @Parameter(description = "Tour package object with updated fields") @RequestBody @Valid TourPackageUpdateRequest request
     ) {
-        TourPackage updatedPackage = tourPackageService.updatePackage(id, tourPackage);
+        TourPackage updatedPackage = tourPackageService.updatePackage(id, request);
         return new ResponseEntity<>(updatedPackage, HttpStatus.OK);
     }
 
