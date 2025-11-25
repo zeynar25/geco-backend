@@ -12,4 +12,6 @@ public interface TourPackageRepository extends JpaRepository<TourPackage, Intege
 
 	List<TourPackage> findAllByOrderByName();
 
+	List<TourPackage> findAllByIsActiveOrderByName(boolean isActive);
+
 }

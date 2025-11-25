@@ -12,6 +12,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name="tour_package")
 public class TourPackage {
 	@Id
@@ -37,4 +39,7 @@ public class TourPackage {
         inverseJoinColumns = @JoinColumn(name = "inclusion_id")
     )
     private List<PackageInclusion> inclusions = new ArrayList<>();
+	
+	@Builder.Default
+	private boolean isActive = true;
 }

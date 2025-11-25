@@ -55,6 +55,14 @@ public class SecurityConfig {
 		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/{id}").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/admin/restore/**").hasRole("ADMIN")
 		            .requestMatchers(HttpMethod.DELETE, "/feedback-category/admin/**").hasRole("ADMIN")
+		            
+		            .requestMatchers(HttpMethod.GET, "/package/active").permitAll()
+		            .requestMatchers(HttpMethod.POST, "/package").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/package/{id}").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.DELETE, "/package/{id}").hasRole("ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/package/admin/restore/{id}").hasRole("ADMIN")
+		            .requestMatchers(HttpMethod.GET, "/package").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.GET, "/package/inactive").hasAnyRole("STAFF", "ADMIN")
 
 					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")
 					.requestMatchers("/account/my-account").authenticated()
