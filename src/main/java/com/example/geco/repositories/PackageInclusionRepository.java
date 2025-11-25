@@ -17,4 +17,6 @@ public interface PackageInclusionRepository extends JpaRepository<PackageInclusi
 	boolean existsByInclusionNameIgnoreCase(String name);
 
 	boolean existsByInclusionNameIgnoreCaseAndInclusionIdNot(String newName, int id);
+
+	List<PackageInclusion> findAllByInclusionIdIn(List<Integer> inclusionIds);
 }
