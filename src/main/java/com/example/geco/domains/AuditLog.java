@@ -43,7 +43,8 @@ public class AuditLog {
     @Enumerated(EnumType.STRING)
     private LogAction action;      
     
-    private String email;       
+    private Integer performedByAccountId;
+    private String performedByEmail;       
     private Role performedByRole; 
 
     @Column(columnDefinition = "TEXT")
