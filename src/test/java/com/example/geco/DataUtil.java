@@ -1,22 +1,10 @@
 package com.example.geco;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.example.geco.domains.Account;
 import com.example.geco.domains.Attraction;
-import com.example.geco.domains.Booking;
-import com.example.geco.domains.Booking.BookingStatus;
-import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.Faq;
-import com.example.geco.domains.Feedback;
 import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.domains.PackageInclusion;
-import com.example.geco.domains.TourPackage;
-import com.example.geco.domains.UserDetail;
-import com.example.geco.dto.AccountResponse;
+import com.example.geco.dto.FeedbackCategoryRequest;
 import com.example.geco.dto.SignupRequest;
 
 public class DataUtil {
@@ -36,46 +24,6 @@ public class DataUtil {
 				.build();
 	}
 	
-	public static UserDetail createUserDetailA() {
-		UserDetail detail = new UserDetail();
-		
-		detail.setSurname("Creus");
-		detail.setFirstName("Coleen");
-		detail.setEmail("krysscoleen.creus@cvsu.edu.ph");
-		
-		return detail;
-	}
-	
-	public static UserDetail createUserDetailB() {
-		UserDetail detail = new UserDetail();
-		
-		detail.setSurname("Soliman");
-		detail.setFirstName("Daniella");
-		detail.setEmail("daniellalyn.soliman@cvsu.edu.ph");
-		
-		return detail;
-	}
-
-	public static Account createAccountA() {
-		UserDetail detail = createUserDetailA();
-		
-		Account account = new Account();
-		account.setPassword("1234567890");
-		account.setDetail(detail);
-		
-		return account;
-	}
-	
-	public static Account createAccountB() {
-		UserDetail detail = createUserDetailB();
-		
-		Account account = new Account();
-		account.setPassword("1234567890");
-		account.setDetail(detail);
-		
-		return account;
-	}
-	
 	public static Attraction createAttractionA() {
 		Attraction attraction = new Attraction();
 		attraction.setAttractionId(0);
@@ -92,18 +40,6 @@ public class DataUtil {
 		attraction.setDescription("A special statue.");
 		
 		return attraction;
-	}
-	
-	public static FeedbackCategory createFeedbackCategoryA() {
-		FeedbackCategory category = new FeedbackCategory();
-		category.setLabel("Attractions");
-		return category;
-	}
-	
-	public static FeedbackCategory createFeedbackCategoryB() {
-		FeedbackCategory category = new FeedbackCategory();
-		category.setLabel("Facilities");
-		return category;
 	}
 	
 	public static Faq createFaqA() {
@@ -134,6 +70,18 @@ public class DataUtil {
 		inclusion.setInclusionPricePerPerson(150);
 		
 		return inclusion;
+	}
+	
+	public static FeedbackCategoryRequest createFeedbackCategoryRequestA() {
+		return FeedbackCategoryRequest.builder()
+				.label("Attractions")
+				.build();
+	}
+	
+	public static FeedbackCategoryRequest createFeedbackCategoryRequestB() {
+		return FeedbackCategoryRequest.builder()
+				.label("Facilities")
+				.build();
 	}
 	
 //	public static TourPackage createPackageA(PackageInclusionService packageInclusionService) {

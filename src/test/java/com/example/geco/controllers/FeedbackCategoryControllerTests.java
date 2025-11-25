@@ -3,6 +3,7 @@ package com.example.geco.controllers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -10,14 +11,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.example.geco.AbstractControllerTest;
 import com.example.geco.DataUtil;
 import com.example.geco.domains.FeedbackCategory;
+import com.example.geco.dto.FeedbackCategoryRequest;
+import com.example.geco.repositories.FeedbackCategoryRepository;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 	@Nested
     class SuccessTests {
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canAddFeedbackCategory() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockAdminAuthentication("admin@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			String categoryJson = objectMapper.writeValueAsString(categoryA);
 			
 			mockMvc.perform(
@@ -30,16 +36,21 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$.feedbackCategoryId").exists()
 			).andExpect(
 	        		MockMvcResultMatchers.jsonPath("$.label").value(categoryA.getLabel())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$.active").value("true")
 			);
 		}
 
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetFeedbackCategory() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
-			feedbackCategoryService.addCategory(categoryA);
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
+			FeedbackCategory savedCategory = feedbackCategoryService.addCategory(categoryA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/feedback-category/" + categoryA.getFeedbackCategoryId())
+					MockMvcRequestBuilders.get("/feedback-category/" + savedCategory.getFeedbackCategoryId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -49,11 +60,14 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		}
 
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFeedbackCategories() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			feedbackCategoryService.addCategory(categoryA);
 			
-			FeedbackCategory categoryB = DataUtil.createFeedbackCategoryB();
+			FeedbackCategoryRequest categoryB = DataUtil.createFeedbackCategoryRequestB();
 			feedbackCategoryService.addCategory(categoryB);
 			
 			mockMvc.perform(
@@ -67,9 +81,60 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$[1].label").value(categoryB.getLabel())
 			);
 		}
+		
+		@Test
+		@WithMockUser(username = "user@email.com", roles = "USER")
+		public void canGetAllActiveFeedbackCategories() throws Exception {
+			mockUserAuthentication("user@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
+			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
+			
+			savedCategoryA.setActive(false);
+			feedbackCategoryRepository.save(savedCategoryA);
+			
+			FeedbackCategoryRequest categoryB = DataUtil.createFeedbackCategoryRequestB();
+			feedbackCategoryService.addCategory(categoryB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/feedback-category/active")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].label").value(categoryB.getLabel())
+			);
+		}
 
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
+		public void canGetAllInactiveFeedbackCategories() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
+			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
+			
+			savedCategoryA.setActive(false);
+			feedbackCategoryRepository.save(savedCategoryA);
+			
+			FeedbackCategoryRequest categoryB = DataUtil.createFeedbackCategoryRequestB();
+			feedbackCategoryService.addCategory(categoryB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/feedback-category/inactive")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].label").value(categoryA.getLabel())
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFeedbackCategoriesEmpty() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/feedback-category")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -81,8 +146,11 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		}
 
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canUpdateFeedbackCategory() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
 			
 			categoryA.setLabel("new label");
@@ -102,12 +170,15 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		}
 		
 		@Test
-		public void canDeleteFeedbackCategory() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canSoftDeleteFeedbackCategory() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/feedback-category/" + savedCategoryA.getFeedbackCategoryId())
+					MockMvcRequestBuilders.delete("/feedback-category/admin/" + savedCategoryA.getFeedbackCategoryId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNoContent()
@@ -117,7 +188,36 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 					MockMvcRequestBuilders.get("/feedback-category/" + savedCategoryA.getFeedbackCategoryId())
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
-					MockMvcResultMatchers.status().isNotFound()
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.active").value("false")
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void canRestoreFeedbackCategory() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
+			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
+			
+			feedbackCategoryService.softDeleteCategory(savedCategoryA.getFeedbackCategoryId());
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.patch("/feedback-category/admin/restore/" + savedCategoryA.getFeedbackCategoryId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isNoContent()
+			);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/feedback-category/" + savedCategoryA.getFeedbackCategoryId())
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+					MockMvcResultMatchers.jsonPath("$.active").value("true")
 			);
 		}
 	}
@@ -125,8 +225,11 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 	@Nested
     class FailureTests {
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotAddFeedbackCategoryImproperLabel() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			categoryA.setLabel("");
 			
 			String categoryJson = objectMapper.writeValueAsString(categoryA);
@@ -138,13 +241,16 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 			).andExpect(
 					MockMvcResultMatchers.status().isBadRequest()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Label must at least have 1 character.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Label is required")
 			);
 		}
 		
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotAddFeedbackCategoryAlreadyExist() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			feedbackCategoryService.addCategory(categoryA);
 			
 			String attractionJson = objectMapper.writeValueAsString(categoryA);
@@ -156,12 +262,15 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 			).andExpect(
 					MockMvcResultMatchers.status().isBadRequest()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Label \"" + categoryA.getLabel() + "\" already exist.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Label '" + categoryA.getLabel() + "' already exist.")
 			);
 		}
 		
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotGetFeedbackCategory() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
 			int id = 0;
 			
 			mockMvc.perform(
@@ -170,13 +279,16 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback Category with ID " + id + " not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback category with ID '" + id + "' not found.")
 			);
 		}
 		
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotUpdateFeedbackCategoryNotFound() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			// did not save categoryA to database.
 			int id = 0;
 			
@@ -190,13 +302,16 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback category \"" + categoryA.getLabel() + "\" not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback category with ID '" + id + "' not found.")
 			);
 		}
 
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotUpdateFeedbackCategoryImproperLabel() throws Exception {
-			FeedbackCategory categoryA = DataUtil.createFeedbackCategoryA();
+			mockStaffAuthentication("staff@email.com");
+			
+			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
 			
 			categoryA.setLabel("");
@@ -209,21 +324,24 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 			).andExpect(
 					MockMvcResultMatchers.status().isBadRequest()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Label must at least have 1 character.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Label is required")
 			);
 		}
 		
 		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotDeleteFeedbackCategoryNotFound() throws Exception {
+			mockAdminAuthentication("admin@email.com");
+			
 			int id = 0;
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.delete("/feedback-category/" + id)
+					MockMvcRequestBuilders.delete("/feedback-category/admin/" + id)
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isNotFound()
 			).andExpect(
-	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback category with ID " + id + " not found.")
+	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback category with ID '" + id + "' not found.")
 			);
 		}
 	}

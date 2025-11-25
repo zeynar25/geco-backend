@@ -12,4 +12,8 @@ public interface FeedbackCategoryRepository extends JpaRepository<FeedbackCatego
 	boolean existsByLabelIgnoreCase(String label);
 
 	List<FeedbackCategory> findAllByOrderByLabel();
+
+	List<FeedbackCategory> findAllByIsActiveOrderByLabel(boolean isActive);
+
+	boolean existsByLabelIgnoreCaseAndFeedbackCategoryIdNot(String label, int id);
 }

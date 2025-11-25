@@ -47,6 +47,13 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.GET, "/package-inclusion/active").permitAll()
 					.requestMatchers("/package-inclusion/staff/**").hasAnyRole("STAFF", "ADMIN")
 					.requestMatchers("/package-inclusion/admin/**").hasRole("ADMIN")
+					
+					.requestMatchers(HttpMethod.GET, "/feedback-category/active").hasRole("USER")
+		            .requestMatchers(HttpMethod.GET, "/feedback-category/**").hasAnyRole("STAFF", "ADMIN") 
+		            .requestMatchers(HttpMethod.POST, "/feedback-category/**").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/{id}").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/admin/restore/**").hasRole("ADMIN")
+		            .requestMatchers(HttpMethod.DELETE, "/feedback-category/admin/**").hasRole("ADMIN")
 
 					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")
 					.requestMatchers("/account/my-account").authenticated()

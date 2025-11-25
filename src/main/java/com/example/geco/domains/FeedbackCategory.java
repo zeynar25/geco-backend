@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name="feedback_category")
 public class FeedbackCategory {
 	@Id
@@ -20,4 +22,7 @@ public class FeedbackCategory {
 	private Integer feedbackCategoryId;
 	
 	private String label;
+	
+	@Builder.Default
+	private boolean isActive = true;
 }
