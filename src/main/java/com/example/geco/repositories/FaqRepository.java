@@ -20,4 +20,6 @@ public interface FaqRepository extends JpaRepository<Faq, Integer>{
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT COALESCE(MAX(f.displayOrder), 0) FROM Faq f")
 	int getMaxDisplayOrderForUpdate();
+
+	List<Faq> findAllByisActiveOrderByDisplayOrder(boolean isActive);
 }

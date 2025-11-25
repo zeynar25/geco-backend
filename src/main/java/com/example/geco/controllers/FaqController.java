@@ -39,6 +39,20 @@ public class FaqController extends AbstractController {
         List<Faq> faqs = faqService.getAllFaqs();
         return new ResponseEntity<>(faqs, HttpStatus.OK);
     }
+    
+    @Operation(summary = "Get all active FAQs", description = "Retrieve a list of all active FAQs")
+    @GetMapping("/active")
+    public ResponseEntity<List<Faq>> getAllActiveFaqs() {
+        List<Faq> faqs = faqService.getAllActiveFaqs();
+        return new ResponseEntity<>(faqs, HttpStatus.OK);
+    }
+    
+    @Operation(summary = "Get all Inactive FAQs", description = "Retrieve a list of all inactive FAQs")
+    @GetMapping("/inactive")
+    public ResponseEntity<List<Faq>> getAllInactiveFaqs() {
+        List<Faq> faqs = faqService.getAllInactiveFaqs();
+        return new ResponseEntity<>(faqs, HttpStatus.OK);
+    }
 
     @Operation(summary = "Update FAQ by ID", description = "Update question and/or answer of a FAQ by ID")
     @PatchMapping("/{id}")
@@ -76,7 +90,7 @@ public class FaqController extends AbstractController {
     
     @Operation(summary = "Restore FAQ by ID", description = "Restore a previously soft-deleted FAQ")
     @PatchMapping("/admin/restore/{id}")
-    public ResponseEntity<Void> restoreFAq(
+    public ResponseEntity<Void> restoreFaq(
             @Parameter(description = "ID of the FAQ to restore") @PathVariable int id) {
         faqService.restoreFaq(id);
         return ResponseEntity.noContent().build();

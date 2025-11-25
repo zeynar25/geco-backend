@@ -4,15 +4,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; 
 
-import com.example.geco.domains.Account;
 import com.example.geco.domains.Faq;
 import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.dto.FaqOrderRequest;
 import com.example.geco.repositories.FaqRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
@@ -62,16 +61,33 @@ public class FaqService extends BaseService{
 		
 		return savedFaq;
 	}
-	
+
+	@Transactional(readOnly = true)
 	public Faq getFaq(int id) {
 		return faqRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("FAQ with ID '" + id + "' not found."));
 	}
-	
+
+
+	@Transactional(readOnly = true)
 	public List<Faq> getAllFaqs() {
 		return faqRepository.findAllByOrderByDisplayOrder();
 	}
-	
+
+
+	@Transactional(readOnly = true)
+	public List<Faq> getAllActiveFaqs() {
+		return faqRepository.findAllByisActiveOrderByDisplayOrder(true);
+	}
+
+
+	@Transactional(readOnly = true)
+	public List<Faq> getAllInactiveFaqs() {
+		return faqRepository.findAllByisActiveOrderByDisplayOrder(false);
+	}
+
+
+	@Transactional(readOnly = true)
 	public Faq updateFaq(Faq faq) {
 		if (faq.getQuestion() == null && faq.getAnswer() == null) {
 			throw new IllegalArgumentException("FAQ question and answer is empty.");
@@ -106,7 +122,6 @@ public class FaqService extends BaseService{
 		return faqRepository.save(existingFaq);
 	}
 
-	@Transactional
 	public void updateOrder(List<FaqOrderRequest> orderList) {
 		List<Faq> prevOrderList = getAllFaqs();
 		

@@ -43,9 +43,9 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
-		@WithMockUser(username = "user@email.com", roles = "USER")
+		@WithMockUser(username = "staff@email.com", roles = "STAF")
 		public void canGetFaq() throws Exception {
-			mockUserAuthentication("user@email.com");
+			mockStaffAuthentication("staff@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqService.addFaq(faqA);
@@ -65,12 +65,15 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFaqs() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
 			Faq faqA = DataUtil.createFaqA();
-			faqRepository.save(faqA);
+			faqService.addFaq(faqA);
 			
 			Faq faqB = DataUtil.createFaqB();
-			faqRepository.save(faqB);
+			faqService.addFaq(faqB);
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/faq")
@@ -93,7 +96,62 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "user@email.com", roles = "USER")
+		public void canGetActiveAllFaqs() throws Exception {
+			mockUserAuthentication("user@email.com");
+			
+			Faq faqA = DataUtil.createFaqA();
+			faqA.setActive(false);
+			faqRepository.save(faqA);
+			
+			Faq faqB = DataUtil.createFaqB();
+			faqRepository.save(faqB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/faq/active")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].faqId").value(faqB.getFaqId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].question").value(faqB.getQuestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].active").value(faqB.isActive())
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
+		public void canGetInactiveAllFaqs() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
+			Faq faqA = DataUtil.createFaqA();
+			faqA.setActive(false);
+			faqRepository.save(faqA);
+			
+			Faq faqB = DataUtil.createFaqB();
+			faqRepository.save(faqB);
+			
+			mockMvc.perform(
+					MockMvcRequestBuilders.get("/faq/inactive")
+						.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(
+					MockMvcResultMatchers.status().isOk()
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].faqId").value(faqA.getFaqId())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].question").value(faqA.getQuestion())
+			).andExpect(
+	        		MockMvcResultMatchers.jsonPath("$[0].active").value(faqA.isActive())
+			);
+		}
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFaqsEmpty() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/faq")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -407,7 +465,10 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotGetFaq() throws Exception {
+			mockStaffAuthentication("staff@email.com");
+			
 			int id = 0;
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/faq/" + id)
