@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.example.geco.services.AccountService;
 import com.example.geco.services.AdminDashboardService;
 import com.example.geco.services.AttractionService;
+import com.example.geco.services.AuditLogService;
 import com.example.geco.services.AuthService;
 import com.example.geco.services.BookingInclusionService;
 import com.example.geco.services.BookingService;
@@ -59,4 +60,7 @@ public abstract class AbstractController {
     
     @Autowired
     protected AdminDashboardService adminDashboardService;
+    
+    @Autowired
+    protected AuditLogService auditLogService;
 }

@@ -1,6 +1,7 @@
 package com.example.geco.controllers;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.geco.domains.AuditLog;
 import com.example.geco.domains.Booking;
-import com.example.geco.domains.Feedback;
-import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.AdminDashboardFinances;
 import com.example.geco.dto.AdminDashboardStats;
@@ -119,6 +119,19 @@ public class MainController extends AbstractController{
 	            .build()
 	            );
 	}
+	
+	@GetMapping("/dashboard/logs")
+	public ResponseEntity<List<AuditLog>> getAuditLogs(
+	        @RequestParam(required = false) String start,
+	        @RequestParam(required = false) String end) {
+
+	    LocalDateTime startTime = start != null ? LocalDateTime.parse(start) : null;
+	    LocalDateTime endTime = end != null ? LocalDateTime.parse(end) : null;
+
+	    List<AuditLog> logs = auditLogService.getLogsBetween(startTime, endTime);
+	    return ResponseEntity.ok(logs);
+	}
+
 
 	// Admin-dashboard feedback categories
 	// call GET /feedback-category for list of feedback categories
