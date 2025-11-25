@@ -21,7 +21,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canAddFeedbackCategory() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			String categoryJson = objectMapper.writeValueAsString(categoryA);
@@ -44,7 +44,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetFeedbackCategory() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategory = feedbackCategoryService.addCategory(categoryA);
@@ -62,7 +62,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFeedbackCategories() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			feedbackCategoryService.addCategory(categoryA);
@@ -85,7 +85,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "user@email.com", roles = "USER")
 		public void canGetAllActiveFeedbackCategories() throws Exception {
-			mockUserAuthentication("user@email.com");
+			mockUserAuthentication(3, "user@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
@@ -109,7 +109,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllInactiveFeedbackCategories() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
@@ -133,7 +133,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFeedbackCategoriesEmpty() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/feedback-category")
@@ -148,7 +148,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canUpdateFeedbackCategory() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
@@ -172,7 +172,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canSoftDeleteFeedbackCategory() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(2, "admin@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
@@ -197,7 +197,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canRestoreFeedbackCategory() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
@@ -227,7 +227,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotAddFeedbackCategoryImproperLabel() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			categoryA.setLabel("");
@@ -248,7 +248,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotAddFeedbackCategoryAlreadyExist() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			feedbackCategoryService.addCategory(categoryA);
@@ -269,7 +269,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotGetFeedbackCategory() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			int id = 0;
 			
@@ -286,7 +286,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotUpdateFeedbackCategoryNotFound() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			// did not save categoryA to database.
@@ -309,7 +309,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotUpdateFeedbackCategoryImproperLabel() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
 			FeedbackCategory savedCategoryA = feedbackCategoryService.addCategory(categoryA);
@@ -331,7 +331,7 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotDeleteFeedbackCategoryNotFound() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(2, "admin@email.com");
 			
 			int id = 0;
 			

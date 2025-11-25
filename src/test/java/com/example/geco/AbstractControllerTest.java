@@ -84,8 +84,9 @@ public abstract class AbstractControllerTest {
 	@Autowired
 	protected PackageInclusionRepository packageInclusionRepository;
 	
-	protected void mockAdminAuthentication(String email) {
+	protected void mockAdminAuthentication(int id, String email) {
 	    Account mockAccount = new Account();
+	    mockAccount.setAccountId(id);
 	    mockAccount.setRole(Account.Role.ADMIN);
 	    mockAccount.setDetail(UserDetail.builder().email(email).build());
 
@@ -98,8 +99,9 @@ public abstract class AbstractControllerTest {
 	    );
 	}
 	
-	protected void mockStaffAuthentication(String email) {
+	protected void mockStaffAuthentication(int id, String email) {
 	    Account mockAccount = new Account();
+	    mockAccount.setAccountId(id);
 	    mockAccount.setRole(Account.Role.STAFF);
 	    mockAccount.setDetail(UserDetail.builder().email(email).build());
 
@@ -112,8 +114,9 @@ public abstract class AbstractControllerTest {
 	    );
 	}
 	
-	protected void mockUserAuthentication(String email) {
+	protected void mockUserAuthentication(int id, String email) {
 	    Account mockAccount = new Account();
+	    mockAccount.setAccountId(id);
 	    mockAccount.setRole(Account.Role.USER);
 	    mockAccount.setDetail(UserDetail.builder().email(email).build());
 

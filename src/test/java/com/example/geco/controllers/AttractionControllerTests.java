@@ -22,7 +22,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
  		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canAddAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			String attractionJson = objectMapper.writeValueAsString(attractionA);
@@ -43,7 +43,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -64,7 +64,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetAllAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -94,7 +94,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -120,7 +120,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canSoftDeleteAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -143,7 +143,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canHardDeleteAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);
@@ -167,7 +167,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetNumberOfAttractions() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			Attraction attractionB = DataUtil.createAttractionB();
@@ -187,7 +187,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 	 	@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddAttractionImproperTitle() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attraction = DataUtil.createAttractionA();
 		    attraction.setName(""); // invalid title
@@ -207,7 +207,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddAttractionImproperDescription() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attraction = DataUtil.createAttractionA();
 		    attraction.setName("valid title"); 
@@ -228,7 +228,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "user@email.com", roles = "USER")
 		public void cannotAddAttractionAsUser() throws Exception {
-			mockUserAuthentication("user@email.com");
+			mockUserAuthentication(3, "user@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			String attractionJson = objectMapper.writeValueAsString(attractionA);
@@ -245,7 +245,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotGetAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionA.setAttractionId(0);
@@ -264,7 +264,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateAttractionImproperName() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -286,7 +286,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateAttractionImproperDescription() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -308,7 +308,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateAttractionMissing() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionA.setAttractionId(0);
@@ -328,7 +328,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "user@email.com", roles = "USER")
 		public void cannotUpdateAttractionAsUser() throws Exception {
-			mockUserAuthentication("user@email.com");
+			mockUserAuthentication(3, "user@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -348,7 +348,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotDeleteAttraction() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			int id = 1;
 			
@@ -365,7 +365,7 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "user@email.com", roles = "USER")
 		public void cannotDeleteAttractionAsUser() throws Exception {
-			mockUserAuthentication("user@email.com");
+			mockUserAuthentication(3, "user@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);

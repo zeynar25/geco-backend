@@ -44,7 +44,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldReturnAllUsersByAdmin() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.USER);
@@ -73,7 +73,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldReturnAllStaffsByAdmin() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.STAFF);
@@ -102,7 +102,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldReturnAllAdminsByAdmin() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.ADMIN);
@@ -135,7 +135,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldReturnAllActiveUsersByAdmin() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.USER);
@@ -162,7 +162,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldReturnAllInactiveUsersByAdmin() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.USER);
@@ -189,7 +189,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = {"STAFF"})
         public void shouldReturnAllUsersByStaff() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			AccountResponse accountA = accountService.addTouristAccount(requestA);
@@ -216,7 +216,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldSoftDeleteAccount() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.USER);
@@ -233,7 +233,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
         public void shouldRestoreAccount() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			requestA.setRole(Role.USER);
@@ -252,7 +252,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = {"STAFF"})
 		public void shouldResetPasswordByStaff() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			AccountResponse accountA = accountService.addTouristAccount(requestA);
@@ -270,7 +270,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
 		public void shouldResetPasswordByAdmin() throws Exception {
-			mockStaffAuthentication("admin@email.com");
+			mockStaffAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			AccountResponse accountA = accountService.addTouristAccount(requestA);
@@ -288,7 +288,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
 		public void shouldUpdateAccountRoleToStaff() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			AccountResponse accountA = accountService.addTouristAccount(requestA);
@@ -314,7 +314,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
 		public void shouldUpdateAccountRoleToAdmin() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
 			AccountResponse accountA = accountService.addTouristAccount(requestA);

@@ -19,7 +19,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canAddInclusion() throws Exception{
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
@@ -42,7 +42,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetInclusion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -64,7 +64,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetAllInclusions() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -118,7 +118,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canGetAllInclusionsEmpty() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/package-inclusion/staff")
@@ -133,7 +133,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateInclusion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -160,7 +160,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateInclusionNameOnly() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -190,7 +190,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateInclusionPriceOnly() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -219,7 +219,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canSoftDeleteInclusion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -244,7 +244,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canRestoreInclusion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -273,7 +273,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionNullName() throws Exception{
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionName(null);
@@ -293,7 +293,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionEmptyName() throws Exception{
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionName("   ");
@@ -313,7 +313,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionNullPrice() throws Exception{
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionPricePerPerson(null);
@@ -333,7 +333,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddInclusionInvalidPrice() throws Exception{
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			inclusionA.setInclusionPricePerPerson(-1);
@@ -353,7 +353,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotGetInclusion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			int id = 0;
 			
@@ -370,7 +370,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateInclusionNameAndPriceMissing() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			PackageInclusion savedInclusionA = packageInclusionService.addInclusion(inclusionA);
@@ -393,7 +393,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateInclusionIdNotFound() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
 			String inclusionJson = objectMapper.writeValueAsString(inclusionA);
@@ -414,7 +414,7 @@ public class PackageInclusionControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotSoftDeleteInclusion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			int id = 0;
 			

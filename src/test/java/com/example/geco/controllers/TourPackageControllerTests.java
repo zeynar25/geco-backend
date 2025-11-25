@@ -21,7 +21,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canAddPackage() throws Exception{
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			TourPackageRequest requestA = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 			String packageJson = objectMapper.writeValueAsString(requestA);
@@ -52,7 +52,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 		@Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void canGetPackage() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        TourPackage savedPackage = tourPackageService.addPackage(request);
@@ -72,7 +72,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void canGetAllPackages() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        TourPackageRequest requestA = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        TourPackage savedA = tourPackageService.addPackage(requestA);
@@ -91,7 +91,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void canUpdatePackage() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        TourPackage savedPackage = tourPackageService.addPackage(request);
@@ -114,7 +114,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
 	    public void canSoftDeleteAndRestorePackage() throws Exception {
-	        mockAdminAuthentication("admin@email.com");
+	        mockAdminAuthentication(1, "admin@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        TourPackage savedPackage = tourPackageService.addPackage(request);
@@ -142,7 +142,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
 	    public void canHardDeletePackage() throws Exception {
-	        mockAdminAuthentication("admin@email.com");
+	        mockAdminAuthentication(1, "admin@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        TourPackage savedPackage = tourPackageService.addPackage(request);
@@ -161,7 +161,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
 	    public void canRestoreSoftDeletedPackage() throws Exception {
-	        mockAdminAuthentication("admin@email.com");
+	        mockAdminAuthentication(1, "admin@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        TourPackage savedPackage = tourPackageService.addPackage(request);
@@ -189,7 +189,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void cannotAddPackageNullDescription() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        request.setDescription(null);
@@ -206,7 +206,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "user@email.com", roles = "USER")
 	    public void userCannotAccessStaffEndpoint() throws Exception {
-	        mockUserAuthentication("user@email.com");
+	        mockUserAuthentication(3, "user@email.com");
 
 	        TourPackageRequest request = DataUtil.createTourPackageRequestA(packageInclusionRepository);
 	        String json = objectMapper.writeValueAsString(request);
@@ -221,7 +221,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "user@email.com", roles = "USER")
 	    public void userCannotAccessAdminEndpoint() throws Exception {
-	        mockUserAuthentication("user@email.com");
+	        mockUserAuthentication(3, "user@email.com");
 
 	        int packageId = 1; // any ID
 	        mockMvc.perform(
@@ -233,7 +233,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void staffCannotAccessAdminOnlyEndpoint() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        int packageId = 1; // any ID
 	        mockMvc.perform(
@@ -245,7 +245,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "user@email.com", roles = "USER")
 	    public void userCannotGetOtherProtectedStaffResources() throws Exception {
-	        mockUserAuthentication("user@email.com");
+	        mockUserAuthentication(3, "user@email.com");
 
 	        mockMvc.perform(
 	                MockMvcRequestBuilders.get("/package")
@@ -256,7 +256,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void cannotGetNonExistingPackage() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        int nonExistentId = 999;
 
@@ -271,7 +271,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "staff@email.com", roles = "STAFF")
 	    public void cannotUpdateNonExistingPackage() throws Exception {
-	        mockStaffAuthentication("staff@email.com");
+	        mockStaffAuthentication(2, "staff@email.com");
 
 	        int nonExistentId = 999;
 	        TourPackageUpdateRequest updateRequest = new TourPackageUpdateRequest();
@@ -291,7 +291,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	    @Test
 	    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
 	    public void cannotDeleteNonExistingPackage() throws Exception {
-	        mockAdminAuthentication("admin@email.com");
+	        mockAdminAuthentication(1, "admin@email.com");
 
 	        int nonExistentId = 999;
 

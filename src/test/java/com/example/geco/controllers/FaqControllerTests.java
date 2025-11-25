@@ -22,7 +22,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canAddFaqByAdmin() throws Exception{
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			String faqJson = objectMapper.writeValueAsString(faqA);
@@ -45,7 +45,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAF")
 		public void canGetFaq() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqService.addFaq(faqA);
@@ -67,7 +67,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFaqs() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqService.addFaq(faqA);
@@ -98,7 +98,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "user@email.com", roles = "USER")
 		public void canGetActiveAllFaqs() throws Exception {
-			mockUserAuthentication("user@email.com");
+			mockUserAuthentication(3, "user@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setActive(false);
@@ -124,7 +124,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetInactiveAllFaqs() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setActive(false);
@@ -150,7 +150,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void canGetAllFaqsEmpty() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			mockMvc.perform(
 					MockMvcRequestBuilders.get("/faq")
@@ -165,7 +165,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateFaq() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(2, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -192,7 +192,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateFaqQuestionOnly() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -219,7 +219,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canUpdateFaqAnswerOnly() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -246,7 +246,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canReorderFaqList() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -283,7 +283,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canSoftDeleteFaq() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -309,7 +309,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canHardDeleteFaq() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -333,7 +333,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void canRestoreFaq() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -362,7 +362,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqMissingQuestion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setQuestion(null);
@@ -383,7 +383,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqShortQuestion() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setQuestion("what?");
@@ -404,7 +404,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqMissingAnswer() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setAnswer(null);
@@ -425,7 +425,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqShortAnswer() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setAnswer("what?");
@@ -446,7 +446,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotAddFaqQuestionAlreadyExist() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqRepository.save(faqA);
@@ -467,7 +467,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotGetFaq() throws Exception {
-			mockStaffAuthentication("staff@email.com");
+			mockStaffAuthentication(2, "staff@email.com");
 			
 			int id = 0;
 			mockMvc.perform(
@@ -483,7 +483,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateFaqMissingQuestionAndAnswer() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);;
@@ -507,7 +507,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateFaqMissing() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqA.setFaqId(0);
@@ -527,7 +527,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotUpdateFaqQuestionAlreadyExist() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			Faq savedFaqA = faqService.addFaq(faqA);
@@ -552,7 +552,7 @@ public class FaqControllerTests extends AbstractControllerTest{
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
 		public void cannotDeleteFaq() throws Exception {
-			mockAdminAuthentication("admin@email.com");
+			mockAdminAuthentication(1, "admin@email.com");
 			
 			int id = 0;
 			
