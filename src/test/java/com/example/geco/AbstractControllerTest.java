@@ -112,9 +112,9 @@ public abstract class AbstractControllerTest {
 	    );
 	}
 	
-	protected void mockGuestAuthentication(String email) {
+	protected void mockUserAuthentication(String email) {
 	    Account mockAccount = new Account();
-	    mockAccount.setRole(Account.Role.GUEST);
+	    mockAccount.setRole(Account.Role.USER);
 	    mockAccount.setDetail(UserDetail.builder().email(email).build());
 
 	    SecurityContextHolder.getContext().setAuthentication(

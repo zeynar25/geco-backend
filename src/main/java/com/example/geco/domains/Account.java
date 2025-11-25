@@ -35,7 +35,7 @@ public class Account implements UserDetails {
 	public enum Role {
 	    ADMIN,
 	    STAFF,
-	    GUEST
+	    USER
 	}
 	
 	@Id

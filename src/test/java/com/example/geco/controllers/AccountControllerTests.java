@@ -43,19 +43,19 @@ public class AccountControllerTests extends AbstractControllerTest {
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllGuestsByAdmin() throws Exception {
+        public void shouldReturnAllUsersByAdmin() throws Exception {
 			mockAdminAuthentication("admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.GUEST);
+			requestA.setRole(Role.USER);
 			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
 
 			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.GUEST);
+			requestB.setRole(Role.USER);
 			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/guest")
+					MockMvcRequestBuilders.get("/account/staff/list/user")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -134,21 +134,21 @@ public class AccountControllerTests extends AbstractControllerTest {
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllActiveGuestsByAdmin() throws Exception {
+        public void shouldReturnAllActiveUsersByAdmin() throws Exception {
 			mockAdminAuthentication("admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.GUEST);
+			requestA.setRole(Role.USER);
 			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
 
 			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.GUEST);
+			requestB.setRole(Role.USER);
 			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
 			
 			accountService.softDeleteAccount(accountB.getAccountId());
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/guest/active")
+					MockMvcRequestBuilders.get("/account/staff/list/user/active")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -161,21 +161,21 @@ public class AccountControllerTests extends AbstractControllerTest {
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllInactiveGuestsByAdmin() throws Exception {
+        public void shouldReturnAllInactiveUsersByAdmin() throws Exception {
 			mockAdminAuthentication("admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.GUEST);
+			requestA.setRole(Role.USER);
 			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
 
 			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.GUEST);
+			requestB.setRole(Role.USER);
 			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
 			
 			accountService.softDeleteAccount(accountB.getAccountId());
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/guest/inactive")
+					MockMvcRequestBuilders.get("/account/staff/list/user/inactive")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -188,7 +188,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 		
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = {"STAFF"})
-        public void shouldReturnAllGuestsByStaff() throws Exception {
+        public void shouldReturnAllUsersByStaff() throws Exception {
 			mockStaffAuthentication("staff@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
@@ -198,7 +198,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 			AccountResponse accountB = accountService.addTouristAccount(requestB);
 			
 			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/guest")
+					MockMvcRequestBuilders.get("/account/staff/list/user")
 						.contentType(MediaType.APPLICATION_JSON)
 			).andExpect(
 					MockMvcResultMatchers.status().isOk()
@@ -219,7 +219,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 			mockAdminAuthentication("admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.GUEST);
+			requestA.setRole(Role.USER);
 			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
 			
 			mockMvc.perform(
@@ -236,7 +236,7 @@ public class AccountControllerTests extends AbstractControllerTest {
 			mockAdminAuthentication("admin@email.com");
 			
 			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.GUEST);
+			requestA.setRole(Role.USER);
 			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
 			
 			accountService.softDeleteAccount(accountA.getAccountId());

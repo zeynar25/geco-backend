@@ -121,14 +121,14 @@ public class AccountService extends BaseService implements UserDetailsService{
 	}
 
 	public AccountResponse addTouristAccount(SignupRequest request) {
-		SignupRequest guestRequest = new SignupRequest(
+		SignupRequest userRequest = new SignupRequest(
 	            request.getEmail(),
 	            request.getPassword(),
 	            request.getConfirmPassword(),
-	            Role.GUEST
+	            Role.USER
 	    );
 		
-		return addAccount(guestRequest);
+		return addAccount(userRequest);
 	}
 	
 	public AccountResponse addAccountByStaff(SignupRequest request) {
@@ -192,24 +192,24 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .toList();
 	}
 
-	public List<AccountResponse> getAllGuests() {
-		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.GUEST);
+	public List<AccountResponse> getAllUsers() {
+		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.USER);
 		
 		return admins.stream()
 	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
 
-	public List<AccountResponse> getAllActiveGuests() {
-		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.GUEST, true);
+	public List<AccountResponse> getAllActiveUsers() {
+		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.USER, true);
 		
 		return admins.stream()
 	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
 
-	public List<AccountResponse> getAllInactiveGuests() {
-		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.GUEST, false);
+	public List<AccountResponse> getAllInactiveUsers() {
+		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.USER, false);
 		
 		return admins.stream()
 	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))

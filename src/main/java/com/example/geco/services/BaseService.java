@@ -8,8 +8,6 @@ import com.example.geco.domains.Account;
 import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.exceptions.AccessDeniedException;
-import com.example.geco.repositories.AccountRepository;
-
 public abstract class BaseService {
 	@Autowired
 	AuditLogService auditLogService;
@@ -55,7 +53,7 @@ public abstract class BaseService {
 	    
 		Role role = getLoggedAccountRole();
 		
-		if (role.equals(Role.GUEST)) {
+		if (role.equals(Role.USER)) {
 			return;
 		}
 		
@@ -76,7 +74,7 @@ public abstract class BaseService {
 			Object currVal) {
 		Role role = getLoggedAccountRole();
 		
-		if (role == Role.GUEST) return;
+		if (role == Role.USER) return;
 		
 		auditLogService.logAction(
 				entity,

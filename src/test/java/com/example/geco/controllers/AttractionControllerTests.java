@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
@@ -227,9 +226,9 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
-		@WithMockUser(username = "guest@email.com", roles = "GUEST")
-		public void cannotAddAttractionAsGuest() throws Exception {
-			mockGuestAuthentication("guest@email.com");
+		@WithMockUser(username = "user@email.com", roles = "USER")
+		public void cannotAddAttractionAsUser() throws Exception {
+			mockUserAuthentication("user@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			String attractionJson = objectMapper.writeValueAsString(attractionA);
@@ -327,9 +326,9 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
-		@WithMockUser(username = "guest@email.com", roles = "GUEST")
-		public void cannotUpdateAttractionAsGuest() throws Exception {
-			mockGuestAuthentication("guest@email.com");
+		@WithMockUser(username = "user@email.com", roles = "USER")
+		public void cannotUpdateAttractionAsUser() throws Exception {
+			mockUserAuthentication("user@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			attractionService.addAttraction(attractionA);
@@ -364,9 +363,9 @@ public class AttractionControllerTests extends AbstractControllerTest{
 		}
 
 		@Test
-		@WithMockUser(username = "guest@email.com", roles = "GUEST")
-		public void cannotDeleteAttractionAsGuest() throws Exception {
-			mockGuestAuthentication("guest@email.com");
+		@WithMockUser(username = "user@email.com", roles = "USER")
+		public void cannotDeleteAttractionAsUser() throws Exception {
+			mockUserAuthentication("user@email.com");
 			
 			Attraction attractionA = DataUtil.createAttractionA();
 			AttractionResponse savedAttractionA = attractionService.addAttraction(attractionA);

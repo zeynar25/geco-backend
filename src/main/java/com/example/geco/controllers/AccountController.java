@@ -97,30 +97,30 @@ public class AccountController extends AbstractController{
 		return ResponseEntity.ok(accounts);
 	}
 	
-	@GetMapping("staff/list/guest")
+	@GetMapping("staff/list/user")
     @Operation(
-    		summary = "Get all guest accounts", 
-			description = "Retrieves a list of all guest accounts")
-    public ResponseEntity<List<AccountResponse>> getAllGuests() {
-        List<AccountResponse> accounts  = accountService.getAllGuests();
+    		summary = "Get all user accounts", 
+			description = "Retrieves a list of all regular user accounts")
+    public ResponseEntity<List<AccountResponse>> getAllUsers() {
+        List<AccountResponse> accounts  = accountService.getAllUsers();
         return ResponseEntity.ok(accounts);
     }
 
-    @GetMapping("staff/list/guest/active")
+    @GetMapping("staff/list/user/active")
     @Operation(
-			summary = "Get all active guest accounts", 
-			description = "Retrieves a list of all active guest accounts")
-    public ResponseEntity<List<AccountResponse>> getAllActiveGuests() {
-        List<AccountResponse> accounts  = accountService.getAllActiveGuests();
+			summary = "Get all active user accounts", 
+			description = "Retrieves a list of all active user accounts")
+    public ResponseEntity<List<AccountResponse>> getAllActiveUsers() {
+        List<AccountResponse> accounts  = accountService.getAllActiveUsers();
         return ResponseEntity.ok(accounts);
     }
 
-    @GetMapping("staff/list/guest/inactive")
+    @GetMapping("staff/list/user/inactive")
     @Operation(
-			summary = "Get all inactive guest accounts", 
-			description = "Retrieves a list of all inactive guest accounts")
-    public ResponseEntity<List<AccountResponse>> getAllInactiveGuests() {
-        List<AccountResponse> accounts  = accountService.getAllInactiveGuests();
+			summary = "Get all inactive user accounts", 
+			description = "Retrieves a list of all inactive user accounts")
+    public ResponseEntity<List<AccountResponse>> getAllInactiveUsers() {
+        List<AccountResponse> accounts  = accountService.getAllInactiveUsers();
         return ResponseEntity.ok(accounts);
     }
 

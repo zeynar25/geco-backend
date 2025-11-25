@@ -43,9 +43,9 @@ public class FaqControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
-		@WithMockUser(username = "guest@email.com", roles = "GUEST")
+		@WithMockUser(username = "user@email.com", roles = "USER")
 		public void canGetFaq() throws Exception {
-			mockGuestAuthentication("guest@email.com");
+			mockUserAuthentication("user@email.com");
 			
 			Faq faqA = DataUtil.createFaqA();
 			faqService.addFaq(faqA);
