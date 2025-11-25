@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.domains.AuditLog.LogAction;
@@ -11,9 +12,9 @@ import com.example.geco.dto.FeedbackCategoryRequest;
 import com.example.geco.repositories.FeedbackCategoryRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class FeedbackCategoryService extends BaseService{
 	@Autowired
 	private FeedbackCategoryRepository feedbackCategoryRepository;
@@ -26,7 +27,6 @@ public class FeedbackCategoryService extends BaseService{
 				.build();
 	}
 	
-	@Transactional
 	public FeedbackCategory addCategory(FeedbackCategoryRequest category) {
 		String label = category.getLabel().trim();
 		
@@ -45,27 +45,30 @@ public class FeedbackCategoryService extends BaseService{
 		return savedCategory;
 	}
 	
-	
+
+    @Transactional(readOnly = true)
 	public FeedbackCategory getCategory(int id) {
 		return feedbackCategoryRepository.findById(id)
 				.orElseThrow(
 	            		() -> new EntityNotFoundException("Feedback category with ID '" + id + "' not found.")
 	            );
 	}
-	
+
+    @Transactional(readOnly = true)
 	public List<FeedbackCategory> getAllCategories() {
 		return feedbackCategoryRepository.findAllByOrderByLabel();
 	}
-	
+
+    @Transactional(readOnly = true)
 	public List<FeedbackCategory> getAllActiveCategories() {
 		return feedbackCategoryRepository.findAllByIsActiveOrderByLabel(true);
 	}
-	
+
+    @Transactional(readOnly = true)
 	public List<FeedbackCategory> getAllInactiveCategories() {
 		return feedbackCategoryRepository.findAllByIsActiveOrderByLabel(false);
 	}
 	
-	@Transactional
 	public FeedbackCategory updateCategory(int id, FeedbackCategoryRequest category) {
 		FeedbackCategory existingCategory = feedbackCategoryRepository.findById(id)
 				.orElseThrow(
@@ -90,7 +93,6 @@ public class FeedbackCategoryService extends BaseService{
 		return feedbackCategoryRepository.save(existingCategory);
 	}
 	
-	@Transactional
 	public void softDeleteCategory(int id) {
 		FeedbackCategory category = feedbackCategoryRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Feedback category with ID '" + id + "' not found."));
@@ -107,7 +109,6 @@ public class FeedbackCategoryService extends BaseService{
 		logIfStaffOrAdmin("FeedbackCategory", (long) id, LogAction.DISABLE, prevCategory, category);
 	}
 
-	@Transactional
 	public void restoreCategory(int id) {
 		FeedbackCategory category = feedbackCategoryRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Feedback category with ID '" + id + "' not found."));
