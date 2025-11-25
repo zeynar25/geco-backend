@@ -41,7 +41,7 @@ public class AuditLog {
     private Long entityId;         
 
     @Enumerated(EnumType.STRING)
-    private LogAction action;         // e.g., "CREATE", "UPDATE", "DISABLE", "DELETE"
+    private LogAction action;      
     
     private String email;       
     private Role performedByRole; 
