@@ -4,25 +4,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; 
 
-import com.example.geco.domains.Account;
-import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.domains.Attraction;
 import com.example.geco.dto.AttractionResponse;
-import com.example.geco.exceptions.AccessDeniedException;
 import com.example.geco.repositories.AttractionRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional
 public class AttractionService extends BaseService{
 	@Autowired
 	AttractionRepository attractionRepository;
-	
+
+	@Transactional(readOnly = true)
 	public long getAttractionsNumber() {
 		return attractionRepository.count();
 	}
@@ -62,13 +60,15 @@ public class AttractionService extends BaseService{
 		
 	    return toResponse(a);
 	}
-	
+
+	@Transactional(readOnly = true)
 	public AttractionResponse getAttraction(int id) {
 		Attraction attraction = attractionRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
         return toResponse(attraction);
 	}
-	
+
+	@Transactional(readOnly = true)
 	public List<AttractionResponse> getAllAttractions() {
 		return attractionRepository.findAllByOrderByName()
 	            .stream()
@@ -76,6 +76,7 @@ public class AttractionService extends BaseService{
 	            .collect(Collectors.toList());
 	}
 
+	@Transactional(readOnly = true)
 	public List<AttractionResponse> getAllActiveAttractions() {
 		return attractionRepository.findAllByIsActiveOrderByName(true)
 	            .stream()
@@ -83,6 +84,7 @@ public class AttractionService extends BaseService{
 	            .collect(Collectors.toList());
 	}
 
+	@Transactional(readOnly = true)
 	public List<AttractionResponse> getAllInactiveAttractions() {
 		return attractionRepository.findAllByIsActiveOrderByName(false)
 	            .stream()
