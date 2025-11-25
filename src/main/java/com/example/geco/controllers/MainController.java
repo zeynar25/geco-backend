@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.AuditLog;
+import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.domains.Booking;
 import com.example.geco.dto.AdminBookingRequest;
 import com.example.geco.dto.AdminDashboardFinances;
@@ -123,12 +124,14 @@ public class MainController extends AbstractController{
 	@GetMapping("/dashboard/logs")
 	public ResponseEntity<List<AuditLog>> getAuditLogs(
 	        @RequestParam(required = false) String start,
-	        @RequestParam(required = false) String end) {
+	        @RequestParam(required = false) String end,
+	        @RequestParam(required = false) String entityName,
+	        @RequestParam(required = false) LogAction action) {
 
 	    LocalDateTime startTime = start != null ? LocalDateTime.parse(start) : null;
 	    LocalDateTime endTime = end != null ? LocalDateTime.parse(end) : null;
 
-	    List<AuditLog> logs = auditLogService.getLogsBetween(startTime, endTime);
+	    List<AuditLog> logs = auditLogService.getLogs(startTime, endTime, entityName, action);
 	    return ResponseEntity.ok(logs);
 	}
 
