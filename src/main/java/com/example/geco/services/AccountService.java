@@ -20,11 +20,10 @@ import com.example.geco.dto.DetailRequest;
 import com.example.geco.dto.PasswordUpdateRequest;
 import com.example.geco.dto.RoleUpdateRequest;
 import com.example.geco.dto.SignupRequest;
-import com.example.geco.exceptions.AccessDeniedException;
 import com.example.geco.repositories.AccountRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional; 
 
 @Service
 @Transactional
@@ -151,7 +150,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		return addAccount(request);
 	}
 	
-	
+	@Transactional(readOnly = true)
 	public Account getAccount(int id) {
 		Account account = accountRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
@@ -159,6 +158,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	}
 
 
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllAdmin() {
 		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.ADMIN);
 		
@@ -168,6 +168,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	}
 
 
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllStaffs() {
 		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.STAFF);
 		
@@ -175,7 +176,8 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
-	
+
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllActiveStaffs() {
 		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.STAFF, true);
 		
@@ -183,7 +185,8 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
 	            .toList();
 	}
-	
+
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllInactiveStaffs() {
 		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.STAFF, false);
 		
@@ -192,6 +195,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllUsers() {
 		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.USER);
 		
@@ -200,6 +204,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllActiveUsers() {
 		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.USER, true);
 		
@@ -208,6 +213,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<AccountResponse> getAllInactiveUsers() {
 		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.USER, false);
 		
