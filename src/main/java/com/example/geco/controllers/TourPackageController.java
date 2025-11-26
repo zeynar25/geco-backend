@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
 import com.example.geco.dto.TourPackageRequest;
 import com.example.geco.dto.TourPackageUpdateRequest;
@@ -81,6 +82,15 @@ public class TourPackageController extends AbstractController {
         List<TourPackage> tourPackages = tourPackageService.getAllInactivePackages();
         return new ResponseEntity<>(tourPackages, HttpStatus.OK);
     }
+    
+    @Operation(
+	    summary = "Get active inclusions not in a tour package",
+	    description = "Retrieve a list of all active package inclusions that are not already included in the specified tour package."
+	)
+	@GetMapping("/{id}/inclusions/available")
+	public List<PackageInclusion> getAvailableInclusions(@PathVariable Integer id) {
+	    return tourPackageService.getAvailableInclusions(id);
+	}
 
     @Operation(
         summary = "Update a Tour Package",

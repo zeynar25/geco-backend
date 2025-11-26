@@ -57,6 +57,7 @@ public class SecurityConfig {
 		            .requestMatchers(HttpMethod.DELETE, "/feedback-category/admin/**").hasRole("ADMIN")
 		            
 		            .requestMatchers(HttpMethod.GET, "/package/active").permitAll()
+		            .requestMatchers(HttpMethod.GET, "/package/*/inclusions/available").permitAll()
 		            .requestMatchers(HttpMethod.POST, "/package").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.PATCH, "/package/{id}").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.DELETE, "/package/{id}").hasRole("ADMIN")

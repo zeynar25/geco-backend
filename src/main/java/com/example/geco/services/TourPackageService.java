@@ -1,6 +1,7 @@
 package com.example.geco.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,19 @@ public class TourPackageService extends BaseService{
 	public List<TourPackage> getAllInactivePackages() {
 		return tourPackageRepository.findAllByIsActiveOrderByName(false);
 	}
+    
+    @Transactional(readOnly = true)
+    public List<PackageInclusion> getAvailableInclusions(int id) {
+        TourPackage tourPackage = tourPackageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tour package with ID '" + id + "' not found."));
+
+        List<PackageInclusion> allActiveInclusions = inclusionRepository.findAllByIsActiveOrderByInclusionName(true);
+
+        // Filter out inclusions already in this package
+        return allActiveInclusions.stream()
+                .filter(inclusion -> !tourPackage.getInclusions().contains(inclusion))
+                .collect(Collectors.toList());
+    }
 	
 	public TourPackage updatePackage(int id, TourPackageUpdateRequest request) {
 		String name = request.getName() != null ? request.getName().trim() : null;
