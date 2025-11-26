@@ -64,11 +64,19 @@ public class SecurityConfig {
 		            .requestMatchers(HttpMethod.PATCH, "/package/admin/restore/{id}").hasRole("ADMIN")
 		            .requestMatchers(HttpMethod.GET, "/package").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.GET, "/package/inactive").hasAnyRole("STAFF", "ADMIN")
-
-					.requestMatchers(HttpMethod.DELETE, "/booking/**").hasRole("ADMIN")
+		            
+		            .requestMatchers(HttpMethod.POST, "/booking").authenticated()
+		            .requestMatchers(HttpMethod.GET, "/booking/me").authenticated()
+		            .requestMatchers(HttpMethod.GET, "/booking/**").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/booking/{id}", "/booking/staff/{id}")
+		            	.hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/booking/restore/{id}").hasRole("ADMIN")
+		            .requestMatchers(HttpMethod.DELETE, "/booking/{id}").hasRole("ADMIN")
+		            
 					.requestMatchers("/account/my-account").authenticated()
 					
 		            .anyRequest().permitAll())
+			
 			.httpBasic(Customizer.withDefaults())
 			.sessionManagement(session ->
 				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

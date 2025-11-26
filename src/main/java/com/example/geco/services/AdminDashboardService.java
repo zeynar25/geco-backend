@@ -61,7 +61,7 @@ public class AdminDashboardService {
 		}
 		
 		if (email == null || email.isBlank()) {
-			return bookingRepository.findByStatusOrderByVisitDateAscVisitTimeAsc(status);
+			return bookingRepository.findByBookingStatusOrderByVisitDateAscVisitTimeAsc(status);
 		}
 		
 		Account account = accountRepository.findByDetailEmail(email.strip())
@@ -71,7 +71,7 @@ public class AdminDashboardService {
 			return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(account.getAccountId());
 		}
 		
-		return bookingRepository.findByAccount_AccountIdAndStatusOrderByVisitDateAscVisitTimeAsc(account.getAccountId(), status);
+		return bookingRepository.findByAccount_AccountIdAndBookingStatusOrderByVisitDateAscVisitTimeAsc(account.getAccountId(), status);
 	}
 
 	public AdminDashboardFinances getDashboardFinance(Integer year, Integer month) {
@@ -85,7 +85,7 @@ public class AdminDashboardService {
 		if (year == null && month == null) {
 			totalBookings = (int) bookingRepository.count();
 			totalRevenue = bookingRepository.findTotalRevenueByStatus(BookingStatus.COMPLETED);
-			completedBookings = bookingRepository.countByStatus(BookingStatus.COMPLETED).intValue();
+			completedBookings = bookingRepository.countByBookingStatus(BookingStatus.COMPLETED).intValue();
 			
 		// When there's no provided year but there's a month, it means data on that month across years.
 		} else if (year == null) {
@@ -104,16 +104,16 @@ public class AdminDashboardService {
 	        LocalDate endDate = LocalDate.of(year, 12, 31);
 
 	        totalBookings = bookingRepository.countByVisitDateBetween(startDate, endDate);
-	        completedBookings = bookingRepository.countByStatusAndVisitDateBetween(BookingStatus.COMPLETED, startDate, endDate);
-	        totalRevenue = bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
+	        completedBookings = bookingRepository.countByBookingStatusAndVisitDateBetween(BookingStatus.COMPLETED, startDate, endDate);
+	        totalRevenue = bookingRepository.getTotalRevenueByBookingStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
 			
 		} else {
 			LocalDate startDate = LocalDate.of(year, month, 1);
 			LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 			
 			totalBookings = bookingRepository.countByVisitDateBetween(startDate, endDate);
-			totalRevenue = bookingRepository.getTotalRevenueByStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
-			completedBookings = bookingRepository.countByStatusAndVisitDateBetween(BookingStatus.COMPLETED, startDate, endDate);		
+			totalRevenue = bookingRepository.getTotalRevenueByBookingStatusAndVisitDateBetween(startDate, endDate, BookingStatus.COMPLETED);
+			completedBookings = bookingRepository.countByBookingStatusAndVisitDateBetween(BookingStatus.COMPLETED, startDate, endDate);		
 		}
 
 		averageRevenuePerBooking = (completedBookings == 0) ? 0 : totalRevenue / completedBookings;
@@ -143,7 +143,7 @@ public class AdminDashboardService {
 	        yearlyBookings.add(
 					ChartData.builder()
 					.period(String.valueOf(year))
-					.value(bookingRepository.countByStatusAndVisitDateBetween(
+					.value(bookingRepository.countByBookingStatusAndVisitDateBetween(
 							BookingStatus.COMPLETED,
 							startDate,
 							endDate))
@@ -168,7 +168,7 @@ public class AdminDashboardService {
 		    getMonthlyBookings.add(
 					ChartData.builder()
 					.period(yearMonth.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
-					.value(bookingRepository.countByStatusAndVisitDateBetween(
+					.value(bookingRepository.countByBookingStatusAndVisitDateBetween(
 							BookingStatus.COMPLETED,
 							startDate,
 							endDate))

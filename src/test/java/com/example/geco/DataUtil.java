@@ -1,27 +1,72 @@
 package com.example.geco;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.example.geco.domains.Account;
+import com.example.geco.domains.Account.Role;
 import com.example.geco.domains.Attraction;
+import com.example.geco.domains.Booking;
+import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.Faq;
 import com.example.geco.domains.PackageInclusion;
+import com.example.geco.domains.TourPackage;
 import com.example.geco.domains.UserDetail;
-import com.example.geco.domains.Account.Role;
+import com.example.geco.dto.BookingInclusionRequest;
+import com.example.geco.dto.BookingRequest;
 import com.example.geco.dto.FeedbackCategoryRequest;
 import com.example.geco.dto.SignupRequest;
 import com.example.geco.dto.TourPackageRequest;
 import com.example.geco.repositories.AccountRepository;
+import com.example.geco.repositories.BookingRepository;
 import com.example.geco.repositories.PackageInclusionRepository;
+import com.example.geco.repositories.TourPackageRepository;
 
 public class DataUtil {
+	
+	private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	
 	public static SignupRequest createSignupRequestA() {
 		return SignupRequest.builder()
 				.email("krysscoleen.creus@cvsu.edu.ph")
 				.password("Hello12345678")
 				.confirmPassword("Hello12345678")
 				.build();
+	}
+	
+	public static Account createUserAccountA(AccountRepository accountRepository) {
+		String hashedPassword = passwordEncoder.encode("Hello12345678");
+		
+		Account account = Account.builder()
+				.role(Role.USER)
+				.password(hashedPassword)
+				.detail(
+						UserDetail.builder()
+						.email("krysscoleen.creus@cvsu.edu.ph")
+						.build())
+				.build();
+		
+		return accountRepository.save(account);
+	}
+	
+	public static Account createAdminAccountA(AccountRepository accountRepository) {
+		String hashedPassword = passwordEncoder.encode("Hello12345678");
+		
+		Account account = Account.builder()
+				.role(Role.ADMIN)
+				.password(hashedPassword)
+				.detail(
+						UserDetail.builder()
+						.email("krysscoleen.creus@cvsu.edu.ph")
+						.build())
+				.build();
+		
+		return accountRepository.save(account);
 	}
 
 	public static SignupRequest createSignupRequestB() {
@@ -32,20 +77,20 @@ public class DataUtil {
 				.build();
 	}
 	
-//	public static Account createAccount(AccountRepository accountRepository) {
-//		String hashedPassword = passwordEncoder.encode(password);
-//		
-//		Account account = Account.builder()
-//				.role(Role.USER)
-//				.password(hashedPassword)
-//				.detail(
-//						UserDetail.builder()
-//						.email("krysscoleen.creus@cvsu.edu.ph")
-//						.build())
-//				.build();
-//		
-//		return accountRepository.save(account);
-//	}
+	public static Account createUserAccountB(AccountRepository accountRepository) {
+		String hashedPassword = passwordEncoder.encode("Hi12345678");
+		
+		Account account = Account.builder()
+				.role(Role.USER)
+				.password(hashedPassword)
+				.detail(
+						UserDetail.builder()
+						.email("daniellalyn.soliman@cvsu.edu.ph")
+						.build())
+				.build();
+		
+		return accountRepository.save(account);
+	}
 	
 	public static Attraction createAttractionA() {
 		Attraction attraction = new Attraction();
@@ -99,6 +144,27 @@ public class DataUtil {
 				.inclusionPricePerPerson(100)
 				.build();
 	}
+
+	public static PackageInclusion createPackageInclusionD() {
+		return PackageInclusion.builder()
+				.inclusionName("Noon Tour")
+				.inclusionPricePerPerson(120)
+				.build();
+	}
+
+	public static PackageInclusion createPackageInclusionE() {
+		return PackageInclusion.builder()
+				.inclusionName("Afternoon Tour")
+				.inclusionPricePerPerson(140)
+				.build();
+	}
+
+	public static PackageInclusion createPackageInclusionF() {
+		return PackageInclusion.builder()
+				.inclusionName("Skydiving")
+				.inclusionPricePerPerson(300)
+				.build();
+	}
 	
 	public static FeedbackCategoryRequest createFeedbackCategoryRequestA() {
 		return FeedbackCategoryRequest.builder()
@@ -128,6 +194,26 @@ public class DataUtil {
 				.build();
 	}
 	
+	public static TourPackage createTourPackageA(
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository) {
+		PackageInclusion inclusionA = DataUtil.createPackageInclusionA();
+		packageInclusionRepository.save(inclusionA);
+		
+		List<PackageInclusion> inclusions = new ArrayList<>();
+		inclusions.add(inclusionA);
+		
+		return tourPackageRepository.save(
+				TourPackage.builder()
+					.name("The best")
+					.description("Detailed description about this package")
+					.duration(60)
+					.basePrice(500)
+					.inclusions(inclusions)
+					.build()
+		);
+	}
+	
 	public static TourPackageRequest createTourPackageRequestB(PackageInclusionRepository packageInclusionRepository) {
 		PackageInclusion inclusionA = DataUtil.createPackageInclusionB();
 		packageInclusionRepository.save(inclusionA);
@@ -147,104 +233,157 @@ public class DataUtil {
 				.inclusionIds(inclusionIds)
 				.build();
 	}
+
 	
-//	public static BookingInclusion createBookingInclusionA(PackageInclusionService packageInclusionService, Booking booking) {
-//		PackageInclusion inclusion = DataUtil.createPackageInclusionA();
-//		PackageInclusion savedInclusion = packageInclusionService.addInclusion(inclusion);
-//		
-//		BookingInclusion bookingInclusion = new BookingInclusion();
-//		bookingInclusion.setBooking(booking);
-//		bookingInclusion.setInclusion(savedInclusion);
-//		bookingInclusion.setQuantity(2);
-//		bookingInclusion.setPriceAtBooking(savedInclusion.getInclusionPricePerPerson());
-//		
-//		return bookingInclusion;
-//	}
-//	
-//	public static BookingInclusion createBookingInclusionB(PackageInclusionService packageInclusionService, Booking booking) {
-//		PackageInclusion inclusion = DataUtil.createPackageInclusionB();
-//		PackageInclusion savedInclusion = packageInclusionService.addInclusion(inclusion);
-//		
-//		BookingInclusion bookingInclusion = new BookingInclusion();
-//		bookingInclusion.setBooking(booking);
-//		bookingInclusion.setInclusion(savedInclusion);
-//		bookingInclusion.setQuantity(1);
-//		bookingInclusion.setPriceAtBooking(savedInclusion.getInclusionPricePerPerson());
-//		
-//		return bookingInclusion;
-//	}
-//	
-//
-//	public static Booking createBookingA(AccountService accountService, 
-//			TourPackageService tourPackageService,
-//			PackageInclusionService packageInclusionService) {
-//		Account account = DataUtil.createAccountA();
-//		AccountResponse savedResponse = accountService.addTouristAccount(account);
-//		
-//		Account savedAccount = accountService.getAccount(savedResponse.getAccountId());
-//		
-//		TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-//		TourPackage savedPackage = tourPackageService.addPackage(packageA);
-//		
-//		Booking booking = new Booking();
-//	    booking.setAccount(savedAccount);
-//	    booking.setTourPackage(savedPackage);
-//	    booking.setVisitDate(LocalDate.now().plusDays(3));
-//	    booking.setVisitTime(LocalTime.of(9, 30));
-//	    booking.setGroupSize(4);
-//	    booking.setStatus(BookingStatus.PENDING);
-//		
-//		BookingInclusion bookingInclusion = DataUtil.createBookingInclusionA(packageInclusionService, booking);
-//		List<BookingInclusion> inclusions = new ArrayList<>();
-//		inclusions.add(bookingInclusion);
-//		
-//		booking.setInclusions(inclusions);
-//	    
-//	    int inclusionsPrice = 0;
-//	    for (BookingInclusion inclusion : inclusions) {
-//	    	inclusionsPrice += inclusion.getPriceAtBooking() * inclusion.getQuantity();
-//	    }
-//	    
-//	    booking.setTotalPrice(savedPackage.getBasePrice() * booking.getGroupSize() + inclusionsPrice);
-//
-//	    return booking;
-//	}
-//	
-//	public static Booking createBookingB(AccountService accountService, 
-//			TourPackageService tourPackageService,
-//			PackageInclusionService packageInclusionService) {
-//		Account account = DataUtil.createAccountA();
-//		AccountResponse savedResponse = accountService.addTouristAccount(account);
-//		
-//		Account savedAccount = accountService.getAccount(savedResponse.getAccountId());
-//		
-//		TourPackage packageA = DataUtil.createPackageA(packageInclusionService);
-//		TourPackage savedPackage = tourPackageService.addPackage(packageA);
-//		
-//		Booking booking = new Booking();
-//	    booking.setAccount(savedAccount);
-//	    booking.setTourPackage(savedPackage);
-//	    booking.setVisitDate(LocalDate.now().plusDays(5));
-//	    booking.setVisitTime(LocalTime.of(9, 30));
-//	    booking.setGroupSize(4);
-//	    booking.setStatus(BookingStatus.PENDING);
-//		
-//		BookingInclusion bookingInclusion = DataUtil.createBookingInclusionB(packageInclusionService, booking);
-//		List<BookingInclusion> inclusions = new ArrayList<>();
-//		inclusions.add(bookingInclusion);
-//		
-//		booking.setInclusions(inclusions);
-//	    
-//	    int inclusionsPrice = 0;
-//	    for (BookingInclusion inclusion : inclusions) {
-//	    	inclusionsPrice += inclusion.getPriceAtBooking() * inclusion.getQuantity();
-//	    }
-//	    
-//	    booking.setTotalPrice(savedPackage.getBasePrice() * booking.getGroupSize() + inclusionsPrice);
-//
-//	    return booking;
-//	}
-//	
+	public static TourPackage createTourPackageB(
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository) {
+		PackageInclusion inclusionA = DataUtil.createPackageInclusionB();
+		packageInclusionRepository.save(inclusionA);
+		
+		PackageInclusion inclusionB = DataUtil.createPackageInclusionC();
+		packageInclusionRepository.save(inclusionB);
+		
+		List<PackageInclusion> inclusions = new ArrayList<>();
+		inclusions.add(inclusionA);
+		inclusions.add(inclusionB);
+		
+		return tourPackageRepository.save(
+				TourPackage.builder()
+					.name("The double best")
+					.description("Detailed description about this package")
+					.duration(120)
+					.basePrice(100)
+					.inclusions(inclusions)
+					.build()
+		);
+	}
+	
+
+	public static BookingInclusionRequest createBookingInclusionRequestA( 
+			PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusion = DataUtil.createPackageInclusionD();
+		PackageInclusion savedInclusion = packageInclusionRepository.save(inclusion);
+		
+		return BookingInclusionRequest.builder()
+				.inclusionId(savedInclusion.getInclusionId())
+				.quantity(2)
+				.build();
+	}
+
+	public static BookingInclusion createBookingInclusionA( 
+			Booking booking,
+			PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusionA = DataUtil.createPackageInclusionD();
+		PackageInclusion savedInclusionA = packageInclusionRepository.save(inclusionA);
+		
+		return BookingInclusion.builder()
+				.booking(booking)
+				.inclusion(savedInclusionA)
+				.quantity(2)
+				.priceAtBooking(savedInclusionA.getInclusionPricePerPerson())
+				.build();
+	}
+	
+	public static BookingInclusionRequest createBookingInclusionRequestB( 
+			PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusion = DataUtil.createPackageInclusionE();
+		PackageInclusion savedInclusion = packageInclusionRepository.save(inclusion);
+		
+		return BookingInclusionRequest.builder()
+				.inclusionId(savedInclusion.getInclusionId())
+				.quantity(1)
+				.build();
+	}
+	
+	public static BookingInclusionRequest createBookingInclusionRequestC( 
+			PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusion = DataUtil.createPackageInclusionF();
+		PackageInclusion savedInclusion = packageInclusionRepository.save(inclusion);
+		
+		return BookingInclusionRequest.builder()
+				.inclusionId(savedInclusion.getInclusionId())
+				.quantity(3)
+				.build();
+	}
+	
+	public static BookingRequest createBookingRequestA(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository
+	) {
+		TourPackage tourPackageA = createTourPackageA(packageInclusionRepository, tourPackageRepository);
+
+	    BookingRequest request = BookingRequest.builder()
+	    		.accountId(id)
+	            .tourPackageId(tourPackageA.getPackageId())
+	            .visitDate(LocalDate.now().plusDays(3))
+	            .visitTime(LocalTime.of(9, 30))
+	            .groupSize(4)
+	            .build(); 
+	    
+	    List<BookingInclusionRequest> bookingInclusionRequests = new ArrayList<>();
+	    bookingInclusionRequests.add(createBookingInclusionRequestA(packageInclusionRepository));
+	    
+	    request.setBookingInclusionRequests(bookingInclusionRequests);
+	    
+	    return request;
+	}
+	
+	public static Booking createBookingA(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository
+	) {
+		Account accountA = createUserAccountA(accountRepository);
+		TourPackage tourPackageA = createTourPackageA(packageInclusionRepository, tourPackageRepository);
+
+	    Booking booking = Booking.builder()
+	    		.account(accountA)
+	            .tourPackage(tourPackageA)
+	            .visitDate(LocalDate.now().plusDays(3))
+	            .visitTime(LocalTime.of(9, 30))
+	            .groupSize(2)
+	            .bookingStatus(Booking.BookingStatus.PENDING)
+	            .paymentStatus(Booking.PaymentStatus.UNPAID)
+	            .build(); 
+		
+	    List<BookingInclusion> inclusions = new ArrayList<>();
+	    inclusions.add(createBookingInclusionA(booking, packageInclusionRepository));
+	    
+	    booking.setBookingInclusions(inclusions);
+	    
+	    return booking;
+	}
+	
+	public static BookingRequest createBookingRequestB(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository
+	) {
+		TourPackage tourPackageA = createTourPackageB(packageInclusionRepository, tourPackageRepository);
+
+	    BookingRequest request = BookingRequest.builder()
+	    		.accountId(id)
+	            .tourPackageId(tourPackageA.getPackageId())
+	            .visitDate(LocalDate.now().plusDays(5))
+	            .visitTime(LocalTime.of(9, 30))
+	            .groupSize(4)
+	            .build(); 
+	    
+	    List<BookingInclusionRequest> bookingInclusionRequests = new ArrayList<>();
+	    bookingInclusionRequests.add(createBookingInclusionRequestB(packageInclusionRepository));
+	    bookingInclusionRequests.add(createBookingInclusionRequestC(packageInclusionRepository));
+	    
+	    request.setBookingInclusionRequests(bookingInclusionRequests);
+	    
+	    return request;
+	}
+	
+
 //	public static Feedback createFeedbackA(AccountService accountService, 
 //			TourPackageService tourPackageService,
 //			PackageInclusionService packageInclusionService,

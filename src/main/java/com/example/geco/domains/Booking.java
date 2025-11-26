@@ -15,10 +15,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,12 +28,35 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name="booking")
 public class Booking {
 	public enum BookingStatus {
-	    PENDING, ACCEPTED, REJECTED, CANCELLED, COMPLETED
+	    PENDING, APPROVED, CANCELLED, REJECTED, COMPLETED;
+		
+		public boolean canTransitionTo(BookingStatus newStatus) {
+	        return switch (this) {
+	            case PENDING -> newStatus == APPROVED || newStatus == CANCELLED || newStatus == REJECTED;
+	            case APPROVED -> newStatus == COMPLETED || newStatus == CANCELLED;
+	            case COMPLETED -> false; // cannot move backwards
+	            case CANCELLED, REJECTED -> false; // cannot move backwards
+	        };
+	    }
 	}
 	
+	public enum PaymentStatus {
+	    UNPAID, PENDING_VERIFICATION, VERIFIED, REJECTED, REFUNDED;
+
+	    public boolean canTransitionTo(PaymentStatus newStatus) {
+	        return switch (this) {
+	            case UNPAID -> newStatus == PENDING_VERIFICATION || newStatus == REJECTED;
+	            case PENDING_VERIFICATION -> newStatus == VERIFIED || newStatus == REJECTED;
+	            case VERIFIED -> newStatus == REFUNDED; // can refund but not go back
+	            case REJECTED, REFUNDED -> false;
+	        };
+	    }              
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private Integer bookingId;
@@ -47,7 +72,8 @@ public class Booking {
 	// Extra services availed.
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
-    private List<BookingInclusion> inclusions = new ArrayList<>();
+	@Builder.Default
+    private List<BookingInclusion> bookingInclusions = new ArrayList<>();
 	
 //	@ManyToOne
 //	@JoinColumn(name = "discountId", referencedColumnName = "discountId")
@@ -59,7 +85,16 @@ public class Booking {
 	private Integer groupSize;
 	
 	@Enumerated(EnumType.STRING)
-	private BookingStatus status;
+	private BookingStatus bookingStatus;
+	
+	@Enumerated(EnumType.STRING)
+	private PaymentStatus paymentStatus;
 	
 	private Integer totalPrice;
+	
+	@Builder.Default
+	boolean isActive = true;
+	
+	@Lob
+	private byte[] proofOfPayment;
 }
