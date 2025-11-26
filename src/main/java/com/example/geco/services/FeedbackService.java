@@ -5,23 +5,28 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.geco.domains.Account;
+import com.example.geco.domains.AuditLog.LogAction;
+import com.example.geco.domains.Booking;
 import com.example.geco.domains.Feedback;
 import com.example.geco.domains.Feedback.FeedbackStatus;
 import com.example.geco.domains.FeedbackCategory;
-import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.dto.FeedbackRequest;
 import com.example.geco.dto.FeedbackResponse;
+import com.example.geco.dto.FeedbackUpdateRequest;
+import com.example.geco.dto.UserFeedbackUpdateRequest;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
 import com.example.geco.repositories.FeedbackCategoryRepository;
 import com.example.geco.repositories.FeedbackRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class FeedbackService {
+public class FeedbackService extends BaseService{
 	@Autowired
 	private FeedbackCategoryRepository feedbackCategoryRepository;
 	
@@ -35,178 +40,264 @@ public class FeedbackService {
 	private BookingRepository bookingRepository;
 	
 	public FeedbackResponse toResponse(Feedback feedback) {
-		return new FeedbackResponse(
-				feedback.getFeedbackId(),
-				feedback.getAccount(),
-				feedback.getBooking(),
-				feedback.getCategory().getLabel(),
-				feedback.getStars(),
-				feedback.getComment(),
-				feedback.getSuggestion(),
-				feedback.getStatus()
-		);
+		return FeedbackResponse.builder()
+				.feedbackId(feedback.getFeedbackId())
+				.account(feedback.getAccount())
+				.booking(feedback.getBooking())
+				.category(feedback.getCategory().getLabel())
+				.stars(feedback.getStars())
+				.comment(feedback.getComment())
+				.suggestion(feedback.getSuggestion())
+				.feedbackStatus(feedback.getFeedbackStatus())
+				.build();
 	}
 	
-	public FeedbackResponse addFeedback(Feedback feedback) {
-		if (feedback.getAccount() == null || feedback.getAccount().getAccountId() == null) {
-	        throw new IllegalArgumentException("Account is missing or invalid.");
-	    }
+	public Feedback createFeedbackCopy(Feedback feedback) {
+		return Feedback.builder()
+				.feedbackId(feedback.getFeedbackId())
+				.account(feedback.getAccount())
+				.booking(feedback.getBooking())
+				.category(feedback.getCategory())
+				.stars(feedback.getStars())
+				.comment(feedback.getComment())
+				.suggestion(feedback.getSuggestion())
+				.feedbackStatus(feedback.getFeedbackStatus())
+				.isActive(feedback.isActive())
+				.build();
+	}
+	
+	public FeedbackResponse addFeedback(FeedbackRequest request) {
+		Integer accountId = getLoggedAccountId();
+		Integer bookingId = request.getBookingId();
+		Integer feedbackCategoryId = request.getCategoryId();
+		Double stars = request.getStars();
+		String comment = request.getComment().trim();
+		String suggestion = request.getSuggestion() != null ? request.getSuggestion().trim() : null;
 		
-	    accountRepository.findById(
-	    		feedback.getAccount().getAccountId()
-	    ).orElseThrow(
-	    		() -> new EntityNotFoundException("Account not found.")
-		);
+	    Account account = accountRepository.findById(accountId)
+	    	.orElseThrow(
+	    		() -> new EntityNotFoundException("Account with ID '" + accountId + "' not found."));
 
-	    if (feedback.getBooking() == null || feedback.getBooking().getBookingId() == null) {
-	        throw new IllegalArgumentException("Booking is missing or invalid.");
-	    }
-
-	    bookingRepository.findById(
-	    		feedback.getBooking().getBookingId()
-	    ).orElseThrow(
-	    		() -> new EntityNotFoundException("Booking not found.")
-	    );
-	    
-	    if (feedback.getCategory() == null || feedback.getCategory().getFeedbackCategoryId() == null) {
-	        throw new IllegalArgumentException("Category is missing or invalid.");
-	    }
-	    
-	    if (feedback.getStars() == null || feedback.getStars() < 0 || feedback.getStars() > 5) {
-	        throw new IllegalArgumentException("Stars must be between 0 and 5.");
-	    }
-		
-		if (feedback.getComment() == null || feedback.getComment().trim().length() < 10) {
-		    throw new IllegalArgumentException("Feedback comment must be at least 10 characters long.");
-		}
-		
-		if (feedback.getSuggestion() == null || feedback.getSuggestion().trim().length() < 10) {
-		    throw new IllegalArgumentException("Suggestion comment must be at least 10 characters long.");
-		}
+	    Booking booking = bookingRepository.findById(bookingId)
+	    	.orElseThrow(
+	    		() -> new EntityNotFoundException("Booking with ID '" + bookingId + "' not found."));
 		
 		// Check if the account's feedback for this booking already exist.
 		if (feedbackRepository.existsByBooking_BookingIdAndAccount_AccountId(
-		        feedback.getBooking().getBookingId(),
-		        feedback.getAccount().getAccountId()
-		)) {
+		        bookingId,
+		        accountId)) {
 		    throw new IllegalArgumentException("Feedback for this booking by this account already exists.");
 		}
 		
 		FeedbackCategory existingCategory = feedbackCategoryRepository.findById(
-		        feedback.getCategory().getFeedbackCategoryId())
-				.orElseThrow(() -> new EntityNotFoundException("Category not found."));
+				feedbackCategoryId)
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Feedback category with ID '" + feedbackCategoryId + "' not found."));
 		
-		feedback.setCategory(existingCategory);
-		feedback.setStatus(FeedbackStatus.NEW);
+		Feedback savedFeedback = Feedback.builder()
+				.account(account)
+				.booking(booking)
+				.category(existingCategory)
+				.stars(stars)
+				.comment(comment)
+				.suggestion(suggestion)
+				.feedbackStatus(FeedbackStatus.NEW)
+				.build();
+
+	    logIfStaffOrAdmin("Feedback", (long) savedFeedback.getFeedbackId(), LogAction.CREATE, null, savedFeedback);
 	    
-	    return toResponse(feedbackRepository.save(feedback));
+	    return toResponse(feedbackRepository.save(savedFeedback));
 	}
-	
+
+	@Transactional(readOnly = true)
 	public FeedbackResponse getFeedback(int id) {
 		Feedback feedback = feedbackRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID \"" + id + "\" not found."));
+	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID '" + id + "' not found."));
 	    
 	    return toResponse(feedback);
 	}
 	
-	public List<FeedbackResponse> getFeedbackByCategoryAndDateRange(
-	        Integer categoryId,
-	        LocalDate startDate,
-	        LocalDate endDate) {
-	    if (startDate == null) {
-            startDate = LocalDate.of(bookingRepository.getEarliestYear(), 1, 1);
-        }
-        
-        if (endDate == null) {
-            endDate = LocalDate.now();
-        }
-        
-        if (endDate.isBefore(startDate)) {
+	private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+	    if (endDate.isBefore(startDate)) {
 	        throw new IllegalArgumentException("End date cannot be earlier than start date.");
 	    }
-
-	    List<Feedback> feedbacks;
-
-	    if (categoryId == null) {
-	        feedbacks = feedbackRepository
-	                .findByBooking_VisitDateBetweenOrderByStatus(startDate, endDate);
-	    } else {
-	        feedbacks = feedbackRepository
-	                .findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByStatus(
-	                        categoryId, startDate, endDate);
-	    }
-
-	    return feedbacks.stream()
-	            .map(this::toResponse)
-	            .toList();
 	}
 	
-	public FeedbackResponse updateFeedback(Feedback feedback) {
-		if (feedback.getAccount() == null && 
-				feedback.getBooking() == null && 
-				feedback.getCategory() == null && 
-				feedback.getStars() == null && 
-				feedback.getComment() == null &&
-				feedback.getSuggestion() == null &&
-				feedback.getStatus() == null) {
+	private LocalDate defaultStartDate(LocalDate startDate) {
+	    return startDate != null ? startDate : LocalDate.of(bookingRepository.getEarliestYear(), 1, 1);
+	}
+	
+	private LocalDate defaultEndDate(LocalDate endDate) {
+	    return endDate != null ? endDate : LocalDate.now();
+	}
+	
+	private List<FeedbackResponse> mapToResponse(List<Feedback> feedbacks) {
+	    return feedbacks.stream().map(this::toResponse).toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<FeedbackResponse> getFeedbacks(
+	        Integer categoryId,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        Boolean isActive // null = all, true = active, false = inactive
+	) {
+	    startDate = defaultStartDate(startDate);
+	    endDate = defaultEndDate(endDate);
+	    validateDateRange(startDate, endDate);
+	
+	    List<Feedback> feedbacks;
+	
+	    if (categoryId == null) {
+	        if (isActive == null) {
+	            feedbacks = feedbackRepository
+	            		.findByBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            				startDate, endDate);
+	        
+	        } else {
+	            feedbacks = feedbackRepository
+	            		.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            				isActive, startDate, endDate);
+	        }
+	        
+	    } else {
+	        if (isActive == null) {
+	            feedbacks = feedbackRepository
+	            		.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            				categoryId, startDate, endDate);
+	        
+	        } else {
+	            feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	                    categoryId, isActive, startDate, endDate);
+	        }
+	    }
+	
+	    return mapToResponse(feedbacks);
+	}
+
+	public FeedbackResponse updateFeedback(int id, UserFeedbackUpdateRequest request) {
+		Double stars = request.getStars();
+	    String comment = request.getComment() != null ? request.getComment().trim() : null;
+	    String suggestion = request.getSuggestion() != null ? request.getSuggestion().trim() : null;
+	    
+		if (stars == null 
+				&& comment == null 
+				&& suggestion == null) {
 			throw new IllegalArgumentException("No fields provided to update feedback.");
 		}
 		
-		Feedback existingFeedback = feedbackRepository.findById(feedback.getFeedbackId())
-				.orElseThrow(() -> new EntityNotFoundException("Feedback with ID \"" + feedback.getFeedbackId() + "\" not found."));
+		Feedback existingFeedback = feedbackRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Feedback with ID '" + id + "' not found."));
 		
-		if (feedback.getCategory() != null) {
-			FeedbackCategory existingCategory = feedbackCategoryRepository.findById(
-			        feedback.getCategory().getFeedbackCategoryId())
-					.orElseThrow(() -> new EntityNotFoundException("Category not found."));
-			existingFeedback.setCategory(existingCategory);
-		}
+		Feedback prevFeedback = createFeedbackCopy(existingFeedback);
 		
-		if (feedback.getStars() != null) {
-			// Round getStars to one decimal.
-			Double stars = Math.round(feedback.getStars() * 10.0) / 10.0;
-			
-			if (stars >= 0 && stars <= 5.0) {
-				existingFeedback.setStars(stars); 
-			} 
+		if (stars != null) {
+			stars = Math.round(stars * 10.0) / 10.0;
+			existingFeedback.setStars(stars); 
 	    } 
 		
-		if (feedback.getComment() != null) {
-			String comment = feedback.getComment().strip();
-			
-			if (comment.length() >= 10) {
-			    existingFeedback.setComment(comment);  
-			}
+		if (comment != null) {
+		    existingFeedback.setComment(comment);  
 	    } 
 		
-		if (feedback.getSuggestion() != null) {
-			String suggestion = feedback.getSuggestion().strip();
-			
+		if (suggestion != null) {
 			if (suggestion.length() >= 10) {
 			    existingFeedback.setSuggestion(suggestion);  
+			} else {
+				throw new IllegalArgumentException("Suggestion must be at least 10 characters");
 			}
 	    } 
 		
-		if (feedback.getStatus() != null) {
-			existingFeedback.setStatus(feedback.getStatus());
-	    } 
+		logIfStaffOrAdmin("Feedback", (long) id, LogAction.UPDATE, prevFeedback, existingFeedback);
 	    
 	    return toResponse(feedbackRepository.save(existingFeedback));
 	}
 	
-	public void deleteFeedback(int id) {
-		Feedback feedback = feedbackRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID \"" + id + "\" not found."));
+	// Can update the feedbackStatus to viewed.
+	public FeedbackResponse updateFeedbackByStaff(int id, FeedbackUpdateRequest request) {
+		Double stars = request.getStars();
+	    String comment = request.getComment() != null ? request.getComment().trim() : null;
+	    String suggestion = request.getSuggestion() != null ? request.getSuggestion().trim() : null;
+		FeedbackStatus feedbackStatus = request.getFeedbackStatus();
 	    
-		feedbackRepository.delete(feedback);
+		if (stars == null 
+				&& comment == null 
+				&& suggestion == null 
+				&& feedbackStatus == null) {
+			throw new IllegalArgumentException("No fields provided to update feedback.");
+		}
+		
+		Feedback existingFeedback = feedbackRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Feedback with ID '" + id + "' not found."));
+		
+		Feedback prevFeedback = createFeedbackCopy(existingFeedback);
+		
+		if (stars != null) {
+			stars = Math.round(stars * 10.0) / 10.0;
+			existingFeedback.setStars(stars); 
+	    } 
+		
+		if (comment != null) {
+		    existingFeedback.setComment(comment);  
+	    } 
+		
+		if (suggestion != null) {
+			if (suggestion.length() >= 10) {
+			    existingFeedback.setSuggestion(suggestion);  
+			} else {
+				throw new IllegalArgumentException("Suggestion must be at least 10 characters");
+			}
+	    } 
+		
+		if (feedbackStatus != null && !feedbackStatus.equals(existingFeedback.getFeedbackStatus())) {
+		    existingFeedback.setFeedbackStatus(feedbackStatus);  
+		}
+		
+		logIfStaffOrAdmin("Feedback", (long) id, LogAction.UPDATE, prevFeedback, existingFeedback);
+	    
+	    return toResponse(feedbackRepository.save(existingFeedback));
 	}
 	
+	public void softDeleteFeedback(int id) {
+		Feedback feedback = feedbackRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID '" + id + "' not found."));
+	    
+		if (!feedback.isActive()) {
+	        throw new IllegalStateException("Account is already disabled.");
+	    }
+	    
+	    Feedback prevFeedback = createFeedbackCopy(feedback);
+
+	    feedback.setActive(false);
+	    feedbackRepository.save(feedback);
+	    
+	    logIfStaffOrAdmin("Feedback", (long) id, LogAction.DISABLE, prevFeedback, feedback);
+	}
+	
+	public void restoreFeedback(int id) {
+		Feedback feedback = feedbackRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("Feedback with ID '" + id + "' not found."));
+	    
+		if (feedback.isActive()) {
+	        throw new IllegalStateException("Account is already active.");
+	    }
+	    
+	    Feedback prevFeedback = createFeedbackCopy(feedback);
+
+	    feedback.setActive(true);
+	    feedbackRepository.save(feedback);
+	    
+	    logIfStaffOrAdmin("Feedback", (long) id, LogAction.RESTORE, prevFeedback, feedback);
+	}
+
+	@Transactional(readOnly = true)
 	public double getAverageRating() {
 		return feedbackRepository.getAverageStars();
 	}
 
-	public int getNumberOfNewFeedbacks(FeedbackStatus status) {
-		Integer count = feedbackRepository.countByStatus(status);
+	@Transactional(readOnly = true)
+	public int getNumberOfNewFeedbacks(FeedbackStatus FeedbackStatus) {
+		Integer count = feedbackRepository.countByFeedbackStatus(FeedbackStatus);
 	    return count != null ? count : 0;
 	}
 }

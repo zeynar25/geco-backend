@@ -17,14 +17,20 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 	
 	boolean existsByBooking_BookingIdAndAccount_AccountId(Integer bookingId, Integer accountId);
 
-	Integer countByStatus(FeedbackStatus status);
+	Integer countByFeedbackStatus(FeedbackStatus feedbackStatus);
 
-	List<Feedback> findByBooking_VisitDateBetweenOrderByStatus(LocalDate startDate, LocalDate endDate);
+	List<Feedback> findByBooking_VisitDateBetweenOrderByFeedbackStatus(LocalDate startDate, LocalDate endDate);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdOrderByStatus(Integer categoryId);
+	List<Feedback> findByCategory_FeedbackCategoryIdOrderByFeedbackStatus(Integer categoryId);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByStatus(
+	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatus(
 			Integer categoryId,
 			LocalDate startDate, 
 			LocalDate endDate);
+
+	List<Feedback> findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(boolean isActive, LocalDate startDate,
+			LocalDate endDate);
+
+	List<Feedback> findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+			Integer categoryId, boolean isActive, LocalDate startDate, LocalDate endDate);
 }
