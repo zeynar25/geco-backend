@@ -136,6 +136,30 @@ public class FeedbackService extends BaseService{
 	}
 
 	@Transactional(readOnly = true)
+	public List<FeedbackResponse> getMyFeedbacks(Integer categoryId, LocalDate startDate, LocalDate endDate) {
+		startDate = defaultStartDate(startDate);
+	    endDate = defaultEndDate(endDate);
+	    validateDateRange(startDate, endDate);
+	    
+	    int accountId = getLoggedAccountId();
+	
+	    List<Feedback> feedbacks;
+	
+	    if (categoryId == null) {
+            feedbacks = feedbackRepository
+            		.findByAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+            				accountId, startDate, endDate);
+	        
+	    } else {
+            feedbacks = feedbackRepository
+            		.findByCategory_FeedbackCategoryIdAndAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+            				categoryId, accountId, startDate, endDate);
+	    }
+	
+	    return mapToResponse(feedbacks);
+	}
+
+	@Transactional(readOnly = true)
 	public List<FeedbackResponse> getFeedbacks(
 	        Integer categoryId,
 	        LocalDate startDate,
@@ -151,23 +175,23 @@ public class FeedbackService extends BaseService{
 	    if (categoryId == null) {
 	        if (isActive == null) {
 	            feedbacks = feedbackRepository
-	            		.findByBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            		.findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 	            				startDate, endDate);
 	        
 	        } else {
 	            feedbacks = feedbackRepository
-	            		.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            		.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 	            				isActive, startDate, endDate);
 	        }
 	        
 	    } else {
 	        if (isActive == null) {
 	            feedbacks = feedbackRepository
-	            		.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            		.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 	            				categoryId, startDate, endDate);
 	        
 	        } else {
-	            feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	            feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 	                    categoryId, isActive, startDate, endDate);
 	        }
 	    }

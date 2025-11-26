@@ -48,13 +48,6 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.GET, "/package-inclusion/active").permitAll()
 					.requestMatchers("/package-inclusion/staff/**").hasAnyRole("STAFF", "ADMIN")
 					.requestMatchers("/package-inclusion/admin/**").hasRole("ADMIN")
-					
-					.requestMatchers(HttpMethod.GET, "/feedback-category/active").hasRole("USER")
-		            .requestMatchers(HttpMethod.GET, "/feedback-category/**").hasAnyRole("STAFF", "ADMIN") 
-		            .requestMatchers(HttpMethod.POST, "/feedback-category/**").hasAnyRole("STAFF", "ADMIN")
-		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/{id}").hasAnyRole("STAFF", "ADMIN")
-		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/admin/restore/**").hasRole("ADMIN")
-		            .requestMatchers(HttpMethod.DELETE, "/feedback-category/admin/**").hasRole("ADMIN")
 		            
 		            .requestMatchers(HttpMethod.GET, "/package/active").permitAll()
 		            .requestMatchers(HttpMethod.GET, "/package/*/inclusions/available").permitAll()
@@ -72,6 +65,22 @@ public class SecurityConfig {
 		            	.hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.PATCH, "/booking/restore/{id}").hasRole("ADMIN")
 		            .requestMatchers(HttpMethod.DELETE, "/booking/{id}").hasRole("ADMIN")
+					
+					.requestMatchers(HttpMethod.GET, "/feedback-category/active").hasRole("USER")
+		            .requestMatchers(HttpMethod.GET, "/feedback-category/**").hasAnyRole("STAFF", "ADMIN") 
+		            .requestMatchers(HttpMethod.POST, "/feedback-category/**").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/{id}").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers(HttpMethod.PATCH, "/feedback-category/admin/restore/**").hasRole("ADMIN")
+		            .requestMatchers(HttpMethod.DELETE, "/feedback-category/admin/**").hasRole("ADMIN")
+		            
+		            .requestMatchers(HttpMethod.POST, "/feedback").authenticated()
+		            .requestMatchers(HttpMethod.GET, "/feedback/me").authenticated() 
+		            .requestMatchers(HttpMethod.GET, "/feedback/**").hasAnyRole("STAFF", "ADMIN") 
+		            .requestMatchers(HttpMethod.PATCH, "/feedback/{id}").authenticated()
+		            .requestMatchers(HttpMethod.PATCH, "/feedback/staff/{id}").hasAnyRole("STAFF", "ADMIN") 
+		            .requestMatchers(HttpMethod.DELETE, "/feedback/{id}").hasRole("ADMIN") 
+		            .requestMatchers(HttpMethod.PATCH, "/feedback/restore/{id}").hasRole("ADMIN") 		            
+		            
 		            
 					.requestMatchers("/account/my-account").authenticated()
 					

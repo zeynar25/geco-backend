@@ -54,6 +54,33 @@ public class FeedbackController extends AbstractController {
         FeedbackResponse feedback = feedbackService.getFeedback(id);
         return new ResponseEntity<>(feedback, HttpStatus.OK);
     }
+    
+    @Operation(
+    	    summary = "Get all my feedbacks",
+    	    description = """
+    	        Retrieve all feedbacks submitted by the logged-in user.
+    	        You may optionally filter by:
+    	        - Category ID (to get feedbacks of a specific category)
+    	        - Start and end dates (to get feedbacks within a date range)
+    	        
+    	        If no filters are provided, all feedbacks for the user are returned.
+    	    """
+	)
+	@GetMapping("/me")
+	public ResponseEntity<List<FeedbackResponse>> getMyFeedbacks(
+	    @Parameter(description = "Filter feedbacks by category ID") 
+	    @RequestParam(required = false) Integer categoryId,
+	    
+	    @Parameter(description = "Start date for filtering feedbacks (defaults to earliest date if not provided)") 
+	    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+	    
+	    @Parameter(description = "End date for filtering feedbacks (defaults to today if not provided)") 
+	    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+	) {
+	    List<FeedbackResponse> feedbacks = feedbackService.getMyFeedbacks(categoryId, startDate, endDate);
+	    return ResponseEntity.ok(feedbacks);
+	}
+
 
     @Operation(
         summary = "Get All Feedbacks",

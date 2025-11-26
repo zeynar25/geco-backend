@@ -19,18 +19,24 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 
 	Integer countByFeedbackStatus(FeedbackStatus feedbackStatus);
 
-	List<Feedback> findByBooking_VisitDateBetweenOrderByFeedbackStatus(LocalDate startDate, LocalDate endDate);
+	List<Feedback> findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(LocalDate startDate, LocalDate endDate);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdOrderByFeedbackStatus(Integer categoryId);
+	List<Feedback> findByCategory_FeedbackCategoryIdOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(Integer categoryId);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 			Integer categoryId,
 			LocalDate startDate, 
 			LocalDate endDate);
 
-	List<Feedback> findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(boolean isActive, LocalDate startDate,
+	List<Feedback> findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(boolean isActive, LocalDate startDate,
 			LocalDate endDate);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatus(
+	List<Feedback> findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 			Integer categoryId, boolean isActive, LocalDate startDate, LocalDate endDate);
+
+	List<Feedback> findByAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+			int accountId, LocalDate startDate, LocalDate endDate);
+
+	List<Feedback> findByCategory_FeedbackCategoryIdAndAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+			Integer categoryId, int accountId, LocalDate startDate, LocalDate endDate);
 }
