@@ -461,7 +461,7 @@ public class DataUtil {
 		Account account = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
 		
-		TourPackage tourPackage = createTourPackageA(packageInclusionRepository, tourPackageRepository);
+		TourPackage tourPackage = createTourPackageB(packageInclusionRepository, tourPackageRepository);
 
 	    Booking booking = Booking.builder()
 	    		.account(account)

@@ -374,7 +374,7 @@ public class BookingService extends BaseService{
 					index++;
 				}
 				totalMonth++;
-				totalAvgVisitors += (double) visitors / 30.0;
+				totalAvgVisitors += visitors;
 			}
 		}
 

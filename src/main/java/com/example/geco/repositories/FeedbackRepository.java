@@ -12,7 +12,7 @@ import com.example.geco.domains.Feedback.FeedbackStatus;
 
 @Repository
 public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
-	@Query("SELECT AVG(f.stars) FROM Feedback f")
+	@Query("SELECT COALESCE(AVG(f.stars), 0) FROM Feedback f")
 	double getAverageStars();
 	
 	boolean existsByBooking_BookingIdAndAccount_AccountId(Integer bookingId, Integer accountId);

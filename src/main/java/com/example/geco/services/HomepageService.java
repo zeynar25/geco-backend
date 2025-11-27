@@ -19,7 +19,7 @@ public class HomepageService {
 	public HomeStats getHomeStats() {
 		return new HomeStats(
 				attractionService.getAttractionsNumber(),
-				bookingService.getAverageVisitor("Month"),
+				bookingService.getAverageVisitor("month"),
 				feedbackService.getAverageRating());
 	}
 
