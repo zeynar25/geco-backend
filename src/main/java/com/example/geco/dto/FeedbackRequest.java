@@ -21,7 +21,7 @@ public class FeedbackRequest {
     @NotNull(message = "Feedback Category ID is required")
     private Integer categoryId;
 
-    @Min(value = 1, message = "Stars must be at least 1")
+    @Min(value = 0, message = "Stars must be at least 0")
     @Max(value = 5, message = "Stars cannot exceed 5")
     private Double stars;
 

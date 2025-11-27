@@ -11,8 +11,10 @@ import com.example.geco.domains.Account;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.AttractionRepository;
+import com.example.geco.repositories.BookingRepository;
 import com.example.geco.repositories.FaqRepository;
 import com.example.geco.repositories.FeedbackCategoryRepository;
+import com.example.geco.repositories.FeedbackRepository;
 import com.example.geco.repositories.PackageInclusionRepository;
 import com.example.geco.repositories.TourPackageRepository;
 import com.example.geco.repositories.UserDetailRepository;
@@ -83,6 +85,12 @@ public abstract class AbstractControllerTest {
 
 	@Autowired
 	protected PackageInclusionRepository packageInclusionRepository;
+	
+	@Autowired
+	protected BookingRepository bookingRepository;
+	
+	@Autowired
+	protected FeedbackRepository feedbackRepository;
 	
 	protected void mockAdminAuthentication(int id, String email) {
 	    Account mockAccount = new Account();

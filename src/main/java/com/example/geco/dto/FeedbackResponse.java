@@ -24,4 +24,6 @@ public class FeedbackResponse {
 	private String comment;
 	private String suggestion;
 	private FeedbackStatus feedbackStatus;
+	
+	private boolean isActive;
 }

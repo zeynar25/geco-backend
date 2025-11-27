@@ -49,6 +49,7 @@ public class FeedbackService extends BaseService{
 				.comment(feedback.getComment())
 				.suggestion(feedback.getSuggestion())
 				.feedbackStatus(feedback.getFeedbackStatus())
+				.isActive(feedback.isActive())
 				.build();
 	}
 	
@@ -94,7 +95,7 @@ public class FeedbackService extends BaseService{
 					.orElseThrow(() -> new EntityNotFoundException(
 							"Feedback category with ID '" + feedbackCategoryId + "' not found."));
 		
-		Feedback savedFeedback = Feedback.builder()
+		Feedback feedback = Feedback.builder()
 				.account(account)
 				.booking(booking)
 				.category(existingCategory)
@@ -103,6 +104,8 @@ public class FeedbackService extends BaseService{
 				.suggestion(suggestion)
 				.feedbackStatus(FeedbackStatus.NEW)
 				.build();
+		
+		Feedback savedFeedback = feedbackRepository.save(feedback);
 
 	    logIfStaffOrAdmin("Feedback", (long) savedFeedback.getFeedbackId(), LogAction.CREATE, null, savedFeedback);
 	    

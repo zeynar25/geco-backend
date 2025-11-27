@@ -14,18 +14,30 @@ import com.example.geco.domains.Attraction;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.Faq;
+import com.example.geco.domains.Feedback;
+import com.example.geco.domains.Feedback.FeedbackStatus;
+import com.example.geco.domains.FeedbackCategory;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
 import com.example.geco.domains.UserDetail;
 import com.example.geco.dto.BookingInclusionRequest;
 import com.example.geco.dto.BookingRequest;
 import com.example.geco.dto.FeedbackCategoryRequest;
+import com.example.geco.dto.FeedbackRequest;
 import com.example.geco.dto.SignupRequest;
 import com.example.geco.dto.TourPackageRequest;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
+import com.example.geco.repositories.FeedbackCategoryRepository;
 import com.example.geco.repositories.PackageInclusionRepository;
 import com.example.geco.repositories.TourPackageRepository;
+import com.example.geco.services.AccountService;
+import com.example.geco.services.BookingService;
+import com.example.geco.services.FeedbackCategoryService;
+import com.example.geco.services.PackageInclusionService;
+import com.example.geco.services.TourPackageService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 public class DataUtil {
 	
@@ -44,6 +56,21 @@ public class DataUtil {
 		
 		Account account = Account.builder()
 				.role(Role.USER)
+				.password(hashedPassword)
+				.detail(
+						UserDetail.builder()
+						.email("krysscoleen.creus@cvsu.edu.ph")
+						.build())
+				.build();
+		
+		return accountRepository.save(account);
+	}
+	
+	public static Account createStaffAccountA(AccountRepository accountRepository) {
+		String hashedPassword = passwordEncoder.encode("Hello12345678");
+		
+		Account account = Account.builder()
+				.role(Role.STAFF)
 				.password(hashedPassword)
 				.detail(
 						UserDetail.builder()
@@ -172,8 +199,20 @@ public class DataUtil {
 				.build();
 	}
 	
+	public static FeedbackCategory createFeedbackCategoryA() {
+		return FeedbackCategory.builder()
+				.label("Attractions")
+				.build();
+	}
+	
 	public static FeedbackCategoryRequest createFeedbackCategoryRequestB() {
 		return FeedbackCategoryRequest.builder()
+				.label("Facilities")
+				.build();
+	}
+	
+	public static FeedbackCategory createFeedbackCategoryB() {
+		return FeedbackCategory.builder()
 				.label("Facilities")
 				.build();
 	}
@@ -296,6 +335,20 @@ public class DataUtil {
 				.build();
 	}
 	
+	public static BookingInclusion createBookingInclusionB( 
+			Booking booking,
+			PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusion = DataUtil.createPackageInclusionE();
+		PackageInclusion savedInclusion = packageInclusionRepository.save(inclusion);
+		
+		return BookingInclusion.builder()
+				.booking(booking)
+				.inclusion(savedInclusion)
+				.quantity(2)
+				.priceAtBooking(savedInclusion.getInclusionPricePerPerson())
+				.build();
+	}
+	
 	public static BookingInclusionRequest createBookingInclusionRequestC( 
 			PackageInclusionRepository packageInclusionRepository) {
 		PackageInclusion inclusion = DataUtil.createPackageInclusionF();
@@ -304,6 +357,20 @@ public class DataUtil {
 		return BookingInclusionRequest.builder()
 				.inclusionId(savedInclusion.getInclusionId())
 				.quantity(3)
+				.build();
+	}
+	
+	public static BookingInclusion createBookingInclusionC( 
+			Booking booking,
+			PackageInclusionRepository packageInclusionRepository) {
+		PackageInclusion inclusion = DataUtil.createPackageInclusionF();
+		PackageInclusion savedInclusion = packageInclusionRepository.save(inclusion);
+		
+		return BookingInclusion.builder()
+				.booking(booking)
+				.inclusion(savedInclusion)
+				.quantity(3)
+				.priceAtBooking(savedInclusion.getInclusionPricePerPerson())
 				.build();
 	}
 	
@@ -337,7 +404,9 @@ public class DataUtil {
 			PackageInclusionRepository packageInclusionRepository,
 			TourPackageRepository tourPackageRepository
 	) {
-		Account accountA = createUserAccountA(accountRepository);
+		Account accountA = accountRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
+		
 		TourPackage tourPackageA = createTourPackageA(packageInclusionRepository, tourPackageRepository);
 
 	    Booking booking = Booking.builder()
@@ -364,11 +433,11 @@ public class DataUtil {
 			PackageInclusionRepository packageInclusionRepository,
 			TourPackageRepository tourPackageRepository
 	) {
-		TourPackage tourPackageA = createTourPackageB(packageInclusionRepository, tourPackageRepository);
+		TourPackage tourPackage = createTourPackageB(packageInclusionRepository, tourPackageRepository);
 
 	    BookingRequest request = BookingRequest.builder()
 	    		.accountId(id)
-	            .tourPackageId(tourPackageA.getPackageId())
+	            .tourPackageId(tourPackage.getPackageId())
 	            .visitDate(LocalDate.now().plusDays(5))
 	            .visitTime(LocalTime.of(9, 30))
 	            .groupSize(4)
@@ -383,54 +452,132 @@ public class DataUtil {
 	    return request;
 	}
 	
+	public static Booking createBookingB(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository
+	) {
+		Account account = accountRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
+		
+		TourPackage tourPackage = createTourPackageA(packageInclusionRepository, tourPackageRepository);
 
-//	public static Feedback createFeedbackA(AccountService accountService, 
-//			TourPackageService tourPackageService,
-//			PackageInclusionService packageInclusionService,
-//			BookingService bookingService,
-//			FeedbackCategoryService feedbackCategoryService) {
-//		
-//		Booking booking = createBookingA(accountService, 
-//				tourPackageService, 
-//				packageInclusionService);
-//		Booking savedBooking = bookingService.addBooking(booking);
-//		
-//		FeedbackCategory category = createFeedbackCategoryA();
-//		FeedbackCategory savedCategory = feedbackCategoryService.addCategory(category);
-//		
-//		Feedback feedback = new Feedback();
-//		feedback.setAccount(booking.getAccount());      
-//		feedback.setBooking(savedBooking); 
-//		feedback.setCategory(savedCategory); 
-//		feedback.setStars(4.5);           
-//		feedback.setComment("Great experience!"); 
-//		feedback.setSuggestion("Keep the place clean.");
-//		 
-//		return feedback;
-//	}
-//	
-//	public static Feedback createFeedbackB(AccountService accountService, 
-//			TourPackageService tourPackageService,
-//			PackageInclusionService packageInclusionService,
-//			BookingService bookingService,
-//			FeedbackCategoryService feedbackCategoryService) {
-//		
-//		Booking booking = createBookingB(accountService, 
-//				tourPackageService, 
-//				packageInclusionService);
-//		Booking savedBooking = bookingService.addBooking(booking);
-//		
-//		FeedbackCategory category = createFeedbackCategoryB();
-//		FeedbackCategory savedCategory = feedbackCategoryService.addCategory(category);
-//		
-//		Feedback feedback = new Feedback();
-//		feedback.setAccount(booking.getAccount());      
-//		feedback.setBooking(savedBooking); 
-//		feedback.setCategory(savedCategory); 
-//		feedback.setStars(4.5);           
-//		feedback.setComment("Great experience!"); 
-//		feedback.setSuggestion("Keep the place clean.");
-//		 
-//		return feedback;
-//	}
+	    Booking booking = Booking.builder()
+	    		.account(account)
+	            .tourPackage(tourPackage)
+	            .visitDate(LocalDate.now().plusDays(5))
+	            .visitTime(LocalTime.of(9, 30))
+	            .groupSize(2)
+	            .bookingStatus(Booking.BookingStatus.PENDING)
+	            .paymentStatus(Booking.PaymentStatus.UNPAID)
+	            .build(); 
+		
+	    List<BookingInclusion> bookingInclusionRequests = new ArrayList<>();
+	    bookingInclusionRequests.add(createBookingInclusionB(booking, packageInclusionRepository));
+	    bookingInclusionRequests.add(createBookingInclusionC(booking, packageInclusionRepository));
+	    
+	    booking.setBookingInclusions(bookingInclusionRequests);
+	    
+	    return booking;
+	}
+	
+	public static FeedbackRequest createFeedbackRequestA(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository,
+			BookingRepository bookingRepository,
+			FeedbackCategoryRepository feedbackCategoryRepository) {
+		
+		Booking booking = createBookingA(id, accountRepository, packageInclusionRepository, tourPackageRepository);
+		Booking savedBooking = bookingRepository.save(booking);
+		
+		FeedbackCategory category = createFeedbackCategoryA();
+		FeedbackCategory savedCategory = feedbackCategoryRepository.save(category);
+		
+		return FeedbackRequest.builder()
+				.bookingId(savedBooking.getBookingId())
+				.categoryId(savedCategory.getFeedbackCategoryId())
+				.stars(4.2)
+				.comment("This is a nice attraction.")
+				.build();
+	}
+	
+	public static FeedbackRequest createFeedbackRequestB(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository,
+			BookingRepository bookingRepository,
+			FeedbackCategoryRepository feedbackCategoryRepository) {
+		
+		Booking booking = createBookingB(id, accountRepository, packageInclusionRepository, tourPackageRepository);
+		Booking savedBooking = bookingRepository.save(booking);
+		
+		FeedbackCategory category = createFeedbackCategoryB();
+		FeedbackCategory savedCategory = feedbackCategoryRepository.save(category);
+		
+		return FeedbackRequest.builder()
+				.bookingId(savedBooking.getBookingId())
+				.categoryId(savedCategory.getFeedbackCategoryId())
+				.stars(5.0)
+				.comment("This is a nice facility.")
+				.build();
+	}
+	
+
+	public static Feedback createFeedbackA(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository,
+			BookingRepository bookingRepository,
+			FeedbackCategoryRepository feedbackCategoryRepository) {
+
+		Account account = accountRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
+		
+		Booking booking = createBookingA(id, accountRepository, packageInclusionRepository, tourPackageRepository);
+		Booking savedBooking = bookingRepository.save(booking);
+		
+		FeedbackCategory category = createFeedbackCategoryA();
+		FeedbackCategory savedCategory = feedbackCategoryRepository.save(category);
+		
+		return Feedback.builder()
+				.account(account)
+				.booking(savedBooking)
+				.category(savedCategory)
+				.stars(4.2)
+				.comment("This is a nice attraction.")
+				.feedbackStatus(FeedbackStatus.NEW)
+				.build();
+	}
+	
+	public static Feedback createFeedbackB(
+			Integer id,
+			AccountRepository accountRepository,
+			PackageInclusionRepository packageInclusionRepository,
+			TourPackageRepository tourPackageRepository,
+			BookingRepository bookingRepository,
+			FeedbackCategoryRepository feedbackCategoryRepository) {
+		
+		Account account = accountRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
+		
+		Booking booking = createBookingA(id, accountRepository, packageInclusionRepository, tourPackageRepository);
+		Booking savedBooking = bookingRepository.save(booking);
+		
+		FeedbackCategory category = createFeedbackCategoryB();
+		FeedbackCategory savedCategory = feedbackCategoryRepository.save(category);
+		
+		return Feedback.builder()
+				.account(account)
+				.booking(savedBooking)
+				.category(savedCategory)
+				.stars(5.0)
+				.comment("This is a nice facility.")
+				.feedbackStatus(FeedbackStatus.NEW)
+				.build();
+	}
 }
