@@ -53,7 +53,7 @@ public class AdminDashboardService {
 	}
 
 	public List<Booking> getBookingByAdmin(AdminBookingRequest request) {
-		String email = request.getName() != null ? request.getName().strip() : null;
+		String email = request.getEmail() != null ? request.getEmail().strip() : null;
 		BookingStatus status = request.getStatus();
 		
 		if ((email == null || email.isBlank()) && status == null) {
@@ -65,7 +65,7 @@ public class AdminDashboardService {
 		}
 		
 		Account account = accountRepository.findByDetailEmail(email.strip())
-			.orElseThrow(() -> new UsernameNotFoundException("Account with Email \"" + email + "\" not found."));
+			.orElseThrow(() -> new UsernameNotFoundException("Account with Email '" + email + "' not found."));
 		
 		if (status == null) {
 			return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(account.getAccountId());

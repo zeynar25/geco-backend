@@ -407,22 +407,28 @@ public class DataUtil {
 		Account accountA = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
 		
-		TourPackage tourPackageA = createTourPackageA(packageInclusionRepository, tourPackageRepository);
+		TourPackage tourPackage = createTourPackageA(packageInclusionRepository, tourPackageRepository);
 
 	    Booking booking = Booking.builder()
 	    		.account(accountA)
-	            .tourPackage(tourPackageA)
+	            .tourPackage(tourPackage)
 	            .visitDate(LocalDate.now().plusDays(3))
 	            .visitTime(LocalTime.of(9, 30))
 	            .groupSize(2)
 	            .bookingStatus(Booking.BookingStatus.PENDING)
 	            .paymentStatus(Booking.PaymentStatus.UNPAID)
+	            .totalPrice(tourPackage.getBasePrice() * 2)
 	            .build(); 
-		
-	    List<BookingInclusion> inclusions = new ArrayList<>();
-	    inclusions.add(createBookingInclusionA(booking, packageInclusionRepository));
 	    
-	    booking.setBookingInclusions(inclusions);
+		
+	    List<BookingInclusion> bookingInclusionRequests = new ArrayList<>();
+	    bookingInclusionRequests.add(createBookingInclusionA(booking, packageInclusionRepository));
+	    
+	    booking.setBookingInclusions(bookingInclusionRequests);
+	    
+	    for (BookingInclusion inclusion : bookingInclusionRequests) {
+		    booking.setTotalPrice(booking.getTotalPrice() + inclusion.getPriceAtBooking());
+	    }
 	    
 	    return booking;
 	}
@@ -471,6 +477,7 @@ public class DataUtil {
 	            .groupSize(2)
 	            .bookingStatus(Booking.BookingStatus.PENDING)
 	            .paymentStatus(Booking.PaymentStatus.UNPAID)
+	            .totalPrice(tourPackage.getBasePrice() * 2)
 	            .build(); 
 		
 	    List<BookingInclusion> bookingInclusionRequests = new ArrayList<>();
@@ -478,6 +485,10 @@ public class DataUtil {
 	    bookingInclusionRequests.add(createBookingInclusionC(booking, packageInclusionRepository));
 	    
 	    booking.setBookingInclusions(bookingInclusionRequests);
+
+	    for (BookingInclusion inclusion : bookingInclusionRequests) {
+		    booking.setTotalPrice(booking.getTotalPrice() + inclusion.getPriceAtBooking());
+	    }
 	    
 	    return booking;
 	}
@@ -565,7 +576,7 @@ public class DataUtil {
 		Account account = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account not found"));
 		
-		Booking booking = createBookingA(id, accountRepository, packageInclusionRepository, tourPackageRepository);
+		Booking booking = createBookingB(id, accountRepository, packageInclusionRepository, tourPackageRepository);
 		Booking savedBooking = bookingRepository.save(booking);
 		
 		FeedbackCategory category = createFeedbackCategoryB();
