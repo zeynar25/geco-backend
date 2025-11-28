@@ -480,4 +480,155 @@ public class MainControllerTests extends AbstractControllerTest{
 				MockMvcResultMatchers.jsonPath("$[1].bookingId").value(savedBookingB.getBookingId())
 		);
 	}
+	
+	@Test
+	public void canGetDashboardStatsDashboardFinances() throws Exception {
+		Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
+	    mockAdminAuthentication(savedAccount.getAccountId(), savedAccount.getDetail().getEmail());
+	    
+	    Booking bookingA = DataUtil.createBookingA(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+
+	    Booking bookingB = DataUtil.createBookingB(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+	    bookingA.setVisitDate(LocalDate.now());
+	    bookingB.setVisitDate(LocalDate.now());
+	    bookingB.setVisitTime(bookingA.getVisitTime().plusMinutes(1));
+	    
+	    bookingA.setBookingStatus(BookingStatus.COMPLETED);
+	    bookingB.setBookingStatus(BookingStatus.COMPLETED);
+	    
+	   	Booking savedBookingA = bookingRepository.save(bookingA);
+	   	Booking savedBookingB = bookingRepository.save(bookingB);
+	   	
+	    mockMvc.perform(
+				MockMvcRequestBuilders.get("/dashboard/finances")
+					.contentType(MediaType.APPLICATION_JSON)
+					.param("year", String.valueOf(LocalDate.now().getYear()))
+					.param("month", String.valueOf(LocalDate.now().getMonthValue()))
+		).andExpect(
+				MockMvcResultMatchers.status().isOk()
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.totalRevenue")
+				.value(savedBookingA.getTotalPrice() + savedBookingB.getTotalPrice())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.averageRevenuePerBooking")
+				.value((savedBookingA.getTotalPrice() + savedBookingB.getTotalPrice()) / 2)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.totalBookings")
+				.value(2)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.completedBookings")
+				.value(2)
+		);
+	}
+	
+	@Test
+	public void canGetDashboardStatsDashboardFinancesYearly() throws Exception {
+		Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
+	    mockAdminAuthentication(savedAccount.getAccountId(), savedAccount.getDetail().getEmail());
+	    
+	    Booking bookingA = DataUtil.createBookingA(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+
+	    Booking bookingB = DataUtil.createBookingB(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+	    bookingA.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitTime(bookingA.getVisitTime().plusMinutes(1));
+	    
+	    bookingA.setBookingStatus(BookingStatus.COMPLETED);
+	    bookingB.setBookingStatus(BookingStatus.COMPLETED);
+	    
+	   	bookingRepository.save(bookingA);
+	   	bookingRepository.save(bookingB);
+	   	
+	    mockMvc.perform(
+				MockMvcRequestBuilders.get("/dashboard/finances/revenue/yearly")
+					.contentType(MediaType.APPLICATION_JSON)
+					.param("startYear", "2025")
+					.param("endYear", "2025")
+		).andExpect(
+				MockMvcResultMatchers.status().isOk()
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$[0].period")
+				.value("2025")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$[0].value")
+				.value(bookingA.getTotalPrice() + bookingB.getTotalPrice())
+		);
+	}
+	
+	@Test
+	public void canGetDashboardStatsDashboardFinancesMonthly() throws Exception {
+		Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
+	    mockAdminAuthentication(savedAccount.getAccountId(), savedAccount.getDetail().getEmail());
+	    
+	    Booking bookingA = DataUtil.createBookingA(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+
+	    Booking bookingB = DataUtil.createBookingB(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+	    bookingA.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitTime(bookingA.getVisitTime().plusMinutes(1));
+	    
+	    bookingA.setBookingStatus(BookingStatus.COMPLETED);
+	    bookingB.setBookingStatus(BookingStatus.COMPLETED);
+	    
+	   	bookingRepository.save(bookingA);
+	   	bookingRepository.save(bookingB);
+	   	
+	    mockMvc.perform(
+				MockMvcRequestBuilders.get("/dashboard/finances/revenue/monthly")
+					.contentType(MediaType.APPLICATION_JSON)
+					.param("year", "2025")
+		).andExpect(
+				MockMvcResultMatchers.status().isOk()
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$[0].period")
+				.value("Jan")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$[0].value")
+				.value(0)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$[10].period")
+				.value("Nov")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$[10].value")
+				.value(bookingA.getTotalPrice() + bookingB.getTotalPrice())
+		);
+	}
+	
+	@Test
+	public void canGetDashboardStatsDashboardTrendsMonthly() throws Exception {
+	}
+	
+	@Test
+	public void canGetDashboardStatsDashboardTrendsYearly() throws Exception {
+	}
 }
