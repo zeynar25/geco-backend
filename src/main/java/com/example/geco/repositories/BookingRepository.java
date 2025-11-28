@@ -84,15 +84,15 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	);
 
 	@Query("""
-		SELECT SUM(b.groupSize) 
+		SELECT COALESCE(SUM(b.groupSize), 0)
 		FROM Booking b 
 		WHERE b.bookingStatus = :status 
 		AND b.visitDate BETWEEN :start AND :end
 			""")
 	Long totalGroupSizeByStatusAndVisitDateBetween(
 			@Param("status") BookingStatus status,
-		    @Param("startYear") LocalDate startYear,
-		    @Param("endYear") LocalDate endYear);
+		    @Param("start") LocalDate startYear,
+		    @Param("end") LocalDate endYear);
 
 	Long countByTourPackageAndVisitDateBetween(TourPackage tourPackage, LocalDate startDate, LocalDate endDate);
 

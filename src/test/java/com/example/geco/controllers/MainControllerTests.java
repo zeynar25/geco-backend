@@ -626,9 +626,136 @@ public class MainControllerTests extends AbstractControllerTest{
 	
 	@Test
 	public void canGetDashboardStatsDashboardTrendsMonthly() throws Exception {
+		Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
+	    mockAdminAuthentication(savedAccount.getAccountId(), savedAccount.getDetail().getEmail());
+	    
+	    Booking bookingA = DataUtil.createBookingA(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+
+	    Booking bookingB = DataUtil.createBookingB(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+	    bookingA.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitTime(bookingA.getVisitTime().plusMinutes(1));
+	    
+	    bookingA.setBookingStatus(BookingStatus.COMPLETED);
+	    bookingB.setBookingStatus(BookingStatus.COMPLETED);
+	    
+	   	bookingRepository.save(bookingA);
+	   	bookingRepository.save(bookingB);
+	   	
+	    mockMvc.perform(
+				MockMvcRequestBuilders.get("/dashboard/trends/yearly")
+					.contentType(MediaType.APPLICATION_JSON)
+					.param("startYear", "2025")
+					.param("endYear", "2025")
+		).andExpect(
+				MockMvcResultMatchers.status().isOk()
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.bookings.[0].period")
+				.value("2025")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.bookings.[0].value")
+				.value(2)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.visitors.[0].period")
+				.value("2025")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.visitors.[0].value")
+				.value(bookingA.getGroupSize() + bookingB.getGroupSize())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[0].period")
+				.value(bookingA.getTourPackage().getName())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[0].value")
+				.value(1)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[1].period")
+				.value(bookingB.getTourPackage().getName())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[1].value")
+				.value(1)
+		);
 	}
 	
 	@Test
 	public void canGetDashboardStatsDashboardTrendsYearly() throws Exception {
+		Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
+	    mockAdminAuthentication(savedAccount.getAccountId(), savedAccount.getDetail().getEmail());
+	    
+	    Booking bookingA = DataUtil.createBookingA(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+
+	    Booking bookingB = DataUtil.createBookingB(
+	    		savedAccount.getAccountId(), 
+	    		accountRepository, 
+	    		packageInclusionRepository, 
+	    		tourPackageRepository);
+	    
+	    bookingA.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitDate(LocalDate.of(2025, 11, 1));
+	    bookingB.setVisitTime(bookingA.getVisitTime().plusMinutes(1));
+	    
+	    bookingA.setBookingStatus(BookingStatus.COMPLETED);
+	    bookingB.setBookingStatus(BookingStatus.COMPLETED);
+	    
+	   	bookingRepository.save(bookingA);
+	   	bookingRepository.save(bookingB);
+	   	
+	    mockMvc.perform(
+				MockMvcRequestBuilders.get("/dashboard/trends/monthly")
+					.contentType(MediaType.APPLICATION_JSON)
+					.param("year", "2025")
+		).andExpect(
+				MockMvcResultMatchers.status().isOk()
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.bookings.[0].period")
+				.value("Jan")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.bookings.[0].value")
+				.value(0)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.bookings.[10].period")
+				.value("Nov")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.bookings.[10].value")
+				.value(2)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.visitors.[0].period")
+				.value("Jan")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.visitors.[0].value")
+				.value(0)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.visitors.[10].period")
+				.value("Nov")
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.visitors.[10].value")
+				.value(bookingA.getGroupSize() + bookingB.getGroupSize())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[0].period")
+				.value(bookingA.getTourPackage().getName())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[0].value")
+				.value(1)
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[1].period")
+				.value(bookingB.getTourPackage().getName())
+		).andExpect(
+				MockMvcResultMatchers.jsonPath("$.packages.[1].value")
+				.value(1)
+		);
 	}
 }
