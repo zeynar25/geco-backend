@@ -13,7 +13,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PasswordUpdateRequest {
-	Integer accountId;
+	@NotBlank(message = "Password is required")
+	@Size(min = 8, message = "Password must be at least 8 characters")
+	@Pattern(
+		    regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$",
+		    message = "Password must contain upper, lower case letters and a number"
+		)
+	String oldPassword;
 	
 	@NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")

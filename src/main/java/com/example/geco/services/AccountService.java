@@ -228,6 +228,11 @@ public class AccountService extends BaseService implements UserDetailsService{
 				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 
 		checkAuth(id);
+
+	    String oldPasswordEntered = request.getOldPassword().trim();
+		if(!passwordEncoder.matches(oldPasswordEntered, existingAccount.getPassword())) {
+            throw new IllegalArgumentException("Wrong old password input.");
+		}
 	    
 	    String newPassword = request.getPassword().trim();
 	    String newConfirmPassword = request.getConfirmPassword().trim();
