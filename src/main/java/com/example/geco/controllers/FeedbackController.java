@@ -1,8 +1,10 @@
 package com.example.geco.controllers;
 
 import java.time.LocalDate;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,18 +58,19 @@ public class FeedbackController extends AbstractController {
     }
     
     @Operation(
-    	    summary = "Get all my feedbacks",
-    	    description = """
-    	        Retrieve all feedbacks submitted by the logged-in user.
-    	        You may optionally filter by:
-    	        - Category ID (to get feedbacks of a specific category)
-    	        - Start and end dates (to get feedbacks within a date range)
-    	        
-    	        If no filters are provided, all feedbacks for the user are returned.
-    	    """
+	    summary = "Get all my feedbacks",
+	    description = """
+	        Retrieve all feedbacks submitted by the logged-in user.
+	        You may optionally filter by:
+	        - Category ID (to get feedbacks of a specific category)
+	        - Start and end dates (to get feedbacks within a date range)
+	        - Pagination parameters (page, size)
+	        
+	        If no filters are provided, all feedbacks for the user are returned.
+	    """
 	)
 	@GetMapping("/me")
-	public ResponseEntity<List<FeedbackResponse>> getMyFeedbacks(
+	public ResponseEntity<Page<FeedbackResponse>> getMyFeedbacks(
 	    @Parameter(description = "Filter feedbacks by category ID") 
 	    @RequestParam(required = false) Integer categoryId,
 	    
@@ -75,54 +78,85 @@ public class FeedbackController extends AbstractController {
 	    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 	    
 	    @Parameter(description = "End date for filtering feedbacks (defaults to today if not provided)") 
-	    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+	    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+	    @Parameter(description = "Page number (0-based index)", example = "0")
+	    @RequestParam(defaultValue = "0") int page,
+
+	    @Parameter(description = "Number of records per page", example = "10")
+	    @RequestParam(defaultValue = "10") int size
 	) {
-	    List<FeedbackResponse> feedbacks = feedbackService.getMyFeedbacks(categoryId, startDate, endDate);
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getMyFeedbacks(categoryId, startDate, endDate, pageable);
 	    return ResponseEntity.ok(feedbacks);
 	}
 
 
-    @Operation(
-        summary = "Get All Feedbacks",
-        description = "Retrieve all feedbacks. Can filter by category ID and/or date range."
-    )
-    @GetMapping
-    public ResponseEntity<List<FeedbackResponse>> getFeedbacks(
-        @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
-        @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        List<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, null);
-        return ResponseEntity.ok(feedbacks);
-    }
+	@Operation(
+	    summary = "Get all feedbacks",
+	    description = "Retrieve all feedbacks. Can filter by category ID, date range, and includes pagination."
+	)
+	@GetMapping
+	public ResponseEntity<Page<FeedbackResponse>> getFeedbacks(
+	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
+	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
-    @Operation(
-        summary = "Get Active Feedbacks",
-        description = "Retrieve all feedbacks that are currently active. Can filter by category ID and/or date range."
-    )
-    @GetMapping("/active")
-    public ResponseEntity<List<FeedbackResponse>> getActiveFeedbacks(
-        @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
-        @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        List<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, true);
-        return ResponseEntity.ok(feedbacks);
-    }
+	    @Parameter(description = "Page number (0-based index)", example = "0")
+	    @RequestParam(defaultValue = "0") int page,
 
-    @Operation(
-        summary = "Get Inactive Feedbacks",
-        description = "Retrieve all feedbacks that are currently inactive. Can filter by category ID and/or date range."
-    )
-    @GetMapping("/inactive")
-    public ResponseEntity<List<FeedbackResponse>> getInactiveFeedbacks(
-        @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
-        @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        List<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, false);
-        return ResponseEntity.ok(feedbacks);
-    }
+	    @Parameter(description = "Number of records per page", example = "10")
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, null, pageable);
+	    return ResponseEntity.ok(feedbacks);
+	}
+
+
+	@Operation(
+	    summary = "Get active feedbacks",
+	    description = "Retrieve all active feedbacks. Can filter by category ID, date range, and includes pagination."
+	)
+	@GetMapping("/active")
+	public ResponseEntity<Page<FeedbackResponse>> getActiveFeedbacks(
+	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
+	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+	    @Parameter(description = "Page number (0-based index)", example = "0")
+	    @RequestParam(defaultValue = "0") int page,
+
+	    @Parameter(description = "Number of records per page", example = "10")
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, true, pageable);
+	    return ResponseEntity.ok(feedbacks);
+	}
+
+
+	@Operation(
+	    summary = "Get inactive feedbacks",
+	    description = "Retrieve all inactive feedbacks. Can filter by category ID, date range, and includes pagination."
+	)
+	@GetMapping("/inactive")
+	public ResponseEntity<Page<FeedbackResponse>> getInactiveFeedbacks(
+	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
+	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+	    @Parameter(description = "Page number (0-based index)", example = "0")
+	    @RequestParam(defaultValue = "0") int page,
+
+	    @Parameter(description = "Number of records per page", example = "10")
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, false, pageable);
+	    return ResponseEntity.ok(feedbacks);
+	}
+
 
     @Operation(
         summary = "Update Feedback (User)",

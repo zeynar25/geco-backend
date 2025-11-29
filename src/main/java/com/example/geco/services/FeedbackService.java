@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,68 +136,70 @@ public class FeedbackService extends BaseService{
 	    return endDate != null ? endDate : LocalDate.now();
 	}
 	
-	private List<FeedbackResponse> mapToResponse(List<Feedback> feedbacks) {
-	    return feedbacks.stream().map(this::toResponse).toList();
+	private Page<FeedbackResponse> mapToResponse(Page<Feedback> feedbacks) {
+	    return feedbacks.map(this::toResponse);
 	}
 
 	@Transactional(readOnly = true)
-	public List<FeedbackResponse> getMyFeedbacks(Integer categoryId, LocalDate startDate, LocalDate endDate) {
+	public Page<FeedbackResponse> getMyFeedbacks(
+			Integer categoryId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 		startDate = defaultStartDate(startDate);
 	    endDate = defaultEndDate(endDate);
 	    validateDateRange(startDate, endDate);
 	    
 	    int accountId = getLoggedAccountId();
 	
-	    List<Feedback> feedbacks;
+	    Page<Feedback> feedbacks;
 	
 	    if (categoryId == null) {
             feedbacks = feedbackRepository
             		.findByAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-            				accountId, startDate, endDate);
+            				accountId, startDate, endDate, pageable);
 	        
 	    } else {
             feedbacks = feedbackRepository
             		.findByCategory_FeedbackCategoryIdAndAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-            				categoryId, accountId, startDate, endDate);
+            				categoryId, accountId, startDate, endDate, pageable);
 	    }
 	
 	    return mapToResponse(feedbacks);
 	}
 
 	@Transactional(readOnly = true)
-	public List<FeedbackResponse> getFeedbacks(
+	public Page<FeedbackResponse> getFeedbacks(
 	        Integer categoryId,
 	        LocalDate startDate,
 	        LocalDate endDate,
-	        Boolean isActive // null = all, true = active, false = inactive
+	        Boolean isActive, // null = all, true = active, false = inactive
+	        Pageable pageable
 	) {
 	    startDate = defaultStartDate(startDate);
 	    endDate = defaultEndDate(endDate);
 	    validateDateRange(startDate, endDate);
 	
-	    List<Feedback> feedbacks;
+	    Page<Feedback> feedbacks;
 	
 	    if (categoryId == null) {
 	        if (isActive == null) {
 	            feedbacks = feedbackRepository
 	            		.findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	            				startDate, endDate);
+	            				startDate, endDate, pageable);
 	        
 	        } else {
 	            feedbacks = feedbackRepository
 	            		.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	            				isActive, startDate, endDate);
+	            				isActive, startDate, endDate, pageable);
 	        }
 	        
 	    } else {
 	        if (isActive == null) {
 	            feedbacks = feedbackRepository
 	            		.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	            				categoryId, startDate, endDate);
+	            				categoryId, startDate, endDate, pageable);
 	        
 	        } else {
 	            feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                    categoryId, isActive, startDate, endDate);
+	                    categoryId, isActive, startDate, endDate, pageable);
 	        }
 	    }
 	

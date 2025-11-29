@@ -3,6 +3,8 @@ package com.example.geco.repositories;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,24 +21,26 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 
 	Integer countByFeedbackStatus(FeedbackStatus feedbackStatus);
 
-	List<Feedback> findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(LocalDate startDate, LocalDate endDate);
+	Page<Feedback> findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+			LocalDate startDate, LocalDate endDate, Pageable pageable);
 
 	List<Feedback> findByCategory_FeedbackCategoryIdOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(Integer categoryId);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 			Integer categoryId,
 			LocalDate startDate, 
-			LocalDate endDate);
+			LocalDate endDate, 
+			Pageable pageable);
 
-	List<Feedback> findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(boolean isActive, LocalDate startDate,
-			LocalDate endDate);
+	Page<Feedback> findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(boolean isActive, LocalDate startDate,
+			LocalDate endDate, Pageable pageable);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-			Integer categoryId, boolean isActive, LocalDate startDate, LocalDate endDate);
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+			Integer categoryId, boolean isActive, LocalDate startDate, LocalDate endDate, Pageable pageable);
 
-	List<Feedback> findByAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-			int accountId, LocalDate startDate, LocalDate endDate);
+	Page<Feedback> findByAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+			int accountId, LocalDate startDate, LocalDate endDate, Pageable pageable);
 
-	List<Feedback> findByCategory_FeedbackCategoryIdAndAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-			Integer categoryId, int accountId, LocalDate startDate, LocalDate endDate);
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+			Integer categoryId, int accountId, LocalDate startDate, LocalDate endDate, Pageable pageable);
 }
