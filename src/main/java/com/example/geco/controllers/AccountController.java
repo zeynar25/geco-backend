@@ -20,7 +20,6 @@ import com.example.geco.dto.RoleUpdateRequest;
 import com.example.geco.dto.SignupRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -54,8 +53,8 @@ public class AccountController extends AbstractController{
 			summary = "Update account details", 
 			description = "Updates the personal details of an account by ID")
 	public ResponseEntity<AccountResponse> updateDetails(
-			@PathVariable @Valid int id, 
-			@RequestBody DetailRequest request) {
+			@PathVariable int id, 
+			@RequestBody @Valid DetailRequest request) {
 		AccountResponse savedAccount  = accountService.updateDetails(id, request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
 	}
@@ -150,7 +149,7 @@ public class AccountController extends AbstractController{
 			description = "Updates the role of an account using admin privileges")
     public ResponseEntity<AccountResponse> updateAccountRoleByAdmin(
             @PathVariable int id, 
-            @RequestBody RoleUpdateRequest request) {
+            @RequestBody @Valid RoleUpdateRequest request) {
         AccountResponse savedAccount  = accountService.updateRoleByAdmin(id, request);
         return new ResponseEntity<>(savedAccount, HttpStatus.OK);
     }
