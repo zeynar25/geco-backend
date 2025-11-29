@@ -268,6 +268,64 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 		
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = "STAFF")
+		public void cannotAddFeedbackCategoryAlreadyExistCaseInsensitive() throws Exception {
+		    mockStaffAuthentication(2, "staff@email.com");
+
+		    FeedbackCategoryRequest categoryA = DataUtil.createFeedbackCategoryRequestA();
+		    feedbackCategoryService.addCategory(categoryA); // saved "Cleaning"
+
+		    categoryA.setLabel(categoryA.getLabel().toUpperCase()); // "CLEANING"
+		    String categoryJson = objectMapper.writeValueAsString(categoryA);
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.post("/feedback-category")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		                    .content(categoryJson)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isBadRequest()
+		    ).andExpect(
+		            MockMvcResultMatchers.jsonPath("$.error")
+		                    .value("Label '" + categoryA.getLabel() + "' already exist.")
+		    );
+		}
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
+		public void cannotAddFeedbackCategoryMissingLabelField() throws Exception {
+		    mockStaffAuthentication(2, "staff@email.com");
+
+		    String invalidJson = "{}"; // label missing entirely
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.post("/feedback-category")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		                    .content(invalidJson)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isBadRequest()
+		    ).andExpect(
+		            MockMvcResultMatchers.jsonPath("$.error").exists()
+		    );
+		}
+		
+		@Test
+		@WithMockUser(username = "user@email.com", roles = "USER")
+		public void userCannotAddCategory() throws Exception {
+		    mockUserAuthentication(3, "user@email.com");
+
+		    FeedbackCategoryRequest catA = DataUtil.createFeedbackCategoryRequestA();
+		    String json = objectMapper.writeValueAsString(catA);
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.post("/feedback-category")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		                    .content(json)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isForbidden()
+		    );
+		}
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
 		public void cannotGetFeedbackCategory() throws Exception {
 			mockStaffAuthentication(2, "staff@email.com");
 			
@@ -344,5 +402,60 @@ public class FeedbackCategoryControllerTests extends AbstractControllerTest {
 	        		MockMvcResultMatchers.jsonPath("$.error").value("Feedback category with ID '" + id + "' not found.")
 			);
 		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void cannotSoftDeleteCategoryAlreadyInactive() throws Exception {
+		    mockAdminAuthentication(2, "admin@email.com");
+
+		    FeedbackCategoryRequest catA = DataUtil.createFeedbackCategoryRequestA();
+		    FeedbackCategory savedA = feedbackCategoryService.addCategory(catA);
+
+		    savedA.setActive(false);
+		    feedbackCategoryRepository.save(savedA);
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.delete("/feedback-category/admin/" + savedA.getFeedbackCategoryId())
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isBadRequest()
+		    ).andExpect(
+		            MockMvcResultMatchers.jsonPath("$.error")
+		                    .value("Category " + savedA.getLabel() + " is already disabled.")
+		    );
+		}
+		
+		@Test
+		@WithMockUser(username = "admin@email.com", roles = "ADMIN")
+		public void cannotRestoreCategoryAlreadyActive() throws Exception {
+		    mockAdminAuthentication(2, "admin@email.com");
+
+		    FeedbackCategoryRequest catA = DataUtil.createFeedbackCategoryRequestA();
+		    FeedbackCategory savedA = feedbackCategoryService.addCategory(catA); // already active
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.patch("/feedback-category/admin/restore/" + savedA.getFeedbackCategoryId())
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isBadRequest()
+		    ).andExpect(
+		            MockMvcResultMatchers.jsonPath("$.error")
+		                    .value("Category " + savedA.getLabel() + " is already active.")
+		    );
+		}
+		
+		@Test
+		@WithMockUser(username = "staff@email.com", roles = "STAFF")
+		public void staffCannotDeleteCategory() throws Exception {
+		    mockStaffAuthentication(2, "staff@email.com");
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.delete("/feedback-category/admin/1")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isForbidden()
+		    );
+		}
+
 	}
 }
