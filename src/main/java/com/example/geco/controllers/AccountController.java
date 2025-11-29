@@ -2,6 +2,9 @@ package com.example.geco.controllers;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.dto.AccountResponse;
@@ -64,8 +68,12 @@ public class AccountController extends AbstractController{
 	@Operation(
 			summary = "Get all admin accounts", 
 			description = "Retrieves a list of all admin accounts")
-	public ResponseEntity<List<AccountResponse>> getAllAdmins() {
-		List<AccountResponse> accounts  = accountService.getAllAdmin();
+	public ResponseEntity<Page<AccountResponse>> getAllAdmins(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllAdmins(pageable);
+	    
 		return ResponseEntity.ok(accounts);
 	}
 	
@@ -73,8 +81,12 @@ public class AccountController extends AbstractController{
 	@Operation(
 			summary = "Get all staff accounts", 
 			description = "Retrieves a list of all staff accounts")
-	public ResponseEntity<List<AccountResponse>> getAllStaffs() {
-		List<AccountResponse> accounts  = accountService.getAllStaffs();
+	public ResponseEntity<Page<AccountResponse>> getAllStaffs(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllStaffs(pageable);
+	    
 		return ResponseEntity.ok(accounts);
 	}
 	
@@ -82,8 +94,12 @@ public class AccountController extends AbstractController{
 	@Operation(
 			summary = "Get all active staff accounts", 
 			description = "Retrieves a list of all active staff accounts")
-	public ResponseEntity<List<AccountResponse>> getAllActiveStaffs() {
-		List<AccountResponse> accounts  = accountService.getAllActiveStaffs();
+	public ResponseEntity<Page<AccountResponse>> getAllActiveStaffs(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllActiveStaffs(pageable);
+	    
 		return ResponseEntity.ok(accounts);
 	}
 	
@@ -91,8 +107,12 @@ public class AccountController extends AbstractController{
 	@Operation(
 			summary = "Get all inactive staff accounts", 
 			description = "Retrieves a list of all inactive staff accounts")
-	public ResponseEntity<List<AccountResponse>> getAllInactiveStaffs() {
-		List<AccountResponse> accounts  = accountService.getAllInactiveStaffs();
+	public ResponseEntity<Page<AccountResponse>> getAllInactiveStaffs(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllInactiveStaffs(pageable);
+	    
 		return ResponseEntity.ok(accounts);
 	}
 	
@@ -100,8 +120,12 @@ public class AccountController extends AbstractController{
     @Operation(
     		summary = "Get all user accounts", 
 			description = "Retrieves a list of all regular user accounts")
-    public ResponseEntity<List<AccountResponse>> getAllUsers() {
-        List<AccountResponse> accounts  = accountService.getAllUsers();
+    public ResponseEntity<Page<AccountResponse>> getAllUsers(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllUsers(pageable);
+	    
         return ResponseEntity.ok(accounts);
     }
 
@@ -109,8 +133,12 @@ public class AccountController extends AbstractController{
     @Operation(
 			summary = "Get all active user accounts", 
 			description = "Retrieves a list of all active user accounts")
-    public ResponseEntity<List<AccountResponse>> getAllActiveUsers() {
-        List<AccountResponse> accounts  = accountService.getAllActiveUsers();
+    public ResponseEntity<Page<AccountResponse>> getAllActiveUsers(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllActiveUsers(pageable);
+	    
         return ResponseEntity.ok(accounts);
     }
 
@@ -118,8 +146,12 @@ public class AccountController extends AbstractController{
     @Operation(
 			summary = "Get all inactive user accounts", 
 			description = "Retrieves a list of all inactive user accounts")
-    public ResponseEntity<List<AccountResponse>> getAllInactiveUsers() {
-        List<AccountResponse> accounts  = accountService.getAllInactiveUsers();
+    public ResponseEntity<Page<AccountResponse>> getAllInactiveUsers(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    Page<AccountResponse> accounts = accountService.getAllInactiveUsers(pageable);
+	    
         return ResponseEntity.ok(accounts);
     }
 

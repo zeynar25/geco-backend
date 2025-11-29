@@ -1,8 +1,9 @@
 package com.example.geco.repositories;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,8 +17,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer>{
 	
 	boolean existsByDetailEmail(String email);
 
-	List<Account> findAllByRoleOrderByDetail_Email(Role role);
+	Page<Account> findAllByRoleOrderByDetail_Email(Role role, Pageable pageable);
 
-	List<Account> findAllByRoleAndIsActiveOrderByDetail_Email(Role staff, boolean isActive);
+	Page<Account> findAllByRoleAndIsActiveOrderByDetail_Email(Role staff, boolean isActive, Pageable pageable);
 
 }

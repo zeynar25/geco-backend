@@ -41,175 +41,227 @@ public class AccountControllerTests extends AbstractControllerTest {
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllUsersByAdmin() throws Exception {
-			mockAdminAuthentication(1, "admin@email.com");
-			
-			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.USER);
-			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+		public void shouldReturnAllUsersByAdmin() throws Exception {
+		    mockAdminAuthentication(1, "admin@email.com");
+		    
+		    SignupRequest requestA = DataUtil.createSignupRequestA();
+		    requestA.setRole(Role.USER);
+		    AccountResponse accountA = accountService.addAccountByAdmin(requestA);
 
-			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.USER);
-			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/user")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].email").value(accountA.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountA.getPasswordStatus().toString())
-			);
-        }
+		    SignupRequest requestB = DataUtil.createSignupRequestB();
+		    requestB.setRole(Role.USER);
+		    AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/account/staff/list/user")
+		                    .param("page", "0")
+		                    .param("size", "10")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isOk())
+		    
+		    // Assert page metadata
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.number").value(0))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.size").value(10))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+
+		    // Assert list inside content[]
+		    .andExpect(
+					MockMvcResultMatchers.jsonPath("$.content[0].email").value(accountB.getEmail()))
+		    .andExpect(
+					MockMvcResultMatchers.jsonPath("$.content[0].passwordStatus").value(accountB.getPasswordStatus().toString()))
+		    .andExpect(
+					MockMvcResultMatchers.jsonPath("$.content[1].email").value(accountA.getEmail()))
+		    .andExpect(
+					MockMvcResultMatchers.jsonPath("$.content[1].passwordStatus").value(accountA.getPasswordStatus().toString()));
+		}
+
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllStaffsByAdmin() throws Exception {
-			mockAdminAuthentication(1, "admin@email.com");
-			
-			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.STAFF);
-			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
-
-			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.STAFF);
-			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/staff")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].email").value(accountA.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountA.getPasswordStatus().toString())
-			);
-        }	
+		public void shouldReturnAllStaffsByAdmin() throws Exception {
+		    mockAdminAuthentication(1, "admin@email.com");
+		    
+		    SignupRequest requestA = DataUtil.createSignupRequestA();
+		    requestA.setRole(Role.STAFF);
+		    AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+		
+		    SignupRequest requestB = DataUtil.createSignupRequestB();
+		    requestB.setRole(Role.STAFF);
+		    AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+		
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/account/staff/list/staff")
+		                    .param("page", "0")
+		                    .param("size", "10")
+		                    .contentType(MediaType.APPLICATION_JSON))
+		    .andExpect(
+		    	MockMvcResultMatchers.status().isOk())
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.number").value(0))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.size").value(10))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+		
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].email")
+		    		.value(accountB.getEmail()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].passwordStatus")
+		    		.value(accountB.getPasswordStatus().toString()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[1].email")
+		    		.value(accountA.getEmail()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[1].passwordStatus")
+		    		.value(accountA.getPasswordStatus().toString()));
+		}
+	
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllAdminsByAdmin() throws Exception {
-			mockAdminAuthentication(1, "admin@email.com");
-			
-			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.ADMIN);
-			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+		public void shouldReturnAllAdminsByAdmin() throws Exception {
+		    mockAdminAuthentication(1, "admin@email.com");
 
-			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.ADMIN);
-			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/admin")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].email").value("admin@example.com")
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].email").value(accountB.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountB.getPasswordStatus().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[2].email").value(accountA.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[2].passwordStatus").value(accountA.getPasswordStatus().toString())
-			);
-        }	
+		    SignupRequest requestA = DataUtil.createSignupRequestA();
+		    requestA.setRole(Role.ADMIN);
+		    AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+		    SignupRequest requestB = DataUtil.createSignupRequestB();
+		    requestB.setRole(Role.ADMIN);
+		    AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/account/staff/list/admin")
+		                    .param("page", "0")
+		                    .param("size", "10")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		    		MockMvcResultMatchers.status().isOk())
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.number").value(0))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.size").value(10))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.totalElements").value(3))
+
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].email").value("admin@example.com"))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[1].email").value(accountB.getEmail()))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[2].email").value(accountA.getEmail()));
+		}
+
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllActiveUsersByAdmin() throws Exception {
-			mockAdminAuthentication(1, "admin@email.com");
-			
-			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.USER);
-			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+		public void shouldReturnAllActiveUsersByAdmin() throws Exception {
+		    mockAdminAuthentication(1, "admin@email.com");
 
-			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.USER);
-			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
-			
-			accountService.softDeleteAccount(accountB.getAccountId());
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/user/active")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].email").value(accountA.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountA.getPasswordStatus().toString())
-			);
-        }
+		    SignupRequest requestA = DataUtil.createSignupRequestA();
+		    requestA.setRole(Role.USER);
+		    AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+
+		    SignupRequest requestB = DataUtil.createSignupRequestB();
+		    requestB.setRole(Role.USER);
+		    AccountResponse accountB = accountService.addAccountByAdmin(requestB);
+
+		    accountService.softDeleteAccount(accountB.getAccountId());
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/account/staff/list/user/active")
+		                    .param("page", "0")
+		                    .param("size", "10")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		    		MockMvcResultMatchers.status().isOk())
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.number").value(0))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.size").value(10))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.totalElements").value(1))
+
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].email").value(accountA.getEmail()))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].passwordStatus").value(accountA.getPasswordStatus().toString()));
+		}
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})
-        public void shouldReturnAllInactiveUsersByAdmin() throws Exception {
-			mockAdminAuthentication(1, "admin@email.com");
-			
-			SignupRequest requestA = DataUtil.createSignupRequestA();
-			requestA.setRole(Role.USER);
-			AccountResponse accountA = accountService.addAccountByAdmin(requestA);
+		public void shouldReturnAllInactiveUsersByAdmin() throws Exception {
+		    mockAdminAuthentication(1, "admin@email.com");
 
-			SignupRequest requestB = DataUtil.createSignupRequestB();
-			requestB.setRole(Role.USER);
-			AccountResponse accountB = accountService.addAccountByAdmin(requestB);
-			
-			accountService.softDeleteAccount(accountB.getAccountId());
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/user/inactive")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
-			);
-        }
+		    SignupRequest requestA = DataUtil.createSignupRequestA();
+		    requestA.setRole(Role.USER);
+		    accountService.addAccountByAdmin(requestA);
+
+		    SignupRequest requestB = DataUtil.createSignupRequestB();
+		    requestB.setRole(Role.USER);
+		    AccountResponse inactiveAccount = accountService.addAccountByAdmin(requestB);
+
+		    accountService.softDeleteAccount(inactiveAccount.getAccountId());
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/account/staff/list/user/inactive")
+		                    .param("page", "0")
+		                    .param("size", "10")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		    		MockMvcResultMatchers.status().isOk())
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.number").value(0))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.size").value(10))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.totalElements").value(1))
+
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].email").value(inactiveAccount.getEmail()))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].passwordStatus").value(inactiveAccount.getPasswordStatus().toString()));
+		}
 		
 		@Test
 		@WithMockUser(username = "staff@email.com", roles = {"STAFF"})
-        public void shouldReturnAllUsersByStaff() throws Exception {
-			mockStaffAuthentication(2, "staff@email.com");
-			
-			SignupRequest requestA = DataUtil.createSignupRequestA();
-			AccountResponse accountA = accountService.addTouristAccount(requestA);
+		public void shouldReturnAllUsersByStaff() throws Exception {
+		    mockStaffAuthentication(2, "staff@email.com");
 
-			SignupRequest requestB = DataUtil.createSignupRequestB();
-			AccountResponse accountB = accountService.addTouristAccount(requestB);
-			
-			mockMvc.perform(
-					MockMvcRequestBuilders.get("/account/staff/list/user")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].email").value(accountB.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].passwordStatus").value(accountB.getPasswordStatus().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].email").value(accountA.getEmail())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].passwordStatus").value(accountA.getPasswordStatus().toString())
-			);
-        }
+		    SignupRequest requestA = DataUtil.createSignupRequestA();
+		    AccountResponse accountA = accountService.addTouristAccount(requestA);
+
+		    SignupRequest requestB = DataUtil.createSignupRequestB();
+		    AccountResponse accountB = accountService.addTouristAccount(requestB);
+
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/account/staff/list/user")
+		                    .param("page", "0")
+		                    .param("size", "10")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		    		MockMvcResultMatchers.status().isOk())
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.number").value(0))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.size").value(10))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].email").value(accountB.getEmail()))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[0].passwordStatus").value(accountB.getPasswordStatus().toString()))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[1].email").value(accountA.getEmail()))
+		     .andExpect(
+		    		 MockMvcResultMatchers.jsonPath("$.content[1].passwordStatus").value(accountA.getPasswordStatus().toString()));
+		}
 		
 		@Test
 		@WithMockUser(username = "admin@email.com", roles = {"ADMIN"})

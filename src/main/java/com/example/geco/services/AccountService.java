@@ -3,12 +3,15 @@ package com.example.geco.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.geco.domains.Account;
 import com.example.geco.domains.Account.Role;
@@ -22,8 +25,7 @@ import com.example.geco.dto.RoleUpdateRequest;
 import com.example.geco.dto.SignupRequest;
 import com.example.geco.repositories.AccountRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional; 
+import jakarta.persistence.EntityNotFoundException; 
 
 @Service
 @Transactional
@@ -159,67 +161,53 @@ public class AccountService extends BaseService implements UserDetailsService{
 
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllAdmin() {
-		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.ADMIN);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllAdmins(Pageable pageable) {
+		return accountRepository.findAllByRoleOrderByDetail_Email(
+				Account.Role.ADMIN, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllStaffs() {
-		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.STAFF);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllStaffs(Pageable pageable) {
+		return accountRepository.findAllByRoleOrderByDetail_Email(
+				Account.Role.STAFF, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllActiveStaffs() {
-		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.STAFF, true);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllActiveStaffs(Pageable pageable) {
+		return accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(
+				Account.Role.STAFF, true, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllInactiveStaffs() {
-		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.STAFF, false);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllInactiveStaffs(Pageable pageable) {
+		return accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(
+				Account.Role.STAFF, false, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllUsers() {
-		List<Account> admins = accountRepository.findAllByRoleOrderByDetail_Email(Account.Role.USER);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllUsers(Pageable pageable) {
+		return accountRepository.findAllByRoleOrderByDetail_Email(
+				Account.Role.USER, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllActiveUsers() {
-		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.USER, true);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllActiveUsers(Pageable pageable) {
+		return accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(
+				Account.Role.USER, true, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 
 	@Transactional(readOnly = true)
-	public List<AccountResponse> getAllInactiveUsers() {
-		List<Account> admins = accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(Account.Role.USER, false);
-		
-		return admins.stream()
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED))
-	            .toList();
+	public Page<AccountResponse> getAllInactiveUsers(Pageable pageable) {
+		return accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(
+				Account.Role.USER, false, pageable)
+				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 	
 	
