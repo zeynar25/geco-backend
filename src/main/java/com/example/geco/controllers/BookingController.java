@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,64 +62,115 @@ public class BookingController extends AbstractController {
     }
 
     @Operation(
-    	    summary = "Get all bookings of the logged-in user",
+    	    summary = "Get all bookings of the logged-in user (paginated)",
     	    description = """
-    	        Retrieves all active bookings belonging to the authenticated user.
-    	        You may optionally filter the results by providing a start date, end date, or both.
-    	        If no dates are provided, all active bookings of the user will be returned.
+    	        Retrieves active bookings belonging to the authenticated user.
+    	        Allows optional filtering by start and end date.
+    	        Pagination is supported using 'page' and 'size'.
     	    """
 	)
-    @GetMapping("/me")
-    public ResponseEntity<List<Booking>> getAllMyBookings(
-        @Parameter(description = "Start date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        List<Booking> bookings = bookingService.getMyBookingByDateRange(startDate, endDate);
-        return new ResponseEntity<>(bookings, HttpStatus.OK);
-    }
+	@GetMapping("/me")
+	public ResponseEntity<Page<Booking>> getAllMyBookings(
+	        @Parameter(description = "Start date filter (optional)")
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+
+	        @Parameter(description = "End date filter (optional)")
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+	        @Parameter(description = "Page number (0-based)") 
+	        @RequestParam(defaultValue = "0") int page,
+
+	        @Parameter(description = "Page size") 
+	        @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<Booking> bookings = bookingService.getMyBookingByDateRange(startDate, endDate, pageable);
+
+	    return new ResponseEntity<>(bookings, HttpStatus.OK);
+	}
     
     @Operation(
-        summary = "Get all Bookings",
-        description = "Retrieve a list of bookings. Can filter by account ID and/or date range."
+            summary = "Get all Bookings",
+            description = "Retrieve a list of bookings. Can filter by account ID and/or date range."
     )
     @GetMapping
-    public ResponseEntity<List<Booking>> getAllBookings(
-        @Parameter(description = "Filter bookings by account ID") @RequestParam(required = false) Integer accountId,
-        @Parameter(description = "Start date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    public ResponseEntity<Page<Booking>> getAllBookings(
+            @Parameter(description = "Filter by account ID")
+            @RequestParam(required = false) Integer accountId,
+
+            @Parameter(description = "Start date filter")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+
+            @Parameter(description = "End date filter")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+            @Parameter(description = "Page number")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "Page size")
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<Booking> bookings = bookingService.getBookingByAccountAndDateRange(accountId, startDate, endDate);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Booking> bookings = bookingService.getBookingByAccountAndDateRange(accountId, startDate, endDate, pageable);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
+
     @Operation(
-        summary = "Get all Active Bookings",
-        description = "Retrieve all bookings that are currently active. Can filter by account ID and/or date range."
+    	    summary = "Get all Active Bookings (paginated)",
+    	    description = "Retrieve active bookings. Supports filters for account ID and date range."
     )
-    @GetMapping("/active")
-    public ResponseEntity<List<Booking>> getAllActiveBookings(
-        @Parameter(description = "Filter bookings by account ID") @RequestParam(required = false) Integer accountId,
-        @Parameter(description = "Start date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        List<Booking> bookings = bookingService.getActiveBookingByAccountAndDateRange(accountId, startDate, endDate);
-        return new ResponseEntity<>(bookings, HttpStatus.OK);
-    }
+	@GetMapping("/active")
+	public ResponseEntity<Page<Booking>> getAllActiveBookings(
+	        @Parameter(description = "Filter by account ID (optional)")
+	        @RequestParam(required = false) Integer accountId,
+
+	        @Parameter(description = "Start date filter (optional)") 
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+
+	        @Parameter(description = "End date filter (optional)") 
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+	        @Parameter(description = "Page number (0-based)")
+	        @RequestParam(defaultValue = "0") int page,
+
+	        @Parameter(description = "Page size")
+	        @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<Booking> bookings = bookingService.getActiveBookingByAccountAndDateRange(accountId, startDate, endDate, pageable);
+	    return new ResponseEntity<>(bookings, HttpStatus.OK);
+	}
 
     
     @Operation(
-        summary = "Get all Inactive Bookings",
-        description = "Retrieve all bookings that are inactive. Can filter by account ID and/or date range."
-    )
-    @GetMapping("/inactive")
-    public ResponseEntity<List<Booking>> getAllInactiveBookings(
-        @Parameter(description = "Filter bookings by account ID") @RequestParam(required = false) Integer accountId,
-        @Parameter(description = "Start date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @Parameter(description = "End date for filtering bookings") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        List<Booking> bookings = bookingService.getInactiveBookingByAccountAndDateRange(accountId, startDate, endDate);
-        return new ResponseEntity<>(bookings, HttpStatus.OK);
-    }
+    	    summary = "Get all Inactive Bookings (paginated)",
+    	    description = "Retrieve inactive bookings. Supports filters for account ID and date range."
+	)
+	@GetMapping("/inactive")
+	public ResponseEntity<Page<Booking>> getAllInactiveBookings(
+	        @Parameter(description = "Filter by account ID (optional)")
+	        @RequestParam(required = false) Integer accountId,
+
+	        @Parameter(description = "Start date filter (optional)") 
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+
+	        @Parameter(description = "End date filter (optional)") 
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+	        @Parameter(description = "Page number (0-based)")
+	        @RequestParam(defaultValue = "0") int page,
+
+	        @Parameter(description = "Page size")
+	        @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<Booking> bookings = bookingService.getInactiveBookingByAccountAndDateRange(accountId, startDate, endDate, pageable);
+	    return new ResponseEntity<>(bookings, HttpStatus.OK);
+	}
+
 
     
     @Operation(

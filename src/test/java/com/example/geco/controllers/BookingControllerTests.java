@@ -104,72 +104,132 @@ public class BookingControllerTests extends AbstractControllerTest{
 		}
 		
 		@Test
-		public void canGetAllMyBookings() throws Exception {
-			Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
+		public void canGetAllMyBookingsWithPagination() throws Exception {
+		    Account savedAccount = DataUtil.createAdminAccountA(accountRepository);
 		    mockAdminAuthentication(savedAccount.getAccountId(), savedAccount.getDetail().getEmail());
-		    
+
 		    BookingRequest requestA = DataUtil.createBookingRequestA(
-					savedAccount.getAccountId(),
-					accountRepository,  
-					packageInclusionRepository,
-					tourPackageRepository);
-		    
+		            savedAccount.getAccountId(),
+		            accountRepository,
+		            packageInclusionRepository,
+		            tourPackageRepository);
+
 		    BookingRequest requestB = DataUtil.createBookingRequestB(
-					savedAccount.getAccountId(),
-					accountRepository,  
-					packageInclusionRepository,
-					tourPackageRepository);
-			
+		            savedAccount.getAccountId(),
+		            accountRepository,
+		            packageInclusionRepository,
+		            tourPackageRepository);
+
 		    Booking savedBookingA = bookingService.addBooking(requestA);
 		    Booking savedBookingB = bookingService.addBooking(requestB);
-		    
+
+		    // --- Page 0: should return Booking A only (size = 1) ---
 		    mockMvc.perform(
-					MockMvcRequestBuilders.get("/booking")
-						.contentType(MediaType.APPLICATION_JSON)
-			).andExpect(
-					MockMvcResultMatchers.status().isOk()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].bookingId").value(savedBookingA.getBookingId())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].account.accountId").value(savedBookingA.getAccount().getAccountId())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].tourPackage.packageId").value(savedBookingA.getTourPackage().getPackageId())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].bookingInclusions").exists()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].visitDate").value(savedBookingA.getVisitDate().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].visitTime").value(savedBookingA.getVisitTime().toString() + ":00")
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].groupSize").value(savedBookingA.getGroupSize())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].bookingStatus").value(savedBookingA.getBookingStatus().name())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].paymentStatus").value(savedBookingA.getPaymentStatus().name())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[0].totalPrice").value(savedBookingA.getTotalPrice())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].bookingId").value(savedBookingB.getBookingId())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].account.accountId").value(savedBookingB.getAccount().getAccountId())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].tourPackage.packageId").value(savedBookingB.getTourPackage().getPackageId())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].bookingInclusions").exists()
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].visitDate").value(savedBookingB.getVisitDate().toString())
-			).andExpect(
-					MockMvcResultMatchers.jsonPath("$[1].visitTime").value(savedBookingB.getVisitTime().toString() + ":00")
-    		).andExpect(
-    				MockMvcResultMatchers.jsonPath("$[1].groupSize").value(savedBookingB.getGroupSize())
-    		).andExpect(
-    				MockMvcResultMatchers.jsonPath("$[1].bookingStatus").value(savedBookingB.getBookingStatus().name())
-    		).andExpect(
-    				MockMvcResultMatchers.jsonPath("$[1].paymentStatus").value(savedBookingB.getPaymentStatus().name())
-    		).andExpect(
-    				MockMvcResultMatchers.jsonPath("$[1].totalPrice").value(savedBookingB.getTotalPrice())
-    		);
+		            MockMvcRequestBuilders.get("/booking")
+		                    .param("page", "0")
+		                    .param("size", "1")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isOk()
+		    )
+
+		    // Page metadata
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.number").value(0))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.size").value(1))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.totalPages").value(2))
+
+		    // Booking A data
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].bookingId")
+		            	.value(savedBookingA.getBookingId()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].account.accountId")
+		            	.value(savedBookingA.getAccount().getAccountId()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].tourPackage.packageId")
+		            	.value(savedBookingA.getTourPackage().getPackageId()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].bookingInclusions").exists())
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].visitDate")
+		            	.value(savedBookingA.getVisitDate().toString()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].visitTime")
+		            	.value(savedBookingA.getVisitTime().toString() + ":00"))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].groupSize")
+		            	.value(savedBookingA.getGroupSize()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].bookingStatus")
+		            	.value(savedBookingA.getBookingStatus().name()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].paymentStatus")
+		            	.value(savedBookingA.getPaymentStatus().name()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].totalPrice")
+		            	.value(savedBookingA.getTotalPrice()));
+
+		    // --- Page 1: should return Booking B only ---
+		    mockMvc.perform(
+		            MockMvcRequestBuilders.get("/booking")
+		                    .param("page", "1")
+		                    .param("size", "1")
+		                    .contentType(MediaType.APPLICATION_JSON)
+		    ).andExpect(
+		            MockMvcResultMatchers.status().isOk()
+		    )
+
+		    // Page metadata
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.number").value(1))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.size").value(1))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.totalPages").value(2))
+
+		    // Booking B data
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].bookingId")
+		            	.value(savedBookingB.getBookingId()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].account.accountId")
+		            	.value(savedBookingB.getAccount().getAccountId()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].tourPackage.packageId")
+		            	.value(savedBookingB.getTourPackage().getPackageId()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].bookingInclusions").exists())
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].visitDate")
+		            	.value(savedBookingB.getVisitDate().toString()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].visitTime")
+		            	.value(savedBookingB.getVisitTime().toString() + ":00"))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].groupSize")
+		            	.value(savedBookingB.getGroupSize()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].bookingStatus")
+		            	.value(savedBookingB.getBookingStatus().name()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].paymentStatus")
+		            	.value(savedBookingB.getPaymentStatus().name()))
+		    .andExpect(
+		    		MockMvcResultMatchers.jsonPath("$.content[0].totalPrice")
+		            	.value(savedBookingB.getTotalPrice()));
 		}
+
 		
 //		@Test
 //		public void canGetAllBookingsWithinFewDays() throws Exception {
@@ -250,7 +310,6 @@ public class BookingControllerTests extends AbstractControllerTest{
 		     .andExpect(MockMvcResultMatchers.jsonPath("$.totalPrice").value(2740));
 		}
 
-		// New test: update booking status
 		@Test
 		public void canUpdateBookingStatus() throws Exception {
 		    Account savedAccount = DataUtil.createAdminAccountA(accountRepository);

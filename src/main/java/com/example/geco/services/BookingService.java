@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -267,73 +269,79 @@ public class BookingService extends BaseService{
 	}
 
 	@Transactional(readOnly = true)
-	public List<Booking> getBookingByAccountAndDateRange(
+	public Page<Booking> getBookingByAccountAndDateRange(
 			Integer accountId, 
 	        LocalDate startDate, 
-	        LocalDate endDate) {
+	        LocalDate endDate,
+	        Pageable pageable) {
 	    if (accountId == null && startDate == null && endDate == null) {
-	    	return bookingRepository.findAll();
+	    	return bookingRepository.findAll(pageable);
 	    } 
 
 	    if (accountId == null) {
-	    	return bookingRepository.findByVisitDateBetween(startDate, endDate);
+	    	return bookingRepository.findByVisitDateBetween(startDate, endDate, pageable);
 	    }
 	    
 	    if (startDate == null && endDate == null) {
-	    	return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(accountId);
+	    	return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(accountId, pageable);
 	    } 
 	    
     	return bookingRepository.findByAccount_AccountIdAndVisitDateBetween(
-    			accountId, startDate, endDate);
+    			accountId, startDate, endDate, pageable);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Booking> getActiveBookingByAccountAndDateRange(
+	public Page<Booking> getActiveBookingByAccountAndDateRange(
 			Integer accountId, 
 	        LocalDate startDate, 
-	        LocalDate endDate) {
+	        LocalDate endDate, 
+	        Pageable pageable) {
 	    if (accountId == null && startDate == null && endDate == null) {
-	    	return bookingRepository.findAllByIsActive(true);
+	    	return bookingRepository.findAllByIsActive(true, pageable);
 	    } 
 
 	    if (accountId == null) {
-	    	return bookingRepository.findByIsActiveAndVisitDateBetween(true, startDate, endDate);
+	    	return bookingRepository.findByIsActiveAndVisitDateBetween(true, startDate, endDate, pageable);
 	    }
 	    
 	    if (startDate == null && endDate == null) {
-	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(accountId, true);
+	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(
+	    			accountId, true, pageable);
 	    } 
 	    
     	return bookingRepository.findByAccount_AccountIdAndIsActiveAndVisitDateBetween(
-    			accountId, true, startDate, endDate);
+    			accountId, true, startDate, endDate, pageable);
 	}
 	
 	@Transactional(readOnly = true)
-	public List<Booking> getMyBookingByDateRange(
+	public Page<Booking> getMyBookingByDateRange(
 			LocalDate startDate, 
-	        LocalDate endDate) {
-	    return getBookingByAccountAndDateRange(getLoggedAccountId(), startDate, endDate);
+	        LocalDate endDate,
+	        Pageable pageable) {
+	    return getBookingByAccountAndDateRange(getLoggedAccountId(), startDate, endDate, pageable);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Booking> getInactiveBookingByAccountAndDateRange(
+	public Page<Booking> getInactiveBookingByAccountAndDateRange(
 			Integer accountId, 
 	        LocalDate startDate, 
-	        LocalDate endDate) {
+	        LocalDate endDate, 
+	        Pageable pageable) {
 	    if (accountId == null && startDate == null && endDate == null) {
-	    	return bookingRepository.findAllByIsActive(false);
+	    	return bookingRepository.findAllByIsActive(false, pageable);
 	    } 
 
 	    if (accountId == null) {
-	    	return bookingRepository.findByIsActiveAndVisitDateBetween(false, startDate, endDate);
+	    	return bookingRepository.findByIsActiveAndVisitDateBetween(false, startDate, endDate, pageable);
 	    }
 	    
 	    if (startDate == null && endDate == null) {
-	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(accountId, false);
+	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(
+	    			accountId, false, pageable);
 	    } 
 	    
     	return bookingRepository.findByAccount_AccountIdAndIsActiveAndVisitDateBetween(
-    			accountId, false, startDate, endDate);
+    			accountId, false, startDate, endDate, pageable);
 	}
 
 	@Transactional(readOnly = true)

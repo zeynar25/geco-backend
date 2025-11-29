@@ -3,6 +3,8 @@ package com.example.geco.repositories;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,20 +18,30 @@ import com.example.geco.domains.TourPackage;
 public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	List<Booking> findAllByOrderByVisitDateAscVisitTimeAsc();
 	
-	List<Booking> findByAccount_AccountIdAndVisitDateBetween(
+	Page<Booking> findByAccount_AccountIdAndVisitDateBetween(
 			int accountId, 
 			LocalDate startDate, 
-			LocalDate endDate);
+			LocalDate endDate,
+			Pageable pageable);
 
 	List<Booking> findByVisitDate(LocalDate date);
+	
+	
+	Page<Booking> findByVisitDateBetween(
+			LocalDate startDate, LocalDate endDate, Pageable pageable
+	);
 	
 	List<Booking> findByVisitDateBetween(
 			LocalDate startDate, LocalDate endDate
 	);
 	
+	
 	List<Booking> findByVisitDateOrderByVisitTimeAsc(LocalDate visitDate);
 	
+	
+	Page<Booking> findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(int id, Pageable pageable);
 	List<Booking> findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(int id);
+	
 	
 	List<Booking> findByAccount_AccountIdAndBookingStatusOrderByVisitDateAscVisitTimeAsc(
 			int id, 
@@ -98,12 +110,14 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 
 	List<Booking> findByVisitDateAndBookingIdNotOrderByVisitTimeAsc(LocalDate visitDate, Integer id);
 
-	List<Booking> findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(Integer accountId, boolean b);
+	Page<Booking> findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(
+			Integer accountId, boolean isActive, Pageable pageable);
 
-	List<Booking> findAllByIsActive(boolean isActive);
+	Page<Booking> findAllByIsActive(boolean isActive, Pageable pageable);
 
-	List<Booking> findByIsActiveAndVisitDateBetween(boolean isActive, LocalDate startDate, LocalDate endDate);
+	Page<Booking> findByIsActiveAndVisitDateBetween(
+			boolean isActive, LocalDate startDate, LocalDate endDate, Pageable pageable);
 
-	List<Booking> findByAccount_AccountIdAndIsActiveAndVisitDateBetween(Integer accountId, boolean isActive,
-			LocalDate startDate, LocalDate endDate);
+	Page<Booking> findByAccount_AccountIdAndIsActiveAndVisitDateBetween(
+			Integer accountId, boolean isActive, LocalDate startDate, LocalDate endDate, Pageable pageable);
 }
