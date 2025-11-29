@@ -54,7 +54,7 @@ public class AccountController extends AbstractController{
 			summary = "Update account details", 
 			description = "Updates the personal details of an account by ID")
 	public ResponseEntity<AccountResponse> updateDetails(
-			@PathVariable int id, 
+			@PathVariable @Valid int id, 
 			@RequestBody DetailRequest request) {
 		AccountResponse savedAccount  = accountService.updateDetails(id, request);
 		return new ResponseEntity<>(savedAccount, HttpStatus.OK);
