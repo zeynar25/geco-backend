@@ -74,6 +74,11 @@ public class TourPackageService extends BaseService{
 		return savedPackage;
 	}
 	
+	@Transactional(readOnly = true)
+	public Long getPackagesNumber() {
+		return tourPackageRepository.count();
+	}
+	
     @Transactional(readOnly = true)
 	public TourPackage getPackage(int id) {
 		return tourPackageRepository.findById(id)

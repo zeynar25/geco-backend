@@ -11,6 +11,9 @@ public class HomepageService {
 	AttractionService attractionService;
 	
 	@Autowired
+	TourPackageService tourPackageService;
+	
+	@Autowired
 	BookingService bookingService;
 	
 	@Autowired
@@ -19,6 +22,7 @@ public class HomepageService {
 	public HomeStats getHomeStats() {
 		return new HomeStats(
 				attractionService.getAttractionsNumber(),
+				tourPackageService.getPackagesNumber(),
 				bookingService.getAverageVisitor("month"),
 				feedbackService.getAverageRating());
 	}

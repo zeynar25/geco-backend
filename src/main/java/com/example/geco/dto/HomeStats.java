@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class HomeStats {
 	Long attractionNumber;
+	Long tourPackageNumber;
 	Double averageVisitor;
 	Double averageRating;
 }
