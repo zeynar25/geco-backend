@@ -25,6 +25,7 @@ public class PackageInclusion {
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	private Integer inclusionId;
 	private String inclusionName;
+	private String inclusionDescription;
 	private Integer inclusionPricePerPerson;
 	
 	@Builder.Default
