@@ -428,15 +428,49 @@ public class BookingService extends BaseService{
         	for (Booking booking : bookingList) {
         		visitorCount += booking.getGroupSize();
         	}
-
-        	CalendarDay cDay = new CalendarDay();
-        	cDay.setBookings(bookingList.size());
-        	cDay.setVisitors(visitorCount);
        
-        	calendar.put(day, cDay);
+        	calendar.put(
+        			day, 
+        			CalendarDay.builder()
+        				.bookings(bookingList.size())
+        				.visitors(visitorCount)
+        				.build()
+        			);
         }
 		
 		return calendar;
+	}
+	
+	@Transactional(readOnly = true)
+	public CalendarDay getCalendarStats(int year, int month) {
+		if (year <= 0) {
+	        throw new IllegalArgumentException("Invalid year.");
+		}
+		
+		if (month <= 0 || month > 12) {
+	        throw new IllegalArgumentException("Invalid month.");
+		}
+		
+		YearMonth yearMonth = YearMonth.of(year, month);
+        int daysInMonth = yearMonth.lengthOfMonth();
+        
+    	List<Booking> allBookings = bookingRepository.findByVisitDateBetween(
+    		    LocalDate.of(year, month, 1),
+    		    LocalDate.of(year, month, daysInMonth)
+    		);
+        
+
+    	int visitorCount = 0;
+        for (int day = 1; day <= daysInMonth; day++) {
+        	for (Booking booking : allBookings) {
+        		visitorCount += booking.getGroupSize();
+        	}
+        }
+		
+		return CalendarDay.builder()
+				.bookings(allBookings.size())
+				.visitors(visitorCount)
+				.build();
 	}
 
 	@Transactional(readOnly = true)

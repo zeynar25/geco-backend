@@ -44,6 +44,13 @@ public class MainController extends AbstractController {
         Map<Integer, CalendarDay> calendar = bookingService.getCalendar(year, month);
         return new ResponseEntity<>(calendar, HttpStatus.OK);
     }
+    
+    @GetMapping("/calendar/stats/{year}/{month}")
+    @Operation(summary = "Display calendar for a given month and year", description = "Returns a map of calendar days and bookings for the specified year and month")
+    public ResponseEntity<?> displayCalendarStats(@PathVariable int year, @PathVariable int month) {
+        CalendarDay monthStats = bookingService.getCalendarStats(year, month);
+        return new ResponseEntity<>(monthStats, HttpStatus.OK);
+    }
 
     @GetMapping("/dashboard")
     @Operation(summary = "Display dashboard statistics", description = "Returns admin dashboard statistics for the current day")
