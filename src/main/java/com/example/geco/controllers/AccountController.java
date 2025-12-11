@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.geco.domains.Account;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
 import com.example.geco.dto.PasswordUpdateRequest;
@@ -43,6 +44,16 @@ public class AccountController extends AbstractController {
             @RequestBody @Valid SignupRequest request) {
         AccountResponse savedAccount = accountService.addTouristAccount(request);
         return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{email}")
+    @Operation(
+        summary = "Get account by email",
+        description = "Retrieves an account with the given email"
+    )
+    public ResponseEntity<?> getAccountByEmail(@PathVariable String email) {
+    	Account account = accountService.getAccount(email);
+        return new ResponseEntity<>(account, HttpStatus.OK);
     }
 
 

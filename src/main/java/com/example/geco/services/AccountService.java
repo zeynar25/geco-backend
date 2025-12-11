@@ -158,6 +158,13 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
         return account;
 	}
+	
+	@Transactional(readOnly = true)
+	public Account getAccount(String email) {
+		Account account = accountRepository.findByDetailEmail(email)
+	            .orElseThrow(() -> new EntityNotFoundException("Account with email '" + email + "' not found."));
+        return account;
+	}
 
 
 	@Transactional(readOnly = true)
