@@ -26,78 +26,146 @@ import com.example.geco.dto.HomeStats;
 import com.example.geco.dto.TrendsResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Main", description = "Main application endpoints for home, dashboard, calendar, bookings, finances, trends, and logs")
+@Tag(
+    name = "Main Controller", 
+    description = "Provides endpoints for home statistics, calendar, admin dashboard, finances, trends, and audit logs"
+)
 public class MainController extends AbstractController {
 
+    // -------------------------------
+    // HOME ENDPOINTS
+    // -------------------------------
+
+    @Operation(
+        summary = "Get Home Page Statistics",
+        description = "Returns aggregated statistics for the home screen, including bookings, revenue, and visitors."
+    )
     @GetMapping("/home")
-    @Operation(summary = "Get home page statistics", description = "Returns aggregated statistics to display on the home page")
     public ResponseEntity<HomeStats> home() {
         return ResponseEntity.ok(homepageService.getHomeStats());
     }
 
+
+    // -------------------------------
+    // CALENDAR ENDPOINTS
+    // -------------------------------
+
+    @Operation(
+        summary = "Display Calendar View",
+        description = "Returns a map of calendar days containing booking information for the specified year and month."
+    )
     @GetMapping("/calendar/{year}/{month}")
-    @Operation(summary = "Display calendar for a given month and year", description = "Returns a map of calendar days and bookings for the specified year and month")
-    public ResponseEntity<?> displayCalendar(@PathVariable int year, @PathVariable int month) {
+    public ResponseEntity<Map<Integer, CalendarDay>> displayCalendar(
+        @Parameter(description = "Year to display") @PathVariable int year,
+        @Parameter(description = "Month to display") @PathVariable int month
+    ) {
         Map<Integer, CalendarDay> calendar = bookingService.getCalendar(year, month);
         return new ResponseEntity<>(calendar, HttpStatus.OK);
     }
-    
+
+    @Operation(
+        summary = "Get Calendar Monthly Statistics",
+        description = "Returns aggregated statistics for all bookings within the specified year and month."
+    )
     @GetMapping("/calendar/stats/{year}/{month}")
-    @Operation(summary = "Display calendar for a given month and year", description = "Returns a map of calendar days and bookings for the specified year and month")
-    public ResponseEntity<?> displayCalendarStats(@PathVariable int year, @PathVariable int month) {
+    public ResponseEntity<CalendarDay> displayCalendarStats(
+        @Parameter(description = "Year of the calendar stats") @PathVariable int year,
+        @Parameter(description = "Month of the calendar stats") @PathVariable int month
+    ) {
         CalendarDay monthStats = bookingService.getCalendarStats(year, month);
         return new ResponseEntity<>(monthStats, HttpStatus.OK);
     }
 
+
+    // -------------------------------
+    // DASHBOARD STATISTICS
+    // -------------------------------
+
+    @Operation(
+        summary = "Get Dashboard Statistics",
+        description = "Returns admin dashboard statistics for today's date."
+    )
     @GetMapping("/dashboard")
-    @Operation(summary = "Display dashboard statistics", description = "Returns admin dashboard statistics for the current day")
     public ResponseEntity<AdminDashboardStats> displayDashboard() {
         LocalDate now = LocalDate.now();
         AdminDashboardStats stats = adminDashboardService.getDashboardStats(now);
         return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 
+
+    @Operation(
+        summary = "Get Dashboard Bookings",
+        description = "Returns bookings filtered by date range, status, or admin search parameters."
+    )
     @PostMapping("/dashboard/bookings")
-    @Operation(summary = "Get dashboard bookings", description = "Returns a list of bookings based on admin request filters")
-    public ResponseEntity<List<Booking>> displayDashboardBookings(@RequestBody AdminBookingRequest request) {
+    public ResponseEntity<List<Booking>> displayDashboardBookings(
+        @Parameter(description = "Filter parameters for retrieving bookings") @RequestBody AdminBookingRequest request
+    ) {
         List<Booking> bookings = adminDashboardService.getBookingByAdmin(request);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
+
+    // -------------------------------
+    // FINANCES
+    // -------------------------------
+
+    @Operation(
+        summary = "Get Monthly Financial Statistics",
+        description = "Returns total revenue, expenses, and computed balance for the given year and month."
+    )
     @GetMapping("/dashboard/finances")
-    @Operation(summary = "Get dashboard financial statistics", description = "Returns monthly financial statistics for the specified year and month")
     public ResponseEntity<AdminDashboardFinances> displayDashboardFinances(
-            @RequestParam int year,
-            @RequestParam int month) {
+        @Parameter(description = "Year to retrieve") @RequestParam int year,
+        @Parameter(description = "Month to retrieve") @RequestParam int month
+    ) {
         AdminDashboardFinances stats = adminDashboardService.getDashboardFinance(year, month);
         return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 
+    @Operation(
+        summary = "Get Yearly Revenue Data",
+        description = "Returns yearly revenue chart points between startYear and endYear."
+    )
     @GetMapping("/dashboard/finances/revenue/yearly")
-    @Operation(summary = "Get yearly revenue data", description = "Returns chart data of revenue between startYear and endYear")
     public ResponseEntity<List<ChartData>> displayDashboardFinancesYearlyRevenue(
-            @RequestParam Integer startYear,
-            @RequestParam Integer endYear) {
+        @Parameter(description = "Start year for revenue data") @RequestParam Integer startYear,
+        @Parameter(description = "End year for revenue data") @RequestParam Integer endYear
+    ) {
         List<ChartData> revenue = bookingService.getYearlyRevenue(startYear, endYear);
         return new ResponseEntity<>(revenue, HttpStatus.OK);
     }
 
+    @Operation(
+        summary = "Get Monthly Revenue Data",
+        description = "Returns monthly revenue chart points for a specified year."
+    )
     @GetMapping("/dashboard/finances/revenue/monthly")
-    @Operation(summary = "Get monthly revenue data", description = "Returns chart data of revenue for the specified year")
     public ResponseEntity<List<ChartData>> displayDashboardFinancesMonthlyRevenue(
-            @RequestParam Integer year) {
+        @Parameter(description = "Year to retrieve") @RequestParam Integer year
+    ) {
         List<ChartData> revenue = bookingService.getMonthlyRevenue(year);
         return new ResponseEntity<>(revenue, HttpStatus.OK);
     }
 
+
+    // -------------------------------
+    // TRENDS (BOOKINGS, VISITORS, PACKAGES)
+    // -------------------------------
+
+    @Operation(
+        summary = "Get Yearly Trends",
+        description = "Returns yearly chart data for bookings, visitors, and packages availed."
+    )
     @GetMapping("/dashboard/trends/yearly")
-    @Operation(summary = "Get yearly trends", description = "Returns yearly chart data for bookings, visitors, and availed packages")
     public ResponseEntity<TrendsResponse> displayDashboardTrendsYearly(
-            @RequestParam Integer startYear,
-            @RequestParam Integer endYear) {
+        @Parameter(description = "Start year") @RequestParam Integer startYear,
+        @Parameter(description = "End year") @RequestParam Integer endYear
+    ) {
         List<ChartData> yearlyBooking = adminDashboardService.getYearlyBookings(startYear, endYear);
         List<ChartData> yearlyVisitors = adminDashboardService.getYearlyVisitors(startYear, endYear);
         List<ChartData> yearlyAvailedPackages = adminDashboardService.getAvailedPackages(startYear, endYear);
@@ -109,10 +177,14 @@ public class MainController extends AbstractController {
                 .build());
     }
 
+    @Operation(
+        summary = "Get Monthly Trends",
+        description = "Returns monthly chart data for bookings, visitors, and availed packages for a given year."
+    )
     @GetMapping("/dashboard/trends/monthly")
-    @Operation(summary = "Get monthly trends", description = "Returns monthly chart data for bookings, visitors, and availed packages for the specified year")
-    public ResponseEntity<TrendsResponse> displayDashboardTrendsMontly(
-            @RequestParam Integer year) {
+    public ResponseEntity<TrendsResponse> displayDashboardTrendsMonthly(
+        @Parameter(description = "Year to retrieve monthly trends") @RequestParam Integer year
+    ) {
         List<ChartData> monthlyBooking = adminDashboardService.getMonthlyBookings(year);
         List<ChartData> monthlyVisitors = adminDashboardService.getMonthlyVisitors(year);
         List<ChartData> monthlyAvailedPackages = adminDashboardService.getAvailedPackages(year, year);
@@ -124,22 +196,26 @@ public class MainController extends AbstractController {
                 .build());
     }
 
-    @GetMapping("/dashboard/logs")
-    @Operation(summary = "Get audit logs", description = "Returns a list of audit logs filtered by optional start/end dates, entity name, or action type")
-    public ResponseEntity<List<AuditLog>> getAuditLogs(
-            @RequestParam(required = false) String start,
-            @RequestParam(required = false) String end,
-            @RequestParam(required = false) String entityName,
-            @RequestParam(required = false) LogAction action) {
 
+    // -------------------------------
+    // AUDIT LOGS
+    // -------------------------------
+
+    @Operation(
+        summary = "Get Audit Logs",
+        description = "Retrieve logs filtered by optional date range, entity name, or action type."
+    )
+    @GetMapping("/dashboard/logs")
+    public ResponseEntity<List<AuditLog>> getAuditLogs(
+        @Parameter(description = "Start datetime in ISO format (yyyy-MM-ddTHH:mm:ss)") @RequestParam(required = false) String start,
+        @Parameter(description = "End datetime in ISO format (yyyy-MM-ddTHH:mm:ss)") @RequestParam(required = false) String end,
+        @Parameter(description = "Filter by entity name") @RequestParam(required = false) String entityName,
+        @Parameter(description = "Filter by log action type") @RequestParam(required = false) LogAction action
+    ) {
         LocalDateTime startTime = start != null ? LocalDateTime.parse(start) : null;
         LocalDateTime endTime = end != null ? LocalDateTime.parse(end) : null;
 
         List<AuditLog> logs = auditLogService.getLogs(startTime, endTime, entityName, action);
         return ResponseEntity.ok(logs);
     }
-
-    // Placeholder endpoints (no implementation shown) for admin dashboard features
-    // Feedback categories, accounts, tour packages, package inclusions, attractions, FAQ
-    // Use GET endpoints as described in the original comments
 }
