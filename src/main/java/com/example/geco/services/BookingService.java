@@ -85,14 +85,18 @@ public class BookingService extends BaseService{
 	}
 	
 	private void validateVisitTime(Integer id, Integer tourDurationMinutes, LocalDate visitDate, LocalTime visitTime) {
-		// Park opens by 8:00, giving time to prepare for the tour by 9:00.
-		LocalTime startTime = LocalTime.of(9, 0);
+		if (tourDurationMinutes < 0) {
+			tourDurationMinutes = 0;
+		}
 		
-		// Ensure tour finishes by 16:00, giving time to close by 17:00
-		LocalTime endTime = LocalTime.of(16, 0).minusMinutes(tourDurationMinutes); 
+		// Park opens by 8:00.
+		LocalTime startTime = LocalTime.of(8, 0);
+		
+		// Closes by 17:00.
+		LocalTime endTime = LocalTime.of(17, 0);
 		
 		if (visitTime.isBefore(startTime) || visitTime.isAfter(endTime)) {
-			throw new IllegalArgumentException("Booking visit time must be between 9:00 and end at by 16:00.");
+			throw new IllegalArgumentException("Booking visit time must be between 8:00 and end at by 17:00.");
 		}
 		
 	    // Check if there's an overlap in schedule and selected schedule.
@@ -214,7 +218,11 @@ public class BookingService extends BaseService{
 		
 		if (groupSize < tourPackage.getMinPerson() 
 				|| groupSize > tourPackage.getMaxPerson()) {
-			throw new IllegalArgumentException("Group size cannot go below or beyond the min and max person of the chosen tour package");
+			throw new IllegalArgumentException("Group size for this tour package cannot go below " 
+				+ tourPackage.getMinPerson() 
+				+ " or beyond "
+				+ tourPackage.getMaxPerson() 
+				+ "pax");
 		}
 		
 		List<Integer> bookingInclusionIds = new ArrayList<>();
