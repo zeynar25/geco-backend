@@ -8,6 +8,7 @@ import com.example.geco.services.AttractionService;
 import com.example.geco.services.AuditLogService;
 import com.example.geco.services.AuthService;
 import com.example.geco.services.BookingService;
+import com.example.geco.services.CalendarDateService;
 import com.example.geco.services.FaqService;
 import com.example.geco.services.FeedbackCategoryService;
 import com.example.geco.services.FeedbackService;
@@ -59,4 +60,7 @@ public abstract class AbstractController {
     
     @Autowired
     protected AuditLogService auditLogService;
+    
+    @Autowired
+    protected CalendarDateService calendarDateService;
 }
