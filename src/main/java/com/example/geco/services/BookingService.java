@@ -25,6 +25,7 @@ import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
 import com.example.geco.domains.Booking.PaymentStatus;
 import com.example.geco.domains.BookingInclusion;
+import com.example.geco.domains.CalendarDate;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
 import com.example.geco.dto.BookingInclusionRequest;
@@ -55,6 +56,9 @@ public class BookingService extends BaseService{
 	
 	@Autowired
 	private BookingRepository bookingRepository;
+
+	@Autowired
+	private CalendarDateService calendarDateService;
 	
 	private Booking createBookingCopy(Booking booking) {
 		return Booking.builder()
@@ -399,47 +403,86 @@ public class BookingService extends BaseService{
 
 	@Transactional(readOnly = true)
 	public Map<Integer, CalendarDay> getCalendar(int year, int month) {
-		if (year <= 0) {
+
+	    if (year <= 0) {
 	        throw new IllegalArgumentException("Invalid year.");
-		}
-		
-		if (month <= 0 || month > 12) {
+	    }
+
+	    if (month < 1 || month > 12) {
 	        throw new IllegalArgumentException("Invalid month.");
-		}
-		
-		Map<Integer, CalendarDay> calendar = new HashMap<>();
-		
-		YearMonth yearMonth = YearMonth.of(year, month);
-        int daysInMonth = yearMonth.lengthOfMonth();
-        
-    	List<Booking> allBookings = bookingRepository.findByVisitDateBetween(
-    		    LocalDate.of(year, month, 1),
-    		    LocalDate.of(year, month, daysInMonth)
-    		);
-    	
-    	Map<LocalDate, List<Booking>> bookingsByDate = allBookings.stream()
-    		    .collect(Collectors.groupingBy(Booking::getVisitDate));
-        
-        for (int day = 1; day <= daysInMonth; day++) {
-        	LocalDate date = LocalDate.of(year, month, day);
-            List<Booking> bookingList = bookingsByDate.getOrDefault(date, List.of());
-            
-        	int visitorCount = 0;
-        	for (Booking booking : bookingList) {
-        		visitorCount += booking.getGroupSize();
-        	}
-       
-        	calendar.put(
-        			day, 
-        			CalendarDay.builder()
-        				.bookings(bookingList.size())
-        				.visitors(visitorCount)
-        				.build()
-        			);
-        }
-		
-		return calendar;
+	    }
+
+	    Map<Integer, CalendarDay> calendar = new HashMap<>();
+
+	    YearMonth yearMonth = YearMonth.of(year, month);
+	    int daysInMonth = yearMonth.lengthOfMonth();
+
+	    LocalDate start = yearMonth.atDay(1);
+	    LocalDate end = yearMonth.atEndOfMonth();
+
+	    List<Booking> allBookings =
+	            bookingRepository.findByVisitDateBetween(start, end);
+
+	    Map<LocalDate, List<Booking>> bookingsByDate =
+	            allBookings.stream()
+	                .collect(Collectors.groupingBy(Booking::getVisitDate));
+
+	    List<CalendarDate> calendarDates =
+	            calendarDateService.getCalendarDateByYearMonth(null, yearMonth);
+
+	    Map<LocalDate, CalendarDate.DateStatus> dateStatusMap =
+	            calendarDates.stream()
+	                .collect(Collectors.toMap(
+	                    CalendarDate::getDate,
+	                    CalendarDate::getDateStatus
+	                ));
+
+	    for (int day = 1; day <= daysInMonth; day++) {
+
+	        LocalDate date = yearMonth.atDay(day);
+	        CalendarDate.DateStatus status = dateStatusMap.get(date);
+
+	        // CLOSED
+	        if (status == CalendarDate.DateStatus.CLOSED) {
+	            calendar.put(day,
+	                CalendarDay.builder()
+	                    .bookings(-2)
+	                    .visitors(-2)
+	                    .build()
+	            );
+	            continue;
+	        }
+
+	        // FULLY BOOKED
+	        if (status == CalendarDate.DateStatus.FULLY_BOOKED) {
+	            calendar.put(day,
+	                CalendarDay.builder()
+	                    .bookings(-1)
+	                    .visitors(-1)
+	                    .build()
+	            );
+	            continue;
+	        }
+
+	        // AVAILABLE or no override
+	        List<Booking> bookingList =
+	                bookingsByDate.getOrDefault(date, List.of());
+
+	        int visitorCount = bookingList.stream()
+	                .mapToInt(Booking::getGroupSize)
+	                .sum();
+
+	        calendar.put(day,
+	            CalendarDay.builder()
+	                .bookings(bookingList.size())
+	                .visitors(visitorCount)
+	                .build()
+	        );
+	    }
+
+	    return calendar;
 	}
+
 	
 	@Transactional(readOnly = true)
 	public CalendarDay getCalendarStats(int year, int month) {
