@@ -1,6 +1,7 @@
 package com.example.geco.services;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.geco.domains.AuditLog.LogAction;
-import com.example.geco.domains.Booking;
 import com.example.geco.domains.CalendarDate;
 import com.example.geco.domains.CalendarDate.DateStatus;
 import com.example.geco.dto.CalendarDateRequest;
@@ -57,10 +57,11 @@ public class CalendarDateService extends BaseService {
 	}
 	
 	@Transactional(readOnly = true)
-	public List<CalendarDate> getCalendarDateByDateRange(
+	public List<CalendarDate> getCalendarDateByYearMonth(
 			DateStatus status,
-			LocalDate startDate, 
-	        LocalDate endDate) {
+			YearMonth yearMonth) {
+		LocalDate startDate = yearMonth.atDay(1);
+	    LocalDate endDate = yearMonth.atEndOfMonth();
 		
 		if (status == null) {
 		    return calendarDateRepository.findByDateBetweenOrderByDate(startDate, endDate);
