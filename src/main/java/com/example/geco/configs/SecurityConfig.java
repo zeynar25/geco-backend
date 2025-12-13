@@ -87,6 +87,9 @@ public class SecurityConfig {
 		            .requestMatchers(HttpMethod.DELETE, "/feedback/{id}").hasRole("ADMIN") 
 		            .requestMatchers(HttpMethod.PATCH, "/feedback/restore/{id}").hasRole("ADMIN") 		            
 		            
+		            
+		            .requestMatchers("/calendar-date/**").hasAnyRole("STAFF", "ADMIN")
+		            
 		            .requestMatchers("/home").permitAll()
 		            .requestMatchers("/calendar/**").permitAll()
 		            .requestMatchers("/dashboard/logs").hasRole("ADMIN")
