@@ -21,11 +21,13 @@ public class TourPackageUpdateRequest {
     @Size(min = 10, message = "Description must be at least 10 characters long.")
     private String description;
 
-    @Min(value = 30, message = "Duration must be at least 30 minutes.")
     private Integer duration;
 
     @Min(value = 0, message = "Base price must be 0 or higher.")
-    private Integer basePrice;
+    private Double basePrice;
+    
+    @Min(value = 0, message = "Price per person must be 0 or higher.")
+    private Double pricePerPerson;
     
     @Min(value = 1, message = "Minimum person must be at least be 1.")
     private Integer minPerson;

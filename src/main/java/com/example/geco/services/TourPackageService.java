@@ -51,10 +51,11 @@ public class TourPackageService extends BaseService{
 		String name = request.getName().trim();
 		String description = request.getDescription().trim();
 		Integer duration = request.getDuration();
-		Integer basePrice = request.getBasePrice();
+		Double basePrice = request.getBasePrice();
+		Double pricePerPerson = request.getPricePerPerson();
 		Integer minPerson = request.getMinPerson();
 		Integer maxPerson= request.getMaxPerson();
-		String notes = request.getDescription() != null ? request.getDescription().trim() : null;
+		String notes = request.getNotes() != null ? request.getNotes().trim() : null;
 		List<Integer> inclusionIds = request.getInclusionIds();
 		
 		List<PackageInclusion> inclusions =
@@ -69,6 +70,7 @@ public class TourPackageService extends BaseService{
 				.description(description)
 				.duration(duration)
 				.basePrice(basePrice)
+				.pricePerPerson(pricePerPerson)
 				.minPerson(minPerson)
 				.maxPerson(maxPerson)
 				.notes(notes)
@@ -125,7 +127,8 @@ public class TourPackageService extends BaseService{
 		String name = request.getName() != null ? request.getName().trim() : null;
 		String description = request.getDescription() != null ? request.getDescription().trim() : null;
 		Integer duration = request.getDuration();
-		Integer basePrice = request.getBasePrice();
+		Double basePrice = request.getBasePrice();
+		Double pricePerPerson = request.getPricePerPerson();
 		Integer minPerson = request.getMinPerson();
 		Integer maxPerson = request.getMaxPerson();
 		String notes = request.getNotes() != null ? request.getNotes().trim() : null;
@@ -166,6 +169,10 @@ public class TourPackageService extends BaseService{
 
 		if (basePrice != null) {
 			existingTourPackage.setBasePrice(basePrice);
+		}
+
+		if (pricePerPerson != null) {
+			existingTourPackage.setPricePerPerson(pricePerPerson);
 		}
 		
 		if (minPerson != null) {

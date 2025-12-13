@@ -98,7 +98,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 
 	        TourPackageUpdateRequest updateRequest = new TourPackageUpdateRequest();
 	        updateRequest.setDescription("Updated description");
-	        updateRequest.setBasePrice(999);
+	        updateRequest.setBasePrice(999.0);
 	        String updateJson = objectMapper.writeValueAsString(updateRequest);
 
 	        mockMvc.perform(
@@ -276,7 +276,7 @@ public class TourPackageControllerTests extends AbstractControllerTest {
 	        int nonExistentId = 999;
 	        TourPackageUpdateRequest updateRequest = new TourPackageUpdateRequest();
 	        updateRequest.setDescription("Updated Description");
-	        updateRequest.setBasePrice(123);
+	        updateRequest.setBasePrice(123.0);
 	        String json = objectMapper.writeValueAsString(updateRequest);
 
 	        mockMvc.perform(

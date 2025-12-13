@@ -228,7 +228,7 @@ public class DataUtil {
 				.name("The best")
 				.description("Detailed description about this package")
 				.duration(60)
-				.basePrice(500)
+				.basePrice(500.0)
 				.inclusionIds(inclusionIds)
 				.build();
 	}
@@ -247,7 +247,7 @@ public class DataUtil {
 					.name("The best")
 					.description("Detailed description about this package")
 					.duration(60)
-					.basePrice(500)
+					.basePrice(500.0)
 					.inclusions(inclusions)
 					.build()
 		);
@@ -268,7 +268,7 @@ public class DataUtil {
 				.name("The double best")
 				.description("Detailed description about this package")
 				.duration(120)
-				.basePrice(100)
+				.basePrice(100.00)
 				.inclusionIds(inclusionIds)
 				.build();
 	}
@@ -292,7 +292,7 @@ public class DataUtil {
 					.name("The double best")
 					.description("Detailed description about this package")
 					.duration(120)
-					.basePrice(100)
+					.basePrice(100.0)
 					.inclusions(inclusions)
 					.build()
 		);

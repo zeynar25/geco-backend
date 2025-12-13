@@ -26,7 +26,6 @@ public class TourPackageRequest {
     private String description;
 
     @NotNull(message = "Duration is required.")
-    @Min(value = 30, message = "Duration must be at least 30 minutes.")
     private Integer duration;
     
     @NotNull(message = "Minimum person is required.")
@@ -39,7 +38,11 @@ public class TourPackageRequest {
 
     @NotNull(message = "Base price is required.")
     @Min(value = 0, message = "Base price must be 0 or higher.")
-    private Integer basePrice;
+    private Double basePrice;
+    
+    @NotNull(message = "Price per person is required.")
+    @Min(value = 0, message = "Price per person must be 0 or higher.")
+    private Double pricePerPerson;
     
     @Size(min = 1, message = "Notes must be at least be 1 character long.")
     private String notes;

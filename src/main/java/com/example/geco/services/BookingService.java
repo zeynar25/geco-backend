@@ -212,6 +212,11 @@ public class BookingService extends BaseService{
 		TourPackage tourPackage = tourPackageRepository.findById(tourPackageId)
 				.orElseThrow(() -> new EntityNotFoundException("Tour package with ID '" + accountId + "' not found."));
 		
+		if (groupSize < tourPackage.getMinPerson() 
+				|| groupSize > tourPackage.getMaxPerson()) {
+			throw new IllegalArgumentException("Group size cannot go below or beyond the min and max person of the chosen tour package");
+		}
+		
 		List<Integer> bookingInclusionIds = new ArrayList<>();
 		for (BookingInclusionRequest bookingInclusionRequest : bookingInclusionRequests) {
 			bookingInclusionIds.add(bookingInclusionRequest.getInclusionId());
@@ -236,9 +241,10 @@ public class BookingService extends BaseService{
 	            .groupSize(groupSize)
 	            .bookingStatus(Booking.BookingStatus.PENDING)
 	            .paymentStatus(Booking.PaymentStatus.UNPAID)
-	            .totalPrice(
-	            		(tourPackage.getBasePrice() * groupSize) 
-	            		+ getTotalInclusionPrice(request.getBookingInclusionRequests(), groupSize)
+	             .totalPrice(
+	            		 tourPackage.getBasePrice() +
+	            		(tourPackage.getPricePerPerson() * groupSize) 
+//	            		+ getTotalInclusionPrice(request.getBookingInclusionRequests(), groupSize)
 	            )
 	            .build();
 
@@ -635,6 +641,12 @@ public class BookingService extends BaseService{
 		
 		if (groupSize != null) {
 			recalculatePrice = true;
+			
+			if (groupSize < existingBooking.getTourPackage().getMinPerson() 
+					|| groupSize > existingBooking.getTourPackage().getMaxPerson()) {
+				throw new IllegalArgumentException("Group size cannot go below or beyond the min and max person of the chosen tour package");
+			}
+			
 			existingBooking.setGroupSize(groupSize);
 		}
 		
@@ -663,8 +675,9 @@ public class BookingService extends BaseService{
 		
 		if (recalculatePrice) {
 			existingBooking.setTotalPrice(
-				(existingBooking.getTourPackage().getBasePrice() * existingBooking.getGroupSize()) +
-				getTotalInclusionPrice(existingBooking)
+					existingBooking.getTourPackage().getBasePrice() +
+				(existingBooking.getTourPackage().getPricePerPerson() * existingBooking.getGroupSize())
+				// + getTotalInclusionPrice(existingBooking)
 			);
 		}
 		
@@ -727,6 +740,12 @@ public class BookingService extends BaseService{
 		
 		if (groupSize != null) {
 			recalculatePrice = true;
+			
+			if (groupSize < existingBooking.getTourPackage().getMinPerson() 
+					|| groupSize > existingBooking.getTourPackage().getMaxPerson()) {
+				throw new IllegalArgumentException("Group size cannot go below or beyond the min and max person of the chosen tour package");
+			}
+			
 			existingBooking.setGroupSize(groupSize);
 		}
 		
@@ -755,8 +774,9 @@ public class BookingService extends BaseService{
 		
 		if (recalculatePrice) {
 			existingBooking.setTotalPrice(
-				(existingBooking.getTourPackage().getBasePrice() * existingBooking.getGroupSize()) +
-				getTotalInclusionPrice(existingBooking)
+				existingBooking.getTourPackage().getBasePrice() +
+				(existingBooking.getTourPackage().getPricePerPerson() * existingBooking.getGroupSize())
+				// + getTotalInclusionPrice(existingBooking)
 			);
 		}
 		

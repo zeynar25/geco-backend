@@ -90,7 +90,7 @@ public class Booking {
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
 	
-	private Integer totalPrice;
+	private Double totalPrice;
 	
 	@Builder.Default
 	boolean isActive = true;

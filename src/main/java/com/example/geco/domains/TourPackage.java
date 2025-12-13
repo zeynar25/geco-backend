@@ -34,7 +34,8 @@ public class TourPackage {
 	private int maxPerson;
 	
 	private String description;
-	private Integer basePrice;
+	private Double basePrice;
+	private Double pricePerPerson;
 	
 	private String notes;
 	
