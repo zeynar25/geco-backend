@@ -28,10 +28,21 @@ public class TourPackageRequest {
     @NotNull(message = "Duration is required.")
     @Min(value = 30, message = "Duration must be at least 30 minutes.")
     private Integer duration;
+    
+    @NotNull(message = "Minimum person is required.")
+    @Min(value = 1, message = "Minimum person must be at least be 1.")
+    private Integer minPerson;
+
+    @NotNull(message = "Maximum person is required.")
+    @Min(value = 1, message = "Max person must be at least be 1.")
+    private Integer maxPerson;
 
     @NotNull(message = "Base price is required.")
     @Min(value = 0, message = "Base price must be 0 or higher.")
     private Integer basePrice;
+    
+    @Size(min = 1, message = "Notes must be at least be 1 character long.")
+    private String notes;
 
     @NotEmpty(message = "At least one inclusion ID is required.")
     private List<Integer> inclusionIds;

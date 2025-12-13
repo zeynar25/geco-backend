@@ -34,6 +34,8 @@ public class TourPackageService extends BaseService{
 				.duration(tourPackage.getDuration())
 				.description(tourPackage.getDescription())
 				.basePrice(tourPackage.getBasePrice())
+				.minPerson(tourPackage.getMinPerson())
+				.maxPerson(tourPackage.getMaxPerson())
 				.inclusions(
 						tourPackage.getInclusions() != null
 				        ? List.copyOf(tourPackage.getInclusions())
@@ -50,6 +52,9 @@ public class TourPackageService extends BaseService{
 		String description = request.getDescription().trim();
 		Integer duration = request.getDuration();
 		Integer basePrice = request.getBasePrice();
+		Integer minPerson = request.getMinPerson();
+		Integer maxPerson= request.getMaxPerson();
+		String notes = request.getDescription() != null ? request.getDescription().trim() : null;
 		List<Integer> inclusionIds = request.getInclusionIds();
 		
 		List<PackageInclusion> inclusions =
@@ -64,6 +69,9 @@ public class TourPackageService extends BaseService{
 				.description(description)
 				.duration(duration)
 				.basePrice(basePrice)
+				.minPerson(minPerson)
+				.maxPerson(maxPerson)
+				.notes(notes)
 				.inclusions(inclusions)
 				.build();
 		
@@ -118,6 +126,9 @@ public class TourPackageService extends BaseService{
 		String description = request.getDescription() != null ? request.getDescription().trim() : null;
 		Integer duration = request.getDuration();
 		Integer basePrice = request.getBasePrice();
+		Integer minPerson = request.getMinPerson();
+		Integer maxPerson = request.getMaxPerson();
+		String notes = request.getNotes() != null ? request.getNotes().trim() : null;
 		List<Integer> inclusionIds = request.getInclusionIds() != null ? request.getInclusionIds() : List.of();
 		
 		if (name == null 
@@ -147,7 +158,6 @@ public class TourPackageService extends BaseService{
 	        }
 	        existingTourPackage.setDescription(description);
 	    }
-
 		
 		if (duration != null) {
 		    existingTourPackage.setDuration(duration);
@@ -157,6 +167,21 @@ public class TourPackageService extends BaseService{
 		if (basePrice != null) {
 			existingTourPackage.setBasePrice(basePrice);
 		}
+		
+		if (minPerson != null) {
+		    existingTourPackage.setMinPerson(minPerson);
+		}
+
+		if (maxPerson != null) {
+		    existingTourPackage.setMaxPerson(maxPerson);
+		}
+		
+		if (notes != null) {
+	        if (notes.isBlank()) {
+	            throw new IllegalArgumentException("Notes cannot be blank.");
+	        }
+	        existingTourPackage.setNotes(notes);
+	    }
 		
 		if (inclusionIds != null) {
 			if (inclusionIds.isEmpty()) {

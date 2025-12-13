@@ -29,8 +29,14 @@ public class TourPackage {
 	
 	private String name;
 	private Integer duration; // in minutes.
+	
+	private int minPerson;
+	private int maxPerson;
+	
 	private String description;
 	private Integer basePrice;
+	
+	private String notes;
 	
 	@ManyToMany
     @JoinTable(
