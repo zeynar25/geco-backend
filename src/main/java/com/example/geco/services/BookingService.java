@@ -23,6 +23,7 @@ import com.example.geco.domains.Account;
 import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.domains.Booking.PaymentMethod;
 import com.example.geco.domains.Booking.PaymentStatus;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.CalendarDate;
@@ -69,6 +70,7 @@ public class BookingService extends BaseService{
 				.visitDate(booking.getVisitDate())
 				.visitTime(booking.getVisitTime())
 				.groupSize(booking.getGroupSize())
+				.paymentMethod(booking.getPaymentMethod())
 				.bookingStatus(booking.getBookingStatus())
 				.paymentStatus(booking.getPaymentStatus())
 				.totalPrice(booking.getTotalPrice())
@@ -206,6 +208,7 @@ public class BookingService extends BaseService{
 		
 		LocalDate visitDate = request.getVisitDate();
 		LocalTime visitTime = request.getVisitTime();
+		PaymentMethod paymentMethod = request.getPaymentMethod();
 		int groupSize = request.getGroupSize();
 		
 		checkAuth(accountId);
@@ -247,6 +250,7 @@ public class BookingService extends BaseService{
 	            .visitDate(visitDate)
 	            .visitTime(visitTime)
 	            .groupSize(groupSize)
+	            .paymentMethod(paymentMethod)
 	            .bookingStatus(Booking.BookingStatus.PENDING)
 	            .paymentStatus(Booking.PaymentStatus.UNPAID)
 	             .totalPrice(

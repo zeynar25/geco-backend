@@ -56,6 +56,10 @@ public class Booking {
 	        };
 	    }              
 	}
+	
+	public enum PaymentMethod {
+	    ONLINE, PARK;        
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) 
@@ -83,6 +87,9 @@ public class Booking {
 	private LocalTime visitTime;
 	
 	private Integer groupSize;
+	
+	@Enumerated(EnumType.STRING)
+	private PaymentMethod paymentMethod;
 	
 	@Enumerated(EnumType.STRING)
 	private BookingStatus bookingStatus;

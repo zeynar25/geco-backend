@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.example.geco.domains.Booking.PaymentMethod;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -29,6 +31,8 @@ public class BookingRequest {
 	
 	@NotNull(message = "Booking's visit time is missing.")
 	private LocalTime visitTime;
+	
+	private PaymentMethod paymentMethod;
 	
 	@NotNull
 	@Min(value = 1, message = "Invalid Booking's group size.")
