@@ -1,6 +1,6 @@
 package com.example.geco.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.example.geco.domains.CalendarDate.DateStatus;
 
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CalendarDateRequest {
 	@NotNull(message = "CalendarDate's date is missing.")
-	private Date date;
+	private LocalDate date;
 	
 	@NotNull(message = "CalendarDate's dateStatus is missing.")
 	private DateStatus dateStatus;

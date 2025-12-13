@@ -1,6 +1,6 @@
 package com.example.geco.domains;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,9 +33,9 @@ public class CalendarDate {
 	private Integer dateId;
 	
 	@Column(nullable = false, unique = true)
-	@Temporal(TemporalType.DATE)
-	private Date date;
+	private LocalDate date;
 	
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private DateStatus dateStatus;
 }
