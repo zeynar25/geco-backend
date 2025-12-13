@@ -442,40 +442,17 @@ public class BookingService extends BaseService{
 	        LocalDate date = yearMonth.atDay(day);
 	        CalendarDate.DateStatus status = dateStatusMap.get(date);
 
-	        // CLOSED
-	        if (status == CalendarDate.DateStatus.CLOSED) {
-	            calendar.put(day,
-	                CalendarDay.builder()
-	                    .bookings(-2)
-	                    .visitors(-2)
-	                    .build()
-	            );
-	            continue;
-	        }
-
-	        // FULLY BOOKED
-	        if (status == CalendarDate.DateStatus.FULLY_BOOKED) {
-	            calendar.put(day,
-	                CalendarDay.builder()
-	                    .bookings(-1)
-	                    .visitors(-1)
-	                    .build()
-	            );
-	            continue;
-	        }
-
-	        // AVAILABLE or no override
 	        List<Booking> bookingList =
 	                bookingsByDate.getOrDefault(date, List.of());
 
 	        int visitorCount = bookingList.stream()
 	                .mapToInt(Booking::getGroupSize)
 	                .sum();
-
-	        calendar.put(day,
-	            CalendarDay.builder()
+	        
+	        calendar.put(day, CalendarDay.builder()
 	                .bookings(bookingList.size())
 	                .visitors(visitorCount)
+	                .status(status)
 	                .build()
 	        );
 	    }

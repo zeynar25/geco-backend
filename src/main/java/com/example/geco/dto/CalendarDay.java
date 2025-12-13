@@ -1,5 +1,7 @@
 package com.example.geco.dto;
 
+import com.example.geco.domains.CalendarDate.DateStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,4 +14,5 @@ import lombok.NoArgsConstructor;
 public class CalendarDay {
 	int visitors;
 	int bookings;
+	DateStatus status;
 }
