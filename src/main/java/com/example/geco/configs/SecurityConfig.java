@@ -36,7 +36,7 @@ public class SecurityConfig {
 		return http.cors(Customizer.withDefaults())
 		    .csrf(customizer -> customizer.disable())
 			.authorizeHttpRequests(request -> request
-					.requestMatchers(HttpMethod.GET, "account/{email}").authenticated()
+					.requestMatchers("/account/**").authenticated()
 					.requestMatchers("/account/admin/**").hasRole("ADMIN")
 					.requestMatchers("/account/staff/**").hasAnyRole("STAFF", "ADMIN")
 					
@@ -94,8 +94,6 @@ public class SecurityConfig {
 		            .requestMatchers("/calendar/**").permitAll()
 		            .requestMatchers("/dashboard/logs").hasRole("ADMIN")
 		            .requestMatchers("/dashboard/**").hasAnyRole("STAFF", "ADMIN")
-		            
-					.requestMatchers("/account/my-account").authenticated()
 			
 		            .anyRequest().permitAll())
 			
@@ -130,7 +128,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration configuration = new CorsConfiguration();
 	    configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-	    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+	    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 	    configuration.setAllowedHeaders(List.of("*"));
 	    configuration.setAllowCredentials(true);
 	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
