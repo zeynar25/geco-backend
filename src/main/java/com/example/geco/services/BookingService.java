@@ -698,13 +698,14 @@ public class BookingService extends BaseService{
 		return bookingRepository.save(existingBooking);
 	}
 	
-	public Booking updateBookingByAdmin(int id, BookingUpdateRequest request) {
+	public Booking updateBookingByStaff(int id, BookingUpdateRequest request) {
 		if (request.getVisitDate() == null 
 				&& request.getVisitTime() == null
 				&& request.getGroupSize() == null
 				&& request.getBookingInclusionRequests() == null
 				&& request.getBookingStatus() == null
-				&& request.getPaymentStatus() == null) {
+				&& request.getPaymentStatus() == null
+				&& request.getStaffReply() == null) {
 			throw new IllegalArgumentException("No fields provided to update booking.");
 		}
 		
@@ -719,6 +720,7 @@ public class BookingService extends BaseService{
 		
 		BookingStatus bookingStatus = request.getBookingStatus() != null ? request.getBookingStatus() : null;
 		PaymentStatus paymentStatus = request.getPaymentStatus() != null ? request.getPaymentStatus() : null;
+		String staffReply = request.getStaffReply() != null ? request.getStaffReply().trim() : null;
 		
 		Booking prevBooking = createBookingCopy(existingBooking);
 		
@@ -812,6 +814,10 @@ public class BookingService extends BaseService{
 		    }
 		    
 		    existingBooking.setPaymentStatus(paymentStatus);
+		}
+		
+		if (staffReply != null) {
+			existingBooking.getStaffReply();
 		}
 		
 		logIfStaffOrAdmin("Booking", (long) id, LogAction.UPDATE, prevBooking, existingBooking);

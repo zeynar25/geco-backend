@@ -104,4 +104,6 @@ public class Booking {
 	
 	@Lob
 	private byte[] proofOfPayment;
+	
+	private String staffReply;
 }

@@ -192,11 +192,11 @@ public class BookingController extends AbstractController {
         description = "Allows staff or admin to update the status or payment status of a booking."
     )
     @PatchMapping("/staff/{id}")
-    public ResponseEntity<Booking> updateBookingStatus(
+    public ResponseEntity<Booking> updateBookingByStaff(
         @Parameter(description = "ID of the booking to update") @PathVariable int id,
         @Parameter(description = "Booking status update details") @RequestBody @Valid BookingUpdateRequest request
     ) {
-        Booking updatedBooking = bookingService.updateBookingByAdmin(id, request);
+        Booking updatedBooking = bookingService.updateBookingByStaff(id, request);
         return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
     }
 
