@@ -1,14 +1,22 @@
 package com.example.geco.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.example.geco.domains.AuditLog.LogAction;
 import com.example.geco.domains.Attraction;
+import com.example.geco.domains.AuditLog.LogAction;
+import com.example.geco.dto.AttractionRequest;
 import com.example.geco.dto.AttractionResponse;
 import com.example.geco.repositories.AttractionRepository;
 
@@ -17,6 +25,9 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 @Transactional
 public class AttractionService extends BaseService{
+	@Value("${app.upload-dir:C:/sts-4.32.0.RELEASE/dev/geco/uploads/attractions}")
+	private String uploadDir;
+	
 	@Autowired
 	AttractionRepository attractionRepository;
 
@@ -25,40 +36,59 @@ public class AttractionService extends BaseService{
 		return attractionRepository.count();
 	}
 	
-	private void validateAttraction(Attraction attraction) {
-		if (attraction.getName() == null || attraction.getName().trim().length() < 1) {
-		    throw new IllegalArgumentException("Attraction name must have at least 1 character.");
-		}
-		
-		if (attraction.getDescription() == null || attraction.getDescription().trim().length() < 10) {
-		    throw new IllegalArgumentException("Attraction description must be at least 10 characters long.");
-		}
-	}
-	
 	public Attraction createAttractionCopy(Attraction a) {
 		return Attraction.builder()
 				.attractionId(a.getAttractionId())
 				.name(a.getName())
 				.description(a.getDescription())
+				.funFact(a.getFunFact())
+				.photo2dUrl(a.getPhoto2dUrl())
 				.isActive(a.isActive())
 			    .build();
 	}
 	
 	private AttractionResponse toResponse(Attraction a) {
-		return new AttractionResponse(
-				a.getAttractionId(),
-				a.getName(),
-				a.getDescription()
-		);
+		return AttractionResponse.builder()
+				.attractionId(a.getAttractionId())
+				.name(a.getName())
+				.description(a.getDescription())
+				.funFact(a.getFunFact())
+				.photo2dUrl(a.getPhoto2dUrl())
+				.build();
     }
 	
-	public AttractionResponse addAttraction(Attraction attraction) {
-		validateAttraction(attraction);
-		Attraction a = attractionRepository.save(attraction);
+	public AttractionResponse addAttraction(AttractionRequest request,
+            MultipartFile image) throws IOException {
+
+		Attraction attraction = Attraction.builder()
+			.name(request.getAttractionName())
+			.description(request.getAttractionDescription())
+			.funFact(request.getAttractionFunFact())
+			.build();
 		
-		logIfStaffOrAdmin("Attraction", (long) a.getAttractionId(), LogAction.CREATE, null, a);
+		Attraction saved = attractionRepository.save(attraction);
 		
-	    return toResponse(a);
+		if (image != null && !image.isEmpty()) {
+			String ext = Optional.ofNullable(image.getOriginalFilename())
+				.filter(f -> f.contains("."))
+				.map(f -> f.substring(f.lastIndexOf(".")))
+				.orElse("");
+			
+			Path uploadPath = Paths.get(uploadDir);
+			Files.createDirectories(uploadPath);
+			
+			String fileName = "attraction-" + saved.getAttractionId() + ext;
+			Path target = uploadPath.resolve(fileName);
+			image.transferTo(target.toFile());
+			
+			saved.setPhoto2dUrl("/uploads/attractions/" + fileName);
+			saved = attractionRepository.save(saved);  // update with photo URL
+		}
+		
+		logIfStaffOrAdmin("Attraction", saved.getAttractionId().longValue(),
+		LogAction.CREATE, null, saved);
+		
+		return toResponse(saved);
 	}
 
 	@Transactional(readOnly = true)
@@ -106,16 +136,19 @@ public class AttractionService extends BaseService{
 
 	    String name = attraction.getName() != null ? attraction.getName().trim() : null;
 	    String description = attraction.getDescription() != null ? attraction.getDescription().trim() : null;
+	    String funFact = attraction.getFunFact() != null ? attraction.getFunFact().trim() : null;
 
-	    if ((name == null || existingAttraction.getName().equals(name)) &&
-	        (description == null || existingAttraction.getDescription().equals(description))) {
-	        throw new IllegalArgumentException("No changes detected for the attraction.");
+	    if ((name == null || existingAttraction.getName().equals(name)) 
+	    		&& (description == null || existingAttraction.getDescription().equals(description))
+	        	&& (funFact == null || existingAttraction.getFunFact().equals(funFact))) {
+	    	throw new IllegalArgumentException("No changes detected for the attraction.");
 	    }
 
 	    Attraction prevAttraction = createAttractionCopy(existingAttraction);
 
 	    if (name != null) existingAttraction.setName(name);
 	    if (description != null) existingAttraction.setDescription(description);
+	    if (funFact != null) existingAttraction.setFunFact(funFact);
 
 	    Attraction updated = attractionRepository.save(existingAttraction);
 
