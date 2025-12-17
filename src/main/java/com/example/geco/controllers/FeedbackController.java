@@ -101,6 +101,7 @@ public class FeedbackController extends AbstractController {
 	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
 	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+	    @Parameter(description = "Filter feedbacks by activeness") @RequestParam(required = false) Boolean isActive,
 
 	    @Parameter(description = "Page number (0-based index)", example = "0")
 	    @RequestParam(defaultValue = "0") int page,
@@ -109,7 +110,7 @@ public class FeedbackController extends AbstractController {
 	    @RequestParam(defaultValue = "10") int size
 	) {
 	    Pageable pageable = PageRequest.of(page, size);
-	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, null, pageable);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, isActive, pageable);
 	    return ResponseEntity.ok(feedbacks);
 	}
 
