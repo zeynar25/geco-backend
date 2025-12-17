@@ -57,21 +57,21 @@ public class AdminDashboardService {
 		BookingStatus status = request.getStatus();
 		
 		if ((email == null || email.isBlank()) && status == null) {
-			return bookingRepository.findAllByOrderByVisitDateAscVisitTimeAsc();
+			return bookingRepository.findAllByOrderByVisitDateDescVisitTimeAsc();
 		}
 		
 		if (email == null || email.isBlank()) {
-			return bookingRepository.findByBookingStatusOrderByVisitDateAscVisitTimeAsc(status);
+			return bookingRepository.findByBookingStatusOrderByVisitDateDescVisitTimeAsc(status);
 		}
 		
 		Account account = accountRepository.findByDetailEmail(email.strip())
 			.orElseThrow(() -> new UsernameNotFoundException("Account with Email '" + email + "' not found."));
 		
 		if (status == null) {
-			return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(account.getAccountId());
+			return bookingRepository.findByAccount_AccountIdOrderByVisitDateDescVisitTimeAsc(account.getAccountId());
 		}
 		
-		return bookingRepository.findByAccount_AccountIdAndBookingStatusOrderByVisitDateAscVisitTimeAsc(account.getAccountId(), status);
+		return bookingRepository.findByAccount_AccountIdAndBookingStatusOrderByVisitDateDescVisitTimeAsc(account.getAccountId(), status);
 	}
 
 	public AdminDashboardFinances getDashboardFinance(Integer year, Integer month) {

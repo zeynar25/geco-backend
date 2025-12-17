@@ -16,9 +16,12 @@ import com.example.geco.domains.TourPackage;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer>{
-	List<Booking> findAllByOrderByVisitDateAscVisitTimeAsc();
+	List<Booking> findAllByOrderByVisitDateDescVisitTimeAsc();
+
+	Page<Booking> findAllByOrderByVisitDateDescVisitTimeAsc(Pageable pageable
+	);
 	
-	Page<Booking> findByAccount_AccountIdAndVisitDateBetween(
+	Page<Booking> findByAccount_AccountIdAndVisitDateBetweenOrderByVisitDateDescVisitTime(
 			int accountId, 
 			LocalDate startDate, 
 			LocalDate endDate,
@@ -26,8 +29,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 
 	List<Booking> findByVisitDate(LocalDate date);
 	
-	
-	Page<Booking> findByVisitDateBetween(
+	Page<Booking> findByVisitDateBetweenOrderByVisitDateDesc(
 			LocalDate startDate, LocalDate endDate, Pageable pageable
 	);
 	
@@ -39,15 +41,15 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	List<Booking> findByVisitDateOrderByVisitTimeAsc(LocalDate visitDate);
 	
 	
-	Page<Booking> findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(int id, Pageable pageable);
-	List<Booking> findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(int id);
+	Page<Booking> findByAccount_AccountIdOrderByVisitDateDescVisitTimeAsc(int id, Pageable pageable);
+	List<Booking> findByAccount_AccountIdOrderByVisitDateDescVisitTimeAsc(int id);
 	
 	
-	List<Booking> findByAccount_AccountIdAndBookingStatusOrderByVisitDateAscVisitTimeAsc(
+	List<Booking> findByAccount_AccountIdAndBookingStatusOrderByVisitDateDescVisitTimeAsc(
 			int id, 
 			BookingStatus status);
 
-	List<Booking> findByBookingStatusOrderByVisitDateAscVisitTimeAsc(BookingStatus status);
+	List<Booking> findByBookingStatusOrderByVisitDateDescVisitTimeAsc(BookingStatus status);
 	
 	List<Booking> findByBookingStatusAndVisitDateBetween(
 			BookingStatus status, 
@@ -110,7 +112,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 
 	List<Booking> findByVisitDateAndBookingIdNotOrderByVisitTimeAsc(LocalDate visitDate, Integer id);
 
-	Page<Booking> findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(
+	Page<Booking> findByAccount_AccountIdAndIsActiveOrderByVisitDateDescVisitTimeAsc(
 			Integer accountId, boolean isActive, Pageable pageable);
 
 	Page<Booking> findAllByIsActive(boolean isActive, Pageable pageable);

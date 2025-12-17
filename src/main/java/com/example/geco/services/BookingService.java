@@ -297,18 +297,18 @@ public class BookingService extends BaseService{
 	        LocalDate endDate,
 	        Pageable pageable) {
 	    if (accountId == null && startDate == null && endDate == null) {
-	    	return bookingRepository.findAll(pageable);
+	    	return bookingRepository.findAllByOrderByVisitDateDescVisitTimeAsc(pageable);
 	    } 
 
 	    if (accountId == null) {
-	    	return bookingRepository.findByVisitDateBetween(startDate, endDate, pageable);
+	    	return bookingRepository.findByVisitDateBetweenOrderByVisitDateDesc(startDate, endDate, pageable);
 	    }
 	    
 	    if (startDate == null && endDate == null) {
-	    	return bookingRepository.findByAccount_AccountIdOrderByVisitDateAscVisitTimeAsc(accountId, pageable);
+	    	return bookingRepository.findByAccount_AccountIdOrderByVisitDateDescVisitTimeAsc(accountId, pageable);
 	    } 
 	    
-    	return bookingRepository.findByAccount_AccountIdAndVisitDateBetween(
+    	return bookingRepository.findByAccount_AccountIdAndVisitDateBetweenOrderByVisitDateDescVisitTime(
     			accountId, startDate, endDate, pageable);
 	}
 
@@ -327,7 +327,7 @@ public class BookingService extends BaseService{
 	    }
 	    
 	    if (startDate == null && endDate == null) {
-	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(
+	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateDescVisitTimeAsc(
 	    			accountId, true, pageable);
 	    } 
 	    
@@ -358,7 +358,7 @@ public class BookingService extends BaseService{
 	    }
 	    
 	    if (startDate == null && endDate == null) {
-	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateAscVisitTimeAsc(
+	    	return bookingRepository.findByAccount_AccountIdAndIsActiveOrderByVisitDateDescVisitTimeAsc(
 	    			accountId, false, pageable);
 	    } 
 	    
@@ -368,7 +368,7 @@ public class BookingService extends BaseService{
 
 	@Transactional(readOnly = true)
 	public double getAverageVisitor(String type) {
-		Iterable<Booking> iterable = bookingRepository.findAllByOrderByVisitDateAscVisitTimeAsc();	
+		Iterable<Booking> iterable = bookingRepository.findAllByOrderByVisitDateDescVisitTimeAsc();	
 		List<Booking> bookings = StreamSupport
 		        .stream(iterable.spliterator(), false)
 		        .collect(Collectors.toList());
