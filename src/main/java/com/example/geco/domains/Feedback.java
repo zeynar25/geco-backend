@@ -48,6 +48,8 @@ public class Feedback {
 	private String comment;
 	private String suggestion;
 	
+	private String staffReply;
+	
 	@Enumerated(EnumType.STRING)
 	private FeedbackStatus feedbackStatus;
 	

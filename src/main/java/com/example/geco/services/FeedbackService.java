@@ -64,6 +64,7 @@ public class FeedbackService extends BaseService{
 				.stars(feedback.getStars())
 				.comment(feedback.getComment())
 				.suggestion(feedback.getSuggestion())
+				.staffReply(feedback.getStaffReply())
 				.feedbackStatus(feedback.getFeedbackStatus())
 				.isActive(feedback.isActive())
 				.build();
@@ -249,7 +250,9 @@ public class FeedbackService extends BaseService{
 		Double stars = request.getStars();
 	    String comment = request.getComment() != null ? request.getComment().trim() : null;
 	    String suggestion = request.getSuggestion() != null ? request.getSuggestion().trim() : null;
-		FeedbackStatus feedbackStatus = request.getFeedbackStatus();
+
+	    String staffReply = request.getStaffReply() != null ? request.getStaffReply().trim() : null;
+	    FeedbackStatus feedbackStatus = request.getFeedbackStatus();
 	    
 		if (stars == null 
 				&& comment == null 
@@ -279,6 +282,10 @@ public class FeedbackService extends BaseService{
 				throw new IllegalArgumentException("Suggestion must be at least 10 characters");
 			}
 	    } 
+		
+		if (staffReply != null) {
+		    existingFeedback.setStaffReply(staffReply); 
+		}
 		
 		if (feedbackStatus != null && !feedbackStatus.equals(existingFeedback.getFeedbackStatus())) {
 		    existingFeedback.setFeedbackStatus(feedbackStatus);  
