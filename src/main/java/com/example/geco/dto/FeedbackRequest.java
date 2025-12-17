@@ -25,9 +25,10 @@ public class FeedbackRequest {
     @Max(value = 5, message = "Stars cannot exceed 5")
     private Double stars;
 
-    @NotBlank(message = "Comment is required")
+    // Optional
     @Size(min = 10, message = "Feedback comment must be at least 10 characters long.")
     private String comment;
 
-    private String suggestion; // Optional
+    @Size(min = 10, message = "Feedback suggestion must be at least 10 characters long.")
+    private String suggestion;
 }

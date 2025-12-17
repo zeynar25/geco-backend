@@ -74,7 +74,7 @@ public class FeedbackService extends BaseService{
 		Integer bookingId = request.getBookingId();
 		Integer feedbackCategoryId = request.getCategoryId();
 		Double stars = request.getStars();
-		String comment = request.getComment().trim();
+		String comment = request.getComment() != null ? request.getComment().trim() : null;
 		String suggestion = request.getSuggestion() != null ? request.getSuggestion().trim() : null;
 		
 	    Account account = accountRepository.findById(accountId)
