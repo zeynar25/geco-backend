@@ -1,6 +1,7 @@
 package com.example.geco.dto;
 
 import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.domains.Booking.PaymentMethod;
 import com.example.geco.domains.Booking.PaymentStatus;
 
 import jakarta.validation.constraints.Size;
@@ -18,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 public class BookingUpdateRequest extends UserBookingUpdateRequest{
 	private BookingStatus bookingStatus;
     private PaymentStatus paymentStatus;
+    private PaymentMethod paymentMethod;
     
     @Size(min = 5, message = "Staff reply comment must be at least 5 characters long.")
     private String staffReply;
