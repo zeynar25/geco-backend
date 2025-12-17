@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 @Table(name="booking")
 public class Booking {
 	public enum BookingStatus {
-	    PENDING, APPROVED, CANCELLED, REJECTED, COMPLETED;
+	    PENDING, CANCELLED, APPROVED, REJECTED, COMPLETED;
 		
 		public boolean canTransitionTo(BookingStatus newStatus) {
 	        return switch (this) {
@@ -45,12 +45,12 @@ public class Booking {
 	}
 	
 	public enum PaymentStatus {
-	    UNPAID, PENDING_VERIFICATION, VERIFIED, REJECTED, REFUNDED;
+	    UNPAID, PAYMENT_VERIFICATION, VERIFIED, REJECTED, REFUNDED;
 
 	    public boolean canTransitionTo(PaymentStatus newStatus) {
 	        return switch (this) {
-	            case UNPAID -> newStatus == PENDING_VERIFICATION || newStatus == REJECTED;
-	            case PENDING_VERIFICATION -> newStatus == VERIFIED || newStatus == REJECTED;
+	            case UNPAID -> newStatus == PAYMENT_VERIFICATION || newStatus == REJECTED;
+	            case PAYMENT_VERIFICATION -> newStatus == VERIFIED || newStatus == REJECTED;
 	            case VERIFIED -> newStatus == REFUNDED; // can refund but not go back
 	            case REJECTED, REFUNDED -> false;
 	        };
