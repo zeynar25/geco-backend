@@ -23,6 +23,8 @@ public class FeedbackResponse {
 	private double stars;
 	private String comment;
 	private String suggestion;
+	private String staffReply;
+	
 	private FeedbackStatus feedbackStatus;
 	
 	private boolean isActive;

@@ -50,6 +50,7 @@ public class FeedbackService extends BaseService{
 				.stars(feedback.getStars())
 				.comment(feedback.getComment())
 				.suggestion(feedback.getSuggestion())
+				.staffReply(feedback.getStaffReply())
 				.feedbackStatus(feedback.getFeedbackStatus())
 				.isActive(feedback.isActive())
 				.build();
@@ -257,6 +258,7 @@ public class FeedbackService extends BaseService{
 		if (stars == null 
 				&& comment == null 
 				&& suggestion == null 
+				&& staffReply == null
 				&& feedbackStatus == null) {
 			throw new IllegalArgumentException("No fields provided to update feedback.");
 		}
