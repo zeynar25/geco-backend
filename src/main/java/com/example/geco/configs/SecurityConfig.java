@@ -68,6 +68,7 @@ public class SecurityConfig {
 		            
 		            .requestMatchers(HttpMethod.POST, "/booking").authenticated()
 		            .requestMatchers(HttpMethod.GET, "/booking/me").authenticated()
+		            .requestMatchers(HttpMethod.GET, "/booking/active").permitAll()
 		            .requestMatchers(HttpMethod.GET, "/booking/**").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.PATCH, "/booking/{id}", "/booking/staff/{id}")
 		            	.hasAnyRole("STAFF", "ADMIN")
@@ -83,6 +84,7 @@ public class SecurityConfig {
 		            
 		            .requestMatchers(HttpMethod.POST, "/feedback").authenticated()
 		            .requestMatchers(HttpMethod.GET, "/feedback/me").authenticated() 
+		            .requestMatchers(HttpMethod.GET, "/feedback/active").permitAll() 
 		            .requestMatchers(HttpMethod.GET, "/feedback/**").hasAnyRole("STAFF", "ADMIN") 
 		            .requestMatchers(HttpMethod.PATCH, "/feedback/{id}").authenticated()
 		            .requestMatchers(HttpMethod.PATCH, "/feedback/staff/{id}").hasAnyRole("STAFF", "ADMIN") 
