@@ -68,7 +68,6 @@ public class SecurityConfig {
 		            
 		            .requestMatchers(HttpMethod.POST, "/booking").authenticated()
 		            .requestMatchers(HttpMethod.GET, "/booking/me").authenticated()
-		            .requestMatchers(HttpMethod.GET, "/booking/active").permitAll()
 		            .requestMatchers(HttpMethod.GET, "/booking/**").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers(HttpMethod.PATCH, "/booking/{id}", "/booking/staff/{id}")
 		            	.hasAnyRole("STAFF", "ADMIN")
