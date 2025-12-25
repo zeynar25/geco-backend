@@ -818,24 +818,10 @@ public class BookingService extends BaseService{
 		}
 		
 		if (bookingStatus != null) {
-		    if (!existingBooking.getBookingStatus().canTransitionTo(bookingStatus)) {
-		        throw new IllegalArgumentException(
-		            "Cannot change booking status from " + existingBooking.getBookingStatus() + 
-		            " to " + bookingStatus
-		        );
-		    }
-		    
 		    existingBooking.setBookingStatus(bookingStatus);
 		}
 
 		if (paymentStatus != null) {
-		    if (!existingBooking.getPaymentStatus().canTransitionTo(paymentStatus)) {
-		        throw new IllegalArgumentException(
-		            "Cannot change payment status from " + existingBooking.getPaymentStatus() + 
-		            " to " + paymentStatus
-		        );
-		    }
-		    
 		    existingBooking.setPaymentStatus(paymentStatus);
 		}
 		

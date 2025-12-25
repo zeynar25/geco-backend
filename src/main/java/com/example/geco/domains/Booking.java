@@ -33,28 +33,10 @@ import lombok.NoArgsConstructor;
 public class Booking {
 	public enum BookingStatus {
 	    PENDING, CANCELLED, APPROVED, REJECTED, COMPLETED;
-		
-		public boolean canTransitionTo(BookingStatus newStatus) {
-	        return switch (this) {
-	            case PENDING -> newStatus == APPROVED || newStatus == CANCELLED || newStatus == REJECTED;
-	            case APPROVED -> newStatus == COMPLETED || newStatus == CANCELLED;
-	            case COMPLETED -> false; // cannot move backwards
-	            case CANCELLED, REJECTED -> false; // cannot move backwards
-	        };
-	    }
 	}
 	
 	public enum PaymentStatus {
-	    UNPAID, PAYMENT_VERIFICATION, VERIFIED, REJECTED, REFUNDED;
-
-	    public boolean canTransitionTo(PaymentStatus newStatus) {
-	        return switch (this) {
-	            case UNPAID -> newStatus == PAYMENT_VERIFICATION || newStatus == REJECTED;
-	            case PAYMENT_VERIFICATION -> newStatus == VERIFIED || newStatus == REJECTED;
-	            case VERIFIED -> newStatus == REFUNDED; // can refund but not go back
-	            case REJECTED, REFUNDED -> false;
-	        };
-	    }              
+	    UNPAID, PAYMENT_VERIFICATION, VERIFIED, REJECTED, REFUNDED;  
 	}
 	
 	public enum PaymentMethod {
