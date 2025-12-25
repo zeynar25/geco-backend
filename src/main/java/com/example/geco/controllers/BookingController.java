@@ -94,7 +94,7 @@ public class BookingController extends AbstractController {
     
     @Operation(
             summary = "Get all Bookings",
-            description = "Retrieve a list of bookings. Can filter by account ID and/or date range."
+            description = "Retrieve a list of bookings. Can filter by account's accountId, date range, booking & payment statuses, and payment method"
     )
     @GetMapping
     public ResponseEntity<Page<Booking>> getAllBookings(
