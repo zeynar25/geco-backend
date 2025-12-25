@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Booking;
+import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.domains.Booking.PaymentMethod;
+import com.example.geco.domains.Booking.PaymentStatus;
 import com.example.geco.dto.BookingRequest;
 import com.example.geco.dto.BookingUpdateRequest;
 import com.example.geco.dto.UserBookingUpdateRequest;
@@ -106,6 +109,15 @@ public class BookingController extends AbstractController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
+            @Parameter(description = "Booking Status")
+            @RequestParam(required = false) BookingStatus bookingStatus,
+
+            @Parameter(description = "Payment Status")
+            @RequestParam(required = false) PaymentStatus paymentStatus,
+
+            @Parameter(description = "Payment Method")
+            @RequestParam(required = false) PaymentMethod paymentMethod,
+            
             @Parameter(description = "Page number")
             @RequestParam(defaultValue = "0") int page,
 
@@ -113,7 +125,7 @@ public class BookingController extends AbstractController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Booking> bookings = bookingService.getBookingByAccountAndDateRange(accountId, startDate, endDate, pageable);
+        Page<Booking> bookings = bookingService.getBookingByFilters(accountId, startDate, endDate, bookingStatus, paymentStatus, paymentMethod, pageable);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 

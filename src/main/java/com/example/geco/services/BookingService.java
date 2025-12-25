@@ -289,6 +289,27 @@ public class BookingService extends BaseService{
 		return bookingRepository.findById(id)
 	            .orElseThrow(() -> new EntityNotFoundException("Booking with ID '" + id + "' not found."));
 	}
+	
+	@Transactional(readOnly = true)
+	public Page<Booking> getBookingByFilters(
+	        Integer accountId,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        BookingStatus bookingStatus,
+	        PaymentStatus paymentStatus,
+	        PaymentMethod paymentMethod,
+	        Pageable pageable) {
+
+	    return bookingRepository.findByFilters(
+	            accountId,
+	            startDate,
+	            endDate,
+	            bookingStatus,
+	            paymentStatus,
+	            paymentMethod,
+	            pageable
+	    );
+	}
 
 	@Transactional(readOnly = true)
 	public Page<Booking> getBookingByAccountAndDateRange(

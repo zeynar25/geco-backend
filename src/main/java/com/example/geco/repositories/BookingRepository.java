@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
+import com.example.geco.domains.Booking.PaymentMethod;
+import com.example.geco.domains.Booking.PaymentStatus;
 import com.example.geco.domains.TourPackage;
 
 @Repository
@@ -110,6 +112,30 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 
 	Long countByTourPackageAndVisitDateBetween(TourPackage tourPackage, LocalDate startDate, LocalDate endDate);
 
+	@Query("""
+       SELECT b
+       FROM Booking b
+       WHERE (:accountId IS NULL OR b.account.accountId = :accountId)
+         AND (
+              (:startDate IS NULL AND :endDate IS NULL)
+              OR b.visitDate BETWEEN COALESCE(:startDate, b.visitDate)
+                                 AND COALESCE(:endDate, b.visitDate)
+         )
+         AND (:bookingStatus IS NULL OR b.bookingStatus = :bookingStatus)
+         AND (:paymentStatus IS NULL OR b.paymentStatus = :paymentStatus)
+         AND (:paymentMethod IS NULL OR b.paymentMethod = :paymentMethod)
+       ORDER BY b.visitDate DESC, b.visitTime ASC
+       """)
+	Page<Booking> findByFilters(
+	        @Param("accountId") Integer accountId,
+	        @Param("startDate") LocalDate startDate,
+	        @Param("endDate") LocalDate endDate,
+	        @Param("bookingStatus") BookingStatus bookingStatus,
+	        @Param("paymentStatus") PaymentStatus paymentStatus,
+	        @Param("paymentMethod") PaymentMethod paymentMethod,
+	        Pageable pageable
+	);
+	
 	List<Booking> findByVisitDateAndBookingIdNotOrderByVisitTimeAsc(LocalDate visitDate, Integer id);
 
 	Page<Booking> findByAccount_AccountIdAndIsActiveOrderByVisitDateDescVisitTimeAsc(
