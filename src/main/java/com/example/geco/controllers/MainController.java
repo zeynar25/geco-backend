@@ -120,8 +120,8 @@ public class MainController extends AbstractController {
     )
     @GetMapping("/dashboard/finances")
     public ResponseEntity<AdminDashboardFinances> displayDashboardFinances(
-        @Parameter(description = "Year to retrieve") @RequestParam int year,
-        @Parameter(description = "Month to retrieve") @RequestParam int month
+        @Parameter(description = "Year to retrieve") @RequestParam(required = false) Integer year,
+        @Parameter(description = "Month to retrieve") @RequestParam(required = false) Integer month
     ) {
         AdminDashboardFinances stats = adminDashboardService.getDashboardFinance(year, month);
         return new ResponseEntity<>(stats, HttpStatus.OK);
