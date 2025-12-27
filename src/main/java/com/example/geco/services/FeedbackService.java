@@ -248,17 +248,11 @@ public class FeedbackService extends BaseService{
 	
 	// Can update the feedbackStatus to viewed.
 	public FeedbackResponse updateFeedbackByStaff(int id, FeedbackUpdateRequest request) {
-		Double stars = request.getStars();
-	    String comment = request.getComment() != null ? request.getComment().trim() : null;
-	    String suggestion = request.getSuggestion() != null ? request.getSuggestion().trim() : null;
-
 	    String staffReply = request.getStaffReply() != null ? request.getStaffReply().trim() : null;
 	    FeedbackStatus feedbackStatus = request.getFeedbackStatus();
 	    
-		if (stars == null 
-				&& comment == null 
-				&& suggestion == null 
-				&& staffReply == null
+		if (
+				staffReply == null
 				&& feedbackStatus == null) {
 			throw new IllegalArgumentException("No fields provided to update feedback.");
 		}
@@ -267,23 +261,6 @@ public class FeedbackService extends BaseService{
 				.orElseThrow(() -> new EntityNotFoundException("Feedback with ID '" + id + "' not found."));
 		
 		Feedback prevFeedback = createFeedbackCopy(existingFeedback);
-		
-		if (stars != null) {
-			stars = Math.round(stars * 10.0) / 10.0;
-			existingFeedback.setStars(stars); 
-	    } 
-		
-		if (comment != null) {
-		    existingFeedback.setComment(comment);  
-	    } 
-		
-		if (suggestion != null) {
-			if (suggestion.length() >= 10) {
-			    existingFeedback.setSuggestion(suggestion);  
-			} else {
-				throw new IllegalArgumentException("Suggestion must be at least 10 characters");
-			}
-	    } 
 		
 		if (staffReply != null) {
 		    existingFeedback.setStaffReply(staffReply); 
