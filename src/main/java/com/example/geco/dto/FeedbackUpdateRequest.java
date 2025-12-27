@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class FeedbackUpdateRequest {
-    @Size(min = 10, message = "Reply must be at least 10 characters")
+    @Size(min = 5, message = "Reply must be at least 5 characters")
 	private String staffReply;
 	private FeedbackStatus feedbackStatus;
 }
