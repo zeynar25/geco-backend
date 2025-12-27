@@ -43,4 +43,32 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 
 	Page<Feedback> findByCategory_FeedbackCategoryIdAndAccount_AccountIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
 			Integer categoryId, int accountId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+
+	Page<Feedback> findByFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	        FeedbackStatus feedbackStatus,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        Pageable pageable);
+
+	Page<Feedback> findByFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	        FeedbackStatus feedbackStatus,
+	        boolean isActive,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        Pageable pageable);
+
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	        Integer categoryId,
+	        FeedbackStatus feedbackStatus,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        Pageable pageable);
+
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	        Integer categoryId,
+	        FeedbackStatus feedbackStatus,
+	        boolean isActive,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        Pageable pageable);
 }

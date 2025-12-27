@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.geco.domains.Feedback.FeedbackStatus;
 import com.example.geco.dto.FeedbackRequest;
 import com.example.geco.dto.FeedbackResponse;
 import com.example.geco.dto.FeedbackUpdateRequest;
@@ -101,6 +102,7 @@ public class FeedbackController extends AbstractController {
 	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
 	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+	    @Parameter(description = "Filter feedbacks by feedbackStatus") @RequestParam(required = false) FeedbackStatus feedbackStatus,
 	    @Parameter(description = "Filter feedbacks by activeness") @RequestParam(required = false) Boolean isActive,
 
 	    @Parameter(description = "Page number (0-based index)", example = "0")
@@ -110,7 +112,7 @@ public class FeedbackController extends AbstractController {
 	    @RequestParam(defaultValue = "10") int size
 	) {
 	    Pageable pageable = PageRequest.of(page, size);
-	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, isActive, pageable);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, feedbackStatus, isActive, pageable);
 	    return ResponseEntity.ok(feedbacks);
 	}
 
@@ -124,6 +126,7 @@ public class FeedbackController extends AbstractController {
 	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
 	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+	    @Parameter(description = "Filter feedbacks by feedbackStatus") @RequestParam(required = false) FeedbackStatus feedbackStatus,
 
 	    @Parameter(description = "Page number (0-based index)", example = "0")
 	    @RequestParam(defaultValue = "0") int page,
@@ -132,7 +135,7 @@ public class FeedbackController extends AbstractController {
 	    @RequestParam(defaultValue = "10") int size
 	) {
 	    Pageable pageable = PageRequest.of(page, size);
-	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, true, pageable);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, feedbackStatus, true, pageable);
 	    return ResponseEntity.ok(feedbacks);
 	}
 
@@ -146,6 +149,7 @@ public class FeedbackController extends AbstractController {
 	    @Parameter(description = "Filter feedbacks by category ID") @RequestParam(required = false) Integer categoryId,
 	    @Parameter(description = "Start date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 	    @Parameter(description = "End date for filtering feedbacks") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+	    @Parameter(description = "Filter feedbacks by feedbackStatus") @RequestParam(required = false) FeedbackStatus feedbackStatus,
 
 	    @Parameter(description = "Page number (0-based index)", example = "0")
 	    @RequestParam(defaultValue = "0") int page,
@@ -154,7 +158,7 @@ public class FeedbackController extends AbstractController {
 	    @RequestParam(defaultValue = "10") int size
 	) {
 	    Pageable pageable = PageRequest.of(page, size);
-	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, false, pageable);
+	    Page<FeedbackResponse> feedbacks = feedbackService.getFeedbacks(categoryId, startDate, endDate, feedbackStatus, false, pageable);
 	    return ResponseEntity.ok(feedbacks);
 	}
 

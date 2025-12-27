@@ -172,39 +172,62 @@ public class FeedbackService extends BaseService{
 	        Integer categoryId,
 	        LocalDate startDate,
 	        LocalDate endDate,
-	        Boolean isActive, // null = all, true = active, false = inactive
+	        FeedbackStatus feedbackStatus,
+	        Boolean isActive,
 	        Pageable pageable
 	) {
 	    startDate = defaultStartDate(startDate);
 	    endDate = defaultEndDate(endDate);
 	    validateDateRange(startDate, endDate);
-	
+
 	    Page<Feedback> feedbacks;
-	
+
 	    if (categoryId == null) {
 	        if (isActive == null) {
-	            feedbacks = feedbackRepository
-	            		.findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	            				startDate, endDate, pageable);
-	        
+	            if (feedbackStatus == null) {
+	                feedbacks =
+	                    feedbackRepository.findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        startDate, endDate, pageable);
+	            } else {
+	                feedbacks =
+	                    feedbackRepository.findByFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        feedbackStatus, startDate, endDate, pageable);
+	            }
 	        } else {
-	            feedbacks = feedbackRepository
-	            		.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	            				isActive, startDate, endDate, pageable);
+	            if (feedbackStatus == null) {
+	                feedbacks =
+	                    feedbackRepository.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        isActive, startDate, endDate, pageable);
+	            } else {
+	                feedbacks =
+	                    feedbackRepository.findByFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        feedbackStatus, isActive, startDate, endDate, pageable);
+	            }
 	        }
-	        
 	    } else {
 	        if (isActive == null) {
-	            feedbacks = feedbackRepository
-	            		.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	            				categoryId, startDate, endDate, pageable);
-	        
+	            if (feedbackStatus == null) {
+	                feedbacks =
+	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        categoryId, startDate, endDate, pageable);
+	            } else {
+	                feedbacks =
+	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        categoryId, feedbackStatus, startDate, endDate, pageable);
+	            }
 	        } else {
-	            feedbacks = feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                    categoryId, isActive, startDate, endDate, pageable);
+	            if (feedbackStatus == null) {
+	                feedbacks =
+	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        categoryId, isActive, startDate, endDate, pageable);
+	            } else {
+	                feedbacks =
+	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                        categoryId, feedbackStatus, isActive, startDate, endDate, pageable);
+	            }
 	        }
 	    }
-	
+
 	    return mapToResponse(feedbacks);
 	}
 
