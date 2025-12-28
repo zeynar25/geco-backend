@@ -1,9 +1,12 @@
 package com.example.geco.services;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,11 +61,13 @@ public class AuditLogService {
     }
     
     @Transactional(readOnly = true)
-    public List<AuditLog> getLogs(
+    public Page<AuditLog> getLogs(
             LocalDateTime start,
             LocalDateTime end,
-            String entityName,   
-            AuditLog.LogAction action
+            String entityName,
+            AuditLog.LogAction action,
+            int page,
+            int size
     ) {
         Integer earliestYear = bookingRepository.getEarliestYear();
 
@@ -78,31 +83,34 @@ public class AuditLogService {
             throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
         }
 
-        // If both filters are provided
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "timestamp")
+        );
+
+        // Both filters
         if (entityName != null && !entityName.isBlank() && action != null) {
             return auditLogRepository
-                    .findAllByEntityNameAndActionAndTimestampBetweenOrderByTimestampDesc(
-                            entityName, action, startTime, endTime);
+                    .findAllByEntityNameAndActionAndTimestampBetween(
+                            entityName, action, startTime, endTime, pageable);
         }
-        
-        // Only entityName filter
+        // Only entityName
         else if (entityName != null && !entityName.isBlank()) {
             return auditLogRepository
-                    .findAllByEntityNameAndTimestampBetweenOrderByTimestampDesc(
-                            entityName, startTime, endTime);
+                    .findAllByEntityNameAndTimestampBetween(
+                            entityName, startTime, endTime, pageable);
         }
-        
-        // Only action filter
+        // Only action
         else if (action != null) {
             return auditLogRepository
-                    .findAllByActionAndTimestampBetweenOrderByTimestampDesc(
-                            action, startTime, endTime);
+                    .findAllByActionAndTimestampBetween(
+                            action, startTime, endTime, pageable);
         }
-        
         // No filters
         else {
             return auditLogRepository
-                    .findAllByTimestampBetweenOrderByTimestampDesc(startTime, endTime);
+                    .findAllByTimestampBetween(startTime, endTime, pageable);
         }
     }
 

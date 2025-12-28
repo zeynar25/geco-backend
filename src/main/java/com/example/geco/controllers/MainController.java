@@ -2,9 +2,11 @@ package com.example.geco.controllers;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -202,20 +204,43 @@ public class MainController extends AbstractController {
     // -------------------------------
 
     @Operation(
-        summary = "Get Audit Logs",
-        description = "Retrieve logs filtered by optional date range, entity name, or action type."
-    )
-    @GetMapping("/dashboard/logs")
-    public ResponseEntity<List<AuditLog>> getAuditLogs(
-        @Parameter(description = "Start datetime in ISO format (yyyy-MM-ddTHH:mm:ss)") @RequestParam(required = false) String start,
-        @Parameter(description = "End datetime in ISO format (yyyy-MM-ddTHH:mm:ss)") @RequestParam(required = false) String end,
-        @Parameter(description = "Filter by entity name") @RequestParam(required = false) String entityName,
-        @Parameter(description = "Filter by log action type") @RequestParam(required = false) LogAction action
-    ) {
-        LocalDateTime startTime = start != null ? LocalDateTime.parse(start) : null;
-        LocalDateTime endTime = end != null ? LocalDateTime.parse(end) : null;
+    	    summary = "Get Audit Logs",
+    	    description = "Retrieve logs filtered by optional date range, entity name, or action type."
+    	)
+    	@GetMapping("/dashboard/logs")
+    	public ResponseEntity<Page<AuditLog>> getAuditLogs(
+    	    @Parameter(description = "Start datetime in ISO format (yyyy-MM-ddTHH:mm:ss)")
+    	    @RequestParam(required = false) String start,
+    	    @Parameter(description = "End datetime in ISO format (yyyy-MM-ddTHH:mm:ss)")
+    	    @RequestParam(required = false) String end,
+    	    @Parameter(description = "Filter by entity name")
+    	    @RequestParam(required = false) String entityName,
+    	    @Parameter(description = "Filter by log action type")
+    	    @RequestParam(required = false) LogAction action,
+    	    @Parameter(description = "Page number (0-based)")
+    	    @RequestParam(defaultValue = "0") int page,
+    	    @Parameter(description = "Page size")
+    	    @RequestParam(defaultValue = "20") int size
+    	) {
+    	    LocalDateTime startTime = null;
+    	    LocalDateTime endTime = null;
 
-        List<AuditLog> logs = auditLogService.getLogs(startTime, endTime, entityName, action);
-        return ResponseEntity.ok(logs);
-    }
+    	    try {
+    	        if (start != null) {
+    	            startTime = LocalDateTime.parse(start);
+    	        }
+    	        if (end != null) {
+    	            endTime = LocalDateTime.parse(end);
+    	        }
+    	    } catch (DateTimeParseException ex) {
+    	        throw new IllegalArgumentException(
+    	            "Invalid datetime format. Use yyyy-MM-ddTHH:mm:ss", ex
+    	        );
+    	    }
+
+    	    Page<AuditLog> logs =
+    	            auditLogService.getLogs(startTime, endTime, entityName, action, page, size);
+
+    	    return ResponseEntity.ok(logs);
+    	}
 }
