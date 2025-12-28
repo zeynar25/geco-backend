@@ -87,7 +87,6 @@ public class FaqService extends BaseService{
 	}
 
 
-	@Transactional(readOnly = true)
 	public Faq updateFaq(Faq faq) {
 		if (faq.getQuestion() == null && faq.getAnswer() == null) {
 			throw new IllegalArgumentException("FAQ question and answer is empty.");
