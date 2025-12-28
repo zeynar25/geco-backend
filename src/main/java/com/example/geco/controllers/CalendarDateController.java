@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/calendar-date")
-@Tag(name = "Account", description = "Operations about CalendarDate")
+@Tag(name = "Calendar Date", description = "Operations about CalendarDate")
 public class CalendarDateController extends AbstractController{
 	@PostMapping
     @Operation(
