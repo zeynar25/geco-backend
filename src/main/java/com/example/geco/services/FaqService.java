@@ -132,7 +132,7 @@ public class FaqService extends BaseService{
 		
 		List<Faq> updatedOrderList = getAllFaqs();
 		
-		logIfStaffOrAdmin("Faq", null, LogAction.DISABLE, prevOrderList, updatedOrderList);
+		logIfStaffOrAdmin("Faq", null, LogAction.UPDATE, prevOrderList, updatedOrderList);
 	}
 	
 	public void softDeleteFaq(int id) {
