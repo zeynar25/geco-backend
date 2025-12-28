@@ -123,39 +123,87 @@ public class AttractionService extends BaseService{
 	            .collect(Collectors.toList());
 	}
 	
-	public AttractionResponse updateAttraction(int id, Attraction attraction) {
+	public AttractionResponse updateAttraction(int id,
+            AttractionRequest request,
+            MultipartFile image) throws IOException {
 		Attraction existingAttraction = attractionRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
-
-		if (attraction.getName() != null && attraction.getName().trim().length() < 1) {
-	        throw new IllegalArgumentException("Attraction name must have at least 1 character.");
-	    }
-
-	    if (attraction.getDescription() != null && attraction.getDescription().trim().length() < 10) {
-	        throw new IllegalArgumentException("Attraction description must be at least 10 characters long.");
-	    }
-
-	    String name = attraction.getName() != null ? attraction.getName().trim() : null;
-	    String description = attraction.getDescription() != null ? attraction.getDescription().trim() : null;
-	    String funFact = attraction.getFunFact() != null ? attraction.getFunFact().trim() : null;
-
-	    if ((name == null || existingAttraction.getName().equals(name)) 
-	    		&& (description == null || existingAttraction.getDescription().equals(description))
-	        	&& (funFact == null || existingAttraction.getFunFact().equals(funFact))) {
-	    	throw new IllegalArgumentException("No changes detected for the attraction.");
-	    }
-
-	    Attraction prevAttraction = createAttractionCopy(existingAttraction);
-
-	    if (name != null) existingAttraction.setName(name);
-	    if (description != null) existingAttraction.setDescription(description);
-	    if (funFact != null) existingAttraction.setFunFact(funFact);
-
-	    Attraction updated = attractionRepository.save(existingAttraction);
-
-	    logIfStaffOrAdmin("Attraction", (long) updated.getAttractionId(), LogAction.UPDATE, prevAttraction, updated);
-
-	    return toResponse(updated);
+			.orElseThrow(() -> new EntityNotFoundException(
+					"Attraction with ID '" + id + "' not found."
+		));
+		
+		String name = request.getAttractionName();
+		String description = request.getAttractionDescription();
+		String funFact = request.getAttractionFunFact();
+		
+		name = (name != null) ? name.trim() : null;
+		description = (description != null) ? description.trim() : null;
+		funFact = (funFact != null) ? funFact.trim() : null;
+		
+		if (name != null && name.length() < 1) {
+			throw new IllegalArgumentException(
+					"Attraction name must have at least 1 character."
+		);
+		}
+		if (description != null && description.length() < 10) {
+			throw new IllegalArgumentException(
+					"Attraction description must be at least 10 characters long."
+		);
+		}
+		
+		boolean hasTextChange =
+		(name != null && !existingAttraction.getName().equals(name)) ||
+		(description != null && !existingAttraction.getDescription().equals(description)) ||
+		(funFact != null &&
+		!((existingAttraction.getFunFact() == null ? "" : existingAttraction.getFunFact())
+		.equals(funFact)));
+		
+		boolean hasImageChange = image != null && !image.isEmpty();
+		
+		if (!hasTextChange && !hasImageChange) {
+			throw new IllegalArgumentException("No changes detected for the attraction.");
+		}
+		
+		Attraction prevAttraction = createAttractionCopy(existingAttraction);
+		
+		if (name != null) {
+			existingAttraction.setName(name);
+		}
+		
+		if (description != null) {
+			existingAttraction.setDescription(description);
+		}
+		
+		if (funFact != null) {
+			existingAttraction.setFunFact(funFact);
+		}
+		
+		if (hasImageChange) {
+			String ext = Optional.ofNullable(image.getOriginalFilename())
+					.filter(f -> f.contains("."))
+					.map(f -> f.substring(f.lastIndexOf(".")))
+					.orElse("");
+		
+			Path uploadPath = Paths.get(uploadDir);
+			Files.createDirectories(uploadPath);
+			
+			String fileName = "attraction-" + existingAttraction.getAttractionId() + ext;
+			Path target = uploadPath.resolve(fileName);
+			image.transferTo(target.toFile());
+			
+			existingAttraction.setPhoto2dUrl("/uploads/attractions/" + fileName);
+		}
+		
+		Attraction updated = attractionRepository.save(existingAttraction);
+		
+		logIfStaffOrAdmin(
+			"Attraction",
+			updated.getAttractionId().longValue(),
+			LogAction.UPDATE,
+			prevAttraction,
+			updated
+		);
+		
+		return toResponse(updated);
 	}
 	
 	public void softDeleteAttraction(int id) {

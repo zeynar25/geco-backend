@@ -87,17 +87,24 @@ public class AttractionController extends AbstractController {
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}")
-    @Operation(
-        summary = "Update attraction by ID",
-        description = "Updates the name and/or description of an attraction by its ID"
-    )
-    public ResponseEntity<AttractionResponse> updateAttraction(
-            @PathVariable int id, 
-            @RequestBody @Valid Attraction attraction) {
-        AttractionResponse updatedAttraction = attractionService.updateAttraction(id, attraction);
-        return new ResponseEntity<>(updatedAttraction, HttpStatus.OK);
-    }
+    @PatchMapping(
+	    value = "/{id}",
+	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+	)
+	@Operation(
+	    summary = "Update attraction (with optional image)",
+	    description = "Updates name/description/funFact and optionally replaces the image"
+	)
+	public ResponseEntity<AttractionResponse> updateAttractionWithImage(
+	        @PathVariable int id,
+	        @ModelAttribute AttractionRequest request,
+	        @RequestPart(value = "image", required = false) MultipartFile image
+	) throws IOException {
+
+	    AttractionResponse updatedAttraction =
+	            attractionService.updateAttraction(id, request, image);
+	    return new ResponseEntity<>(updatedAttraction, HttpStatus.OK);
+	}
 
     @DeleteMapping("/{id}")
     @Operation(
