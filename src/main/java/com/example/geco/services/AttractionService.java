@@ -54,6 +54,7 @@ public class AttractionService extends BaseService{
 				.description(a.getDescription())
 				.funFact(a.getFunFact())
 				.photo2dUrl(a.getPhoto2dUrl())
+				.isActive(a.isActive())
 				.build();
     }
 	
