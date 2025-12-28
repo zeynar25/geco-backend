@@ -1,5 +1,9 @@
 package com.example.geco.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
@@ -14,10 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.geco.domains.Account;
 import com.example.geco.domains.AuditLog.LogAction;
@@ -45,6 +51,8 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 @Transactional
 public class BookingService extends BaseService{
+	@Value("${app.upload-dir.payments:C:/sts-4.32.0.RELEASE/dev/geco/uploads/payments}")
+	private String paymentsUploadDir;
 	
 	@Autowired
 	private AccountRepository accountRepository;
@@ -623,61 +631,80 @@ public class BookingService extends BaseService{
 	}
 	
 	
-	public Booking updateBooking(int id, UserBookingUpdateRequest request) {
-		if (request.getVisitDate() == null 
-				&& request.getVisitTime() == null
-				&& request.getGroupSize() == null
-				&& request.getBookingInclusionRequests() == null) {
+	public Booking updateBooking(int id,
+            UserBookingUpdateRequest request,
+            MultipartFile proofOfPaymentFile) {
+
+		boolean hasJsonChanges =
+		request != null &&
+		(request.getVisitDate() != null ||
+		request.getVisitTime() != null ||
+		request.getGroupSize() != null ||
+		request.getBookingInclusionRequests() != null);
+		
+		boolean hasFile =
+		proofOfPaymentFile != null && !proofOfPaymentFile.isEmpty();
+		
+		if (!hasJsonChanges && !hasFile) {
 			throw new IllegalArgumentException("No fields provided to update booking.");
 		}
 		
 		Booking existingBooking = bookingRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Booking with ID '" + id + "' not found."));
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Booking with ID '" + id + "' not found."));
 		
-		LocalDate visitDate = request.getVisitDate() != null ? request.getVisitDate() : null;
-		LocalTime visitTime = request.getVisitTime() != null ? request.getVisitTime() : null;
-		Integer groupSize = request.getGroupSize() != null ? request.getGroupSize() : null;
-		List<BookingInclusionRequest> bookingInclusionRequests = request.getBookingInclusionRequests() != null 
-				? request.getBookingInclusionRequests() : null;
-		
+		LocalDate visitDate = request != null ? request.getVisitDate() : null;
+		LocalTime visitTime = request != null ? request.getVisitTime() : null;
+		Integer groupSize = request != null ? request.getGroupSize() : null;
+		List<BookingInclusionRequest> bookingInclusionRequests =
+		request != null ? request.getBookingInclusionRequests() : null;
 		
 		Booking prevBooking = createBookingCopy(existingBooking);
-		
 		
 		boolean recalculatePrice = false;
 		
 		if (visitDate != null) {
 			LocalDate today = LocalDate.now();
-		    LocalDate currentBookingDate = existingBooking.getVisitDate();
-	
-		    // If the current booking date is within 2 days, forbid changes
-		    if (!currentBookingDate.isAfter(today.plusDays(1))) {
-		        throw new IllegalArgumentException("Cannot change the visit date because the booking is within 2 days.");
-		    }
-		  
+			LocalDate currentBookingDate = existingBooking.getVisitDate();
+			
+			if (!currentBookingDate.isAfter(today.plusDays(1))) {
+				throw new IllegalArgumentException(
+						"Cannot change the visit date because the booking is within 2 days.");
+			}
+		
 			validateVisitDate(visitDate);
 			existingBooking.setVisitDate(visitDate);
 		}
 		
 		if (visitTime != null) {
 			LocalDate today = LocalDate.now();
-		    LocalDate currentBookingDate = existingBooking.getVisitDate();
-
-		    // If the booking is within 2 days, forbid time changes
-		    if (!currentBookingDate.isAfter(today.plusDays(1))) {
-		        throw new IllegalArgumentException("Cannot change the visit time because the booking is within 2 days.");
-		    }
-		    
-			validateVisitTime(existingBooking.getBookingId(), existingBooking.getTourPackage().getDuration(), visitDate, visitTime);
+			LocalDate currentBookingDate = existingBooking.getVisitDate();
+			
+			if (!currentBookingDate.isAfter(today.plusDays(1))) {
+				throw new IllegalArgumentException(
+						"Cannot change the visit time because the booking is within 2 days.");
+			}
+			
+			LocalDate effectiveDate =
+			(visitDate != null) ? visitDate : existingBooking.getVisitDate();
+			
+			validateVisitTime(
+				existingBooking.getBookingId(),
+				existingBooking.getTourPackage().getDuration(),
+				effectiveDate,
+				visitTime
+			);
+			
 			existingBooking.setVisitTime(visitTime);
 		}
 		
 		if (groupSize != null) {
 			recalculatePrice = true;
 			
-			if (groupSize < existingBooking.getTourPackage().getMinPerson() 
-					|| groupSize > existingBooking.getTourPackage().getMaxPerson()) {
-				throw new IllegalArgumentException("Group size cannot go below or beyond the min and max person of the chosen tour package");
+			if (groupSize < existingBooking.getTourPackage().getMinPerson()
+			|| groupSize > existingBooking.getTourPackage().getMaxPerson()) {
+				throw new IllegalArgumentException(
+						"Group size cannot go below or beyond the min and max person of the chosen tour package");
 			}
 			
 			existingBooking.setGroupSize(groupSize);
@@ -686,32 +713,61 @@ public class BookingService extends BaseService{
 		if (bookingInclusionRequests != null) {
 			recalculatePrice = true;
 			
-			// Remove old inclusions
-		    existingBooking.getBookingInclusions().clear();
-
-		    // Add new inclusions
-		    List<BookingInclusion> newInclusions = new ArrayList<>();
-		    for (BookingInclusionRequest reqInclusion : bookingInclusionRequests) {
-		        PackageInclusion inclusion = inclusionRepository.findById(reqInclusion.getInclusionId())
-		                .orElseThrow(() -> new IllegalArgumentException("Inclusion ID " + reqInclusion.getInclusionId() + " not found."));
-
-		        newInclusions.add(BookingInclusion.builder()
-		                .booking(existingBooking)
-		                .inclusion(inclusion)
-		                .quantity(reqInclusion.getQuantity())
-		                .priceAtBooking(inclusion.getInclusionPricePerPerson())
-		                .build());
-		    }
-		    
-		    existingBooking.setBookingInclusions(newInclusions);
+			existingBooking.getBookingInclusions().clear();
+			
+			List<BookingInclusion> newInclusions = new ArrayList<>();
+			
+			for (BookingInclusionRequest reqInclusion : bookingInclusionRequests) {
+				PackageInclusion inclusion = inclusionRepository.findById(reqInclusion.getInclusionId())
+						.orElseThrow(() -> new IllegalArgumentException(
+								"Inclusion ID " + reqInclusion.getInclusionId() + " not found."));
+			
+			newInclusions.add(BookingInclusion.builder()
+			   .booking(existingBooking)
+			   .inclusion(inclusion)
+			   .quantity(reqInclusion.getQuantity())
+			   .priceAtBooking(inclusion.getInclusionPricePerPerson())
+			   .build());
+			}
+			
+			existingBooking.setBookingInclusions(newInclusions);
 		}
 		
 		if (recalculatePrice) {
-			existingBooking.setTotalPrice(
-					existingBooking.getTourPackage().getBasePrice() +
-				(existingBooking.getTourPackage().getPricePerPerson() * existingBooking.getGroupSize())
-				// + getTotalInclusionPrice(existingBooking)
-			);
+		existingBooking.setTotalPrice(
+		existingBooking.getTourPackage().getBasePrice()
+		       + (existingBooking.getTourPackage().getPricePerPerson()
+		       * existingBooking.getGroupSize())
+		// + getTotalInclusionPrice(existingBooking)
+		);
+		}
+		
+		// --- NEW: handle proof-of-payment file, same pattern as AttractionService ---
+		if (hasFile) {
+			try {
+				Path uploadPath = Paths.get(paymentsUploadDir);
+				Files.createDirectories(uploadPath);
+				
+				String originalName = proofOfPaymentFile.getOriginalFilename();
+				String ext = "";
+				
+				if (originalName != null && originalName.contains(".")) {
+				ext = originalName.substring(originalName.lastIndexOf("."));
+				}
+				
+				String fileName = "booking-" + existingBooking.getBookingId() + ext;
+				Path target = uploadPath.resolve(fileName);
+				proofOfPaymentFile.transferTo(target.toFile());
+				
+				String url = "/uploads/payments/" + fileName;
+				existingBooking.setProofOfPaymentPhoto(url);
+				
+				if (existingBooking.getPaymentStatus() == PaymentStatus.UNPAID) {
+					existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to save proof of payment file", e);
+			}
 		}
 		
 		logIfStaffOrAdmin("Booking", (long) id, LogAction.UPDATE, prevBooking, existingBooking);

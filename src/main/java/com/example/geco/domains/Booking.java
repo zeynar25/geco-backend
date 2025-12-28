@@ -84,8 +84,7 @@ public class Booking {
 	@Builder.Default
 	boolean isActive = true;
 	
-	@Lob
-	private byte[] proofOfPayment;
+	private String proofOfPaymentPhoto;
 	
 	private String staffReply;
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.geco.domains.Booking;
 import com.example.geco.domains.Booking.BookingStatus;
@@ -186,17 +189,30 @@ public class BookingController extends AbstractController {
 
     
     @Operation(
-        summary = "Update Booking (User)",
-        description = "Allows a user to update their booking. Only certain fields are editable by the user."
-    )
-    @PatchMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(
-        @Parameter(description = "ID of the booking to update") @PathVariable int id,
-        @Parameter(description = "Booking update details") @RequestBody @Valid UserBookingUpdateRequest request
-    ) {
-        Booking updatedBooking = bookingService.updateBooking(id, request);
-        return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
-    }
+	    summary = "Update Booking (User)",
+	    description = """
+	        Allows a user to update their booking.
+	        Editable fields: visitDate, visitTime, groupSize, inclusions.
+	        Optionally accepts a proof-of-payment image file.
+	    """
+	)
+	@PatchMapping(
+	    value = "/{id}",
+	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+	)
+	public ResponseEntity<Booking> updateBooking(
+	    @Parameter(description = "ID of the booking to update")
+	    @PathVariable int id,
+
+	    @Parameter(description = "Booking update details (JSON)")
+	    @RequestPart("data") @Valid UserBookingUpdateRequest request,
+
+	    @Parameter(description = "Proof of payment image (optional)")
+	    @RequestPart(value = "proofOfPayment", required = false) MultipartFile proofOfPayment
+	) {
+	    Booking updatedBooking = bookingService.updateBooking(id, request, proofOfPayment);
+	    return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
+	}
 
     
     @Operation(
