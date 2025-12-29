@@ -107,6 +107,7 @@ public class FeedbackService extends BaseService{
 				.comment(comment)
 				.suggestion(suggestion)
 				.feedbackStatus(FeedbackStatus.NEW)
+				.isActive(false)
 				.build();
 		
 		Feedback savedFeedback = feedbackRepository.save(feedback);
