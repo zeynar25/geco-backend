@@ -167,7 +167,7 @@ public class FeedbackService extends BaseService{
 	
 	    return mapToResponse(feedbacks);
 	}
-
+	
 	@Transactional(readOnly = true)
 	public Page<FeedbackResponse> getFeedbacks(
 	        Integer categoryId,
@@ -175,56 +175,116 @@ public class FeedbackService extends BaseService{
 	        LocalDate endDate,
 	        FeedbackStatus feedbackStatus,
 	        Boolean isActive,
+	        String email,
 	        Pageable pageable
 	) {
 	    startDate = defaultStartDate(startDate);
 	    endDate = defaultEndDate(endDate);
 	    validateDateRange(startDate, endDate);
 
+	    String q = email == null ? "" : email.trim();
+	    boolean hasEmail = !q.isEmpty();
+
 	    Page<Feedback> feedbacks;
 
-	    if (categoryId == null) {
-	        if (isActive == null) {
-	            if (feedbackStatus == null) {
-	                feedbacks =
-	                    feedbackRepository.findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        startDate, endDate, pageable);
+	    if (!hasEmail) {
+	        if (categoryId == null) {
+	            if (isActive == null) {
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository.findByBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository.findByFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            feedbackStatus, startDate, endDate, pageable);
+	                }
 	            } else {
-	                feedbacks =
-	                    feedbackRepository.findByFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        feedbackStatus, startDate, endDate, pageable);
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            isActive, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository.findByFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            feedbackStatus, isActive, startDate, endDate, pageable);
+	                }
 	            }
 	        } else {
-	            if (feedbackStatus == null) {
-	                feedbacks =
-	                    feedbackRepository.findByIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        isActive, startDate, endDate, pageable);
+	            if (isActive == null) {
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            categoryId, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository.findByCategory_FeedbackCategoryIdAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            categoryId, feedbackStatus, startDate, endDate, pageable);
+	                }
 	            } else {
-	                feedbacks =
-	                    feedbackRepository.findByFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        feedbackStatus, isActive, startDate, endDate, pageable);
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            categoryId, isActive, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository.findByCategory_FeedbackCategoryIdAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                            categoryId, feedbackStatus, isActive, startDate, endDate, pageable);
+	                }
 	            }
 	        }
 	    } else {
-	        if (isActive == null) {
-	            if (feedbackStatus == null) {
-	                feedbacks =
-	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        categoryId, startDate, endDate, pageable);
+	        if (categoryId == null) {
+	            if (isActive == null) {
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByAccount_Detail_EmailContainingIgnoreCaseAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                q, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                q, feedbackStatus, startDate, endDate, pageable);
+	                }
 	            } else {
-	                feedbacks =
-	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        categoryId, feedbackStatus, startDate, endDate, pageable);
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByAccount_Detail_EmailContainingIgnoreCaseAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                q, isActive, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                q, feedbackStatus, isActive, startDate, endDate, pageable);
+	                }
 	            }
 	        } else {
-	            if (feedbackStatus == null) {
-	                feedbacks =
-	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        categoryId, isActive, startDate, endDate, pageable);
+	            if (isActive == null) {
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                categoryId, q, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                categoryId, q, feedbackStatus, startDate, endDate, pageable);
+	                }
 	            } else {
-	                feedbacks =
-	                    feedbackRepository.findByCategory_FeedbackCategoryIdAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
-	                        categoryId, feedbackStatus, isActive, startDate, endDate, pageable);
+	                if (feedbackStatus == null) {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                categoryId, q, isActive, startDate, endDate, pageable);
+	                } else {
+	                    feedbacks =
+	                        feedbackRepository
+	                            .findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	                                categoryId, q, feedbackStatus, isActive, startDate, endDate, pageable);
+	                }
 	            }
 	        }
 	    }

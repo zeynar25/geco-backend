@@ -71,4 +71,72 @@ public interface FeedbackRepository  extends JpaRepository<Feedback, Integer>{
 	        LocalDate startDate,
 	        LocalDate endDate,
 	        Pageable pageable);
+	
+	Page<Feedback> findByAccount_Detail_EmailContainingIgnoreCaseAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    String email, 
+	    LocalDate startDate, 
+	    LocalDate endDate, 
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    String email,
+	    FeedbackStatus feedbackStatus,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByAccount_Detail_EmailContainingIgnoreCaseAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    String email,
+	    boolean isActive,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    String email,
+	    FeedbackStatus feedbackStatus,
+	    boolean isActive,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    Integer categoryId,
+	    String email,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    Integer categoryId,
+	    String email,
+	    FeedbackStatus feedbackStatus,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    Integer categoryId,
+	    String email,
+	    boolean isActive,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
+
+	Page<Feedback> findByCategory_FeedbackCategoryIdAndAccount_Detail_EmailContainingIgnoreCaseAndFeedbackStatusAndIsActiveAndBooking_VisitDateBetweenOrderByFeedbackStatusAscBooking_VisitDateDescBooking_VisitTimeDesc(
+	    Integer categoryId,
+	    String email,
+	    FeedbackStatus feedbackStatus,
+	    boolean isActive,
+	    LocalDate startDate,
+	    LocalDate endDate,
+	    Pageable pageable
+	);
 }
