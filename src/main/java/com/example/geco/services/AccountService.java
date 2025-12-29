@@ -56,6 +56,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .firstName(detail != null ? detail.getFirstName() : null)
 	            .email(detail != null ? detail.getEmail() : null)
 	            .contactNumber(detail != null ? detail.getContactNumber() : null)
+	            .isActive(account.isActive())
 	            .build();
 	}
 	

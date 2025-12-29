@@ -27,4 +27,6 @@ public class AccountResponse {
     String firstName;
     String email;
     String contactNumber;
+    
+    Boolean isActive;
 }
