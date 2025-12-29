@@ -148,6 +148,19 @@ public class AccountService extends BaseService implements UserDetailsService{
 		    throw new IllegalArgumentException("Role must be specified when admin creates an account.");
 		}
 		
+		// if role assigned is admin, that means they're transferring their admin rights.
+//		if (request.getRole() == Role.ADMIN) {
+//			int userId = getLoggedAccountId();
+//			Account account = accountRepository.findById(userId)
+//		            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
+//			
+//			account.setRole(Role.STAFF);
+//			
+//			
+//			return new AccountResponse();
+//		}
+		
+		
 		return addAccount(request);
 	}
 	
@@ -307,9 +320,13 @@ public class AccountService extends BaseService implements UserDetailsService{
 		if (!newPassword.equals(newConfirmPassword)) {
 			throw new IllegalArgumentException("Password and Confirm password must match.");
 		}
+		
+		Account prevAccount = createAccountCopy(existingAccount);
 
 		String hashedPassword = passwordEncoder.encode(newPassword);
         existingAccount.setPassword(hashedPassword);
+        
+        logIfStaffOrAdmin("Account", (long) id, LogAction.UPDATE, prevAccount, existingAccount);
         
         accountRepository.save(existingAccount);
         
