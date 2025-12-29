@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Account;
+import com.example.geco.domains.Account.Role;
 import com.example.geco.dto.AccountResponse;
 import com.example.geco.dto.DetailRequest;
 import com.example.geco.dto.PasswordUpdateRequest;
@@ -284,20 +285,34 @@ public class AccountController extends AbstractController {
     @GetMapping("staff/search")
     @Operation(
         summary = "Search accounts by email",
-        description = "Searches accounts by email (case-insensitive, contains match)"
+        description = "Searches accounts by email with optional role and status filters"
     )
     public ResponseEntity<Page<AccountResponse>> searchAccountsByEmail(
-        @Parameter(description = "Partial email to search for", example = "john")
         @RequestParam("email") String email,
-
-        @Parameter(description = "Page number (0-based index)", example = "0")
+        @RequestParam(value = "role", required = false) Role role,           // ADMIN/STAFF/USER
+        @RequestParam(value = "status", required = false) String status,     // ACTIVE/INACTIVE
         @RequestParam(defaultValue = "0") int page,
-
-        @Parameter(description = "Number of records per page", example = "10")
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<AccountResponse> accounts = accountService.searchAccountsByEmail(email, pageable);
+
+        Boolean activeFilter = null;
+        if (status != null && !status.isBlank()) {
+            switch (status.trim().toUpperCase()) {
+                case "ACTIVE":
+                    activeFilter = true;
+                    break;
+                case "INACTIVE":
+                    activeFilter = false;
+                    break;
+                default:
+                    activeFilter = null;
+            }
+        }
+
+        Page<AccountResponse> accounts =
+                accountService.searchAccountsByEmail(email, role, activeFilter, pageable);
+
         return ResponseEntity.ok(accounts);
     }
 

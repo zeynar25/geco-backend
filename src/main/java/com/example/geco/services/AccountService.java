@@ -235,18 +235,55 @@ public class AccountService extends BaseService implements UserDetailsService{
 	}
 	
 	@Transactional(readOnly = true)
-	public Page<AccountResponse> searchAccountsByEmail(String emailQuery, Pageable pageable) {
+	public Page<AccountResponse> searchAccountsByEmail(
+	        String emailQuery,
+	        Role roleFilter,
+	        Boolean activeFilter,
+	        Pageable pageable
+	) {
 	    String q = emailQuery == null ? "" : emailQuery.trim();
 
 	    if (q.isEmpty()) {
-	        // you can either return empty, or all accounts; choose what you prefer.
-	        return accountRepository.findAll(pageable)
-	                .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	        // Decide behavior: here we just delegate to the non-search listing
+	        if (roleFilter != null && activeFilter != null) {
+	            return accountRepository
+	                    .findAllByRoleAndIsActiveOrderByDetail_Email(roleFilter, activeFilter, pageable)
+	                    .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	        } else if (roleFilter != null) {
+	            return accountRepository
+	                    .findAllByRoleOrderByDetail_Email(roleFilter, pageable)
+	                    .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	        } else if (activeFilter != null) {
+	            return accountRepository
+	                    .findAllByIsActiveOrderByDetail_Email(activeFilter, pageable)
+	                    .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	        } else {
+	            return accountRepository
+	                    .findAllByOrderByDetail_Email(pageable)
+	                    .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	        }
 	    }
 
-	    return accountRepository
-	            .findAllByDetail_EmailContainingIgnoreCaseOrderByDetail_Email(q, pageable)
-	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	    if (roleFilter != null && activeFilter != null) {
+	        return accountRepository
+	                .findAllByDetail_EmailContainingIgnoreCaseAndRoleAndIsActiveOrderByDetail_Email(
+	                        q, roleFilter, activeFilter, pageable)
+	                .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	    } else if (roleFilter != null) {
+	        return accountRepository
+	                .findAllByDetail_EmailContainingIgnoreCaseAndRoleOrderByDetail_Email(
+	                        q, roleFilter, pageable)
+	                .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	    } else if (activeFilter != null) {
+	        return accountRepository
+	                .findAllByDetail_EmailContainingIgnoreCaseAndIsActiveOrderByDetail_Email(
+	                        q, activeFilter, pageable)
+	                .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	    } else {
+	        return accountRepository
+	                .findAllByDetail_EmailContainingIgnoreCaseOrderByDetail_Email(q, pageable)
+	                .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	    }
 	}
 	
 	

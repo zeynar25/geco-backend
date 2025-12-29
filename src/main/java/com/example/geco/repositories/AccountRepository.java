@@ -26,7 +26,26 @@ public interface AccountRepository extends JpaRepository<Account, Integer>{
 	Page<Account> findAllByRoleAndIsActiveOrderByDetail_Email(Role staff, boolean isActive, Pageable pageable);
 
 	Page<Account> findAllByDetail_EmailContainingIgnoreCaseOrderByDetail_Email(
+		    String email,
+		    Pageable pageable
+		);
+
+	Page<Account> findAllByDetail_EmailContainingIgnoreCaseAndRoleOrderByDetail_Email(
 	    String email,
+	    Role role,
+	    Pageable pageable
+	);
+
+	Page<Account> findAllByDetail_EmailContainingIgnoreCaseAndIsActiveOrderByDetail_Email(
+	    String email,
+	    boolean isActive,
+	    Pageable pageable
+	);
+
+	Page<Account> findAllByDetail_EmailContainingIgnoreCaseAndRoleAndIsActiveOrderByDetail_Email(
+	    String email,
+	    Role role,
+	    boolean isActive,
 	    Pageable pageable
 	);
 }
