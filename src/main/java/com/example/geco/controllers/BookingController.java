@@ -189,30 +189,36 @@ public class BookingController extends AbstractController {
 
     
     @Operation(
-	    summary = "Update Booking (User)",
-	    description = """
-	        Allows a user to update their booking.
-	        Editable fields: visitDate, visitTime, groupSize, inclusions.
-	        Optionally accepts a proof-of-payment image file.
-	    """
-	)
-	@PatchMapping(
-	    value = "/{id}",
-	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-	)
-	public ResponseEntity<Booking> updateBooking(
-	    @Parameter(description = "ID of the booking to update")
-	    @PathVariable int id,
+    	    summary = "Update Booking (User)",
+    	    description = """
+    	        Allows a user to update their booking.
+    	        Editable fields: visitDate, visitTime, groupSize, inclusions.
+    	        Optionally accepts a proof-of-payment image file.
+    	    """
+    	)
+    	@PatchMapping(
+    	    value = "/{id}",
+    	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    	)
+    	public ResponseEntity<Booking> updateBooking(
+    	    @Parameter(description = "ID of the booking to update")
+    	    @PathVariable int id,
 
-	    @Parameter(description = "Booking update details (JSON)")
-	    @RequestPart("data") @Valid UserBookingUpdateRequest request,
+    	    @Parameter(description = "Booking update details (JSON)")
+    	    @RequestPart("data") @Valid UserBookingUpdateRequest request,
 
-	    @Parameter(description = "Proof of payment image (optional)")
-	    @RequestPart(value = "proofOfPayment", required = false) MultipartFile proofOfPayment
-	) {
-	    Booking updatedBooking = bookingService.updateBooking(id, request, proofOfPayment);
-	    return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
-	}
+    	    @Parameter(description = "Resubmitting proof of payment")
+    	    @RequestPart(value = "resubmit", required = false) Boolean resubmitFlag,
+
+    	    @Parameter(description = "Proof of payment image (optional)")
+    	    @RequestPart(value = "proofOfPayment", required = false) MultipartFile proofOfPayment
+    	) {
+    	    boolean resubmit = Boolean.TRUE.equals(resubmitFlag);
+    	    
+    	    Booking updatedBooking =
+    	        bookingService.updateBooking(id, request, resubmit, proofOfPayment);
+    	    return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
+    	}
 
     
     @Operation(

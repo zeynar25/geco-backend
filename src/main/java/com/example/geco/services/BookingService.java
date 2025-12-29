@@ -633,10 +633,12 @@ public class BookingService extends BaseService{
 	
 	public Booking updateBooking(int id,
             UserBookingUpdateRequest request,
+            Boolean resubmit,
             MultipartFile proofOfPaymentFile) {
 
 		boolean hasJsonChanges =
 		request != null &&
+		resubmit == false &&
 		(request.getVisitDate() != null ||
 		request.getVisitTime() != null ||
 		request.getGroupSize() != null ||
@@ -734,12 +736,16 @@ public class BookingService extends BaseService{
 		}
 		
 		if (recalculatePrice) {
-		existingBooking.setTotalPrice(
-		existingBooking.getTourPackage().getBasePrice()
-		       + (existingBooking.getTourPackage().getPricePerPerson()
-		       * existingBooking.getGroupSize())
-		// + getTotalInclusionPrice(existingBooking)
-		);
+			existingBooking.setTotalPrice(
+			existingBooking.getTourPackage().getBasePrice()
+			       + (existingBooking.getTourPackage().getPricePerPerson()
+			       * existingBooking.getGroupSize())
+			// + getTotalInclusionPrice(existingBooking)
+			);
+		}
+		
+		if (resubmit) {
+			existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
 		}
 		
 		// --- NEW: handle proof-of-payment file, same pattern as AttractionService ---
