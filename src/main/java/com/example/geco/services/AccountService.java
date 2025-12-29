@@ -149,17 +149,17 @@ public class AccountService extends BaseService implements UserDetailsService{
 		}
 		
 		// if role assigned is admin, that means they're transferring their admin rights.
-//		if (request.getRole() == Role.ADMIN) {
-//			int userId = getLoggedAccountId();
-//			Account account = accountRepository.findById(userId)
-//		            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
-//			
-//			account.setRole(Role.STAFF);
-//			
-//			
-//			return new AccountResponse();
-//		}
-		
+		if (request.getRole() == Role.ADMIN) {
+			int userId = getLoggedAccountId();
+			Account account = accountRepository.findById(userId)
+		            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + userId + "' not found."));
+			
+			Account prevAccount = createAccountCopy(account);
+			account.setRole(Role.STAFF);
+			
+			accountRepository.save(account);
+			logIfStaffOrAdmin("Account", (long) userId, LogAction.UPDATE, prevAccount, account);
+		}
 		
 		return addAccount(request);
 	}
@@ -396,6 +396,18 @@ public class AccountService extends BaseService implements UserDetailsService{
 		
 		if (existingAccount.getRole().equals(request.getRole())) {
 		    throw new IllegalArgumentException("Account already has role " + request.getRole());
+		}
+		
+		if (request.getRole() == Role.ADMIN) {
+			int userId = getLoggedAccountId();
+			Account account = accountRepository.findById(userId)
+		            .orElseThrow(() -> new EntityNotFoundException("Account with ID '" + userId + "' not found."));
+			
+			Account prevAccount = createAccountCopy(account);
+			account.setRole(Role.STAFF);
+			
+			accountRepository.save(account);
+			logIfStaffOrAdmin("Account", (long) userId, LogAction.UPDATE, prevAccount, account);
 		}
 		
 		Account prevAccount = createAccountCopy(existingAccount);
