@@ -24,9 +24,11 @@ public class AuditLogService {
     @Autowired
     private AuditLogRepository auditLogRepository;
     
-    @Autowired BookingRepository bookingRepository;
+    @Autowired 
+    BookingRepository bookingRepository;
     
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private String json(Object value) {
         try {
