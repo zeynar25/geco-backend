@@ -10,6 +10,7 @@ import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -397,55 +398,51 @@ public class BookingService extends BaseService{
 
 	@Transactional(readOnly = true)
 	public double getAverageVisitor(String type) {
-		Iterable<Booking> iterable = bookingRepository.findAllByOrderByVisitDateDescVisitTimeAsc();	
-		List<Booking> bookings = StreamSupport
-		        .stream(iterable.spliterator(), false)
-		        .collect(Collectors.toList());
-		
-		if(bookings.isEmpty()) return 0;
-		
-		int minYear = bookings.get(0).getVisitDate().getYear();
-		int maxYear = bookings.get(bookings.size() - 1).getVisitDate().getYear();;
-		int minMonth = bookings.get(0).getVisitDate().getMonthValue();
-		int maxMonth = bookings.get(bookings.size() - 1).getVisitDate().getMonthValue();
+	    Iterable<Booking> iterable =
+	            bookingRepository.findAllByOrderByVisitDateDescVisitTimeAsc();
 
-		double totalAvgVisitors = 0;
-		int totalMonth = 0;
-		int index = 0;
-		
-		for (int year = minYear; year <= maxYear; year++) {
-			int startMonth = (year == minYear) ? minMonth : 1;
-		    int endMonth = (year == maxYear) ? maxMonth : 12;
-			
-			for (int month = startMonth; month <= endMonth; month++) {
-				int visitors = 0;
-				
-				while (index < bookings.size()) {
-					// If we go beyond current year and month, break.
-					LocalDate currDate = bookings.get(index).getVisitDate();
-					
-					if (currDate.getYear() > year ||
-							(currDate.getYear() == year && currDate.getMonthValue() > month)) {
-						break;
-					}
-					
-					visitors++;
-					index++;
-				}
-				totalMonth++;
-				totalAvgVisitors += visitors;
-			}
-		}
+	    List<Booking> bookings = StreamSupport
+	            .stream(iterable.spliterator(), false)
+	            .collect(Collectors.toList());
 
-		double n = 0;
-		if (type.equals("year")) {
-			n = totalAvgVisitors / (maxYear - minYear + 1);
-			
-		} else if (type.equals("month")) {
-			n = totalAvgVisitors / totalMonth;
-		}
-			
-		return n;
+	    if (bookings.isEmpty()) return 0;
+
+	    // Find min/max visit dates, independent of list order
+	    LocalDate minDate = bookings.stream()
+	            .map(Booking::getVisitDate)
+	            .min(Comparator.naturalOrder())
+	            .orElseThrow();
+	    LocalDate maxDate = bookings.stream()
+	            .map(Booking::getVisitDate)
+	            .max(Comparator.naturalOrder())
+	            .orElseThrow();
+
+	    YearMonth start = YearMonth.from(minDate);
+	    YearMonth end = YearMonth.from(maxDate);
+
+	    // Count visitors per YearMonth
+	    Map<YearMonth, Long> visitorsPerMonth = bookings.stream()
+	            .collect(Collectors.groupingBy(
+	                    b -> YearMonth.from(b.getVisitDate()),
+	                    Collectors.counting()
+	            ));
+
+	    long totalVisitors = 0;
+	    int monthCount = 0;
+
+	    for (YearMonth ym = start; !ym.isAfter(end); ym = ym.plusMonths(1)) {
+	        totalVisitors += visitorsPerMonth.getOrDefault(ym, 0L);
+	        monthCount++;
+	    }
+
+	    if ("year".equalsIgnoreCase(type)) {
+	        int yearCount = end.getYear() - start.getYear() + 1;
+	        return yearCount == 0 ? 0 : (double) totalVisitors / yearCount;
+	    } else if ("month".equalsIgnoreCase(type)) {
+	        return monthCount == 0 ? 0 : (double) totalVisitors / monthCount;
+	    } else {
+	        return 0;
+	    }
 	}
 
 	@Transactional(readOnly = true)
