@@ -92,6 +92,48 @@ public class AccountController extends AbstractController {
     // ============================
     // PAGINATED ADMIN / STAFF LISTS
     // ============================
+    
+    @GetMapping("staff/list/all")
+    @Operation(
+        summary = "Get all accounts",
+        description = "Retrieves a paginated list of all accounts, any role"
+    )
+    public ResponseEntity<Page<AccountResponse>> getAllAccounts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AccountResponse> accounts = accountService.getAllAccounts(pageable);
+        return ResponseEntity.ok(accounts);
+    }
+
+    @GetMapping("staff/list/all/active")
+    @Operation(
+        summary = "Get all active accounts",
+        description = "Retrieves a paginated list of all active accounts, any role"
+    )
+    public ResponseEntity<Page<AccountResponse>> getAllActiveAccounts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AccountResponse> accounts = accountService.getAllActiveAccounts(pageable);
+        return ResponseEntity.ok(accounts);
+    }
+
+    @GetMapping("staff/list/all/inactive")
+    @Operation(
+        summary = "Get all inactive accounts",
+        description = "Retrieves a paginated list of all inactive accounts, any role"
+    )
+    public ResponseEntity<Page<AccountResponse>> getAllInactiveAccounts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AccountResponse> accounts = accountService.getAllInactiveAccounts(pageable);
+        return ResponseEntity.ok(accounts);
+    }
 
     @GetMapping("staff/list/admin")
     @Operation(
@@ -238,6 +280,26 @@ public class AccountController extends AbstractController {
     // ============================
     // ADMIN OPERATIONS
     // ============================
+    
+    @GetMapping("staff/search")
+    @Operation(
+        summary = "Search accounts by email",
+        description = "Searches accounts by email (case-insensitive, contains match)"
+    )
+    public ResponseEntity<Page<AccountResponse>> searchAccountsByEmail(
+        @Parameter(description = "Partial email to search for", example = "john")
+        @RequestParam("email") String email,
+
+        @Parameter(description = "Page number (0-based index)", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+
+        @Parameter(description = "Number of records per page", example = "10")
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AccountResponse> accounts = accountService.searchAccountsByEmail(email, pageable);
+        return ResponseEntity.ok(accounts);
+    }
 
     @PostMapping("/admin")
     @Operation(

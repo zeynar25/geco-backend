@@ -16,9 +16,17 @@ public interface AccountRepository extends JpaRepository<Account, Integer>{
 	Optional<Account> findByDetailEmail(String email);
 	
 	boolean existsByDetailEmail(String email);
+	
+	Page<Account> findAllByOrderByDetail_Email(Pageable pageable);
+
+	Page<Account> findAllByIsActiveOrderByDetail_Email(boolean isActive, Pageable pageable);
 
 	Page<Account> findAllByRoleOrderByDetail_Email(Role role, Pageable pageable);
 
 	Page<Account> findAllByRoleAndIsActiveOrderByDetail_Email(Role staff, boolean isActive, Pageable pageable);
 
+	Page<Account> findAllByDetail_EmailContainingIgnoreCaseOrderByDetail_Email(
+	    String email,
+	    Pageable pageable
+	);
 }

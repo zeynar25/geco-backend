@@ -1,7 +1,5 @@
 package com.example.geco.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -166,6 +164,24 @@ public class AccountService extends BaseService implements UserDetailsService{
 	            .orElseThrow(() -> new EntityNotFoundException("Account with email '" + email + "' not found."));
         return account;
 	}
+	
+	@Transactional(readOnly = true)
+	public Page<AccountResponse> getAllAccounts(Pageable pageable) {
+	    return accountRepository.findAllByOrderByDetail_Email(pageable)
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	}
+
+	@Transactional(readOnly = true)
+	public Page<AccountResponse> getAllActiveAccounts(Pageable pageable) {
+	    return accountRepository.findAllByIsActiveOrderByDetail_Email(true, pageable)
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	}
+
+	@Transactional(readOnly = true)
+	public Page<AccountResponse> getAllInactiveAccounts(Pageable pageable) {
+	    return accountRepository.findAllByIsActiveOrderByDetail_Email(false, pageable)
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	}
 
 
 	@Transactional(readOnly = true)
@@ -216,6 +232,21 @@ public class AccountService extends BaseService implements UserDetailsService{
 		return accountRepository.findAllByRoleAndIsActiveOrderByDetail_Email(
 				Account.Role.USER, false, pageable)
 				.map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<AccountResponse> searchAccountsByEmail(String emailQuery, Pageable pageable) {
+	    String q = emailQuery == null ? "" : emailQuery.trim();
+
+	    if (q.isEmpty()) {
+	        // you can either return empty, or all accounts; choose what you prefer.
+	        return accountRepository.findAll(pageable)
+	                .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
+	    }
+
+	    return accountRepository
+	            .findAllByDetail_EmailContainingIgnoreCaseOrderByDetail_Email(q, pageable)
+	            .map(a -> toResponse(a, PasswordStatus.UNCHANGED));
 	}
 	
 	
