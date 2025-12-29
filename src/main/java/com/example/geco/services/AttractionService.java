@@ -25,7 +25,7 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 @Transactional
 public class AttractionService extends BaseService{
-	@Value("${app.upload-dir:C:/sts-4.32.0.RELEASE/dev/geco/uploads/attractions}")
+	@Value("${app.upload-dir.attractions:C:/sts-4.32.0.RELEASE/dev/geco/uploads/attractions}")
 	private String uploadDir;
 	
 	@Autowired
