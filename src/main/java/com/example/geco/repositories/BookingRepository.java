@@ -113,19 +113,20 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	Long countByTourPackageAndVisitDateBetween(TourPackage tourPackage, LocalDate startDate, LocalDate endDate);
 
 	@Query("""
-       SELECT b
-       FROM Booking b
-       WHERE (:accountId IS NULL OR b.account.accountId = :accountId)
-         AND (
-              (:startDate IS NULL AND :endDate IS NULL)
-              OR b.visitDate BETWEEN COALESCE(:startDate, b.visitDate)
-                                 AND COALESCE(:endDate, b.visitDate)
-         )
-         AND (:bookingStatus IS NULL OR b.bookingStatus = :bookingStatus)
-         AND (:paymentStatus IS NULL OR b.paymentStatus = :paymentStatus)
-         AND (:paymentMethod IS NULL OR b.paymentMethod = :paymentMethod)
-       ORDER BY b.visitDate DESC, b.visitTime ASC
-       """)
+	       SELECT b
+	       FROM Booking b
+	       WHERE (:accountId IS NULL OR b.account.accountId = :accountId)
+	         AND (
+	              (:startDate IS NULL AND :endDate IS NULL)
+	              OR b.visitDate BETWEEN COALESCE(:startDate, b.visitDate)
+	                                 AND COALESCE(:endDate, b.visitDate)
+	         )
+	         AND (:bookingStatus IS NULL OR b.bookingStatus = :bookingStatus)
+	         AND (:paymentStatus IS NULL OR b.paymentStatus = :paymentStatus)
+	         AND (:paymentMethod IS NULL OR b.paymentMethod = :paymentMethod)
+	         AND (:email IS NULL OR LOWER(b.account.detail.email) LIKE LOWER(CONCAT('%', :email, '%')))
+	       ORDER BY b.visitDate DESC, b.visitTime ASC
+	       """)
 	Page<Booking> findByFilters(
 	        @Param("accountId") Integer accountId,
 	        @Param("startDate") LocalDate startDate,
@@ -133,6 +134,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	        @Param("bookingStatus") BookingStatus bookingStatus,
 	        @Param("paymentStatus") PaymentStatus paymentStatus,
 	        @Param("paymentMethod") PaymentMethod paymentMethod,
+	        @Param("email") String email,
 	        Pageable pageable
 	);
 	

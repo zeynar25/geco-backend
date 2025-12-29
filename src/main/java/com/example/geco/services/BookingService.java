@@ -307,8 +307,9 @@ public class BookingService extends BaseService{
 	        BookingStatus bookingStatus,
 	        PaymentStatus paymentStatus,
 	        PaymentMethod paymentMethod,
-	        Pageable pageable) {
-
+	        String email,
+	        Pageable pageable
+	) {
 	    return bookingRepository.findByFilters(
 	            accountId,
 	            startDate,
@@ -316,6 +317,7 @@ public class BookingService extends BaseService{
 	            bookingStatus,
 	            paymentStatus,
 	            paymentMethod,
+	            email,
 	            pageable
 	    );
 	}

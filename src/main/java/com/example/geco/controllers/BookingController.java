@@ -96,41 +96,53 @@ public class BookingController extends AbstractController {
 	}
     
     @Operation(
-            summary = "Get all Bookings",
-            description = "Retrieve a list of bookings. Can filter by account's accountId, date range, booking & payment statuses, and payment method"
-    )
-    @GetMapping
-    public ResponseEntity<Page<Booking>> getAllBookings(
-            @Parameter(description = "Filter by account ID")
-            @RequestParam(required = false) Integer accountId,
+	    summary = "Get all Bookings",
+	    description = "Retrieve a list of bookings. Can filter by account's accountId, date range, booking & payment statuses, payment method, and account email."
+	)
+	@GetMapping
+	public ResponseEntity<Page<Booking>> getAllBookings(
+	    @Parameter(description = "Filter by account ID")
+	    @RequestParam(required = false) Integer accountId,
 
-            @Parameter(description = "Start date filter")
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+	    @Parameter(description = "Start date filter")
+	    @RequestParam(required = false)
+	    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 
-            @Parameter(description = "End date filter")
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+	    @Parameter(description = "End date filter")
+	    @RequestParam(required = false)
+	    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
-            @Parameter(description = "Booking Status")
-            @RequestParam(required = false) BookingStatus bookingStatus,
+	    @Parameter(description = "Booking Status")
+	    @RequestParam(required = false) BookingStatus bookingStatus,
 
-            @Parameter(description = "Payment Status")
-            @RequestParam(required = false) PaymentStatus paymentStatus,
+	    @Parameter(description = "Payment Status")
+	    @RequestParam(required = false) PaymentStatus paymentStatus,
 
-            @Parameter(description = "Payment Method")
-            @RequestParam(required = false) PaymentMethod paymentMethod,
-            
-            @Parameter(description = "Page number")
-            @RequestParam(defaultValue = "0") int page,
+	    @Parameter(description = "Payment Method")
+	    @RequestParam(required = false) PaymentMethod paymentMethod,
 
-            @Parameter(description = "Page size")
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Booking> bookings = bookingService.getBookingByFilters(accountId, startDate, endDate, bookingStatus, paymentStatus, paymentMethod, pageable);
-        return new ResponseEntity<>(bookings, HttpStatus.OK);
-    }
+	    @Parameter(description = "Filter by account email (contains, case-insensitive)")
+	    @RequestParam(required = false) String email,
+
+	    @Parameter(description = "Page number")
+	    @RequestParam(defaultValue = "0") int page,
+
+	    @Parameter(description = "Page size")
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<Booking> bookings = bookingService.getBookingByFilters(
+	        accountId,
+	        startDate,
+	        endDate,
+	        bookingStatus,
+	        paymentStatus,
+	        paymentMethod,
+	        email,
+	        pageable
+	    );
+	    return new ResponseEntity<>(bookings, HttpStatus.OK);
+	}
 
 
     @Operation(
