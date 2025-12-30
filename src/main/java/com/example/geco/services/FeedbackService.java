@@ -135,13 +135,20 @@ public class FeedbackService extends BaseService{
 	    if (startDate != null) {
 	        return startDate;
 	    }
+	    
 	    Integer earliestYear = bookingRepository.getEarliestYear();
 	    int year = (earliestYear != null) ? earliestYear : LocalDate.now().getYear();
 	    return LocalDate.of(year, 1, 1);
 	}
 	
 	private LocalDate defaultEndDate(LocalDate endDate) {
-	    return endDate != null ? endDate : LocalDate.now();
+	    if (endDate != null) {
+	        return endDate;
+	    }
+	    
+	    Integer earliestYear = bookingRepository.getEarliestYear();
+	    int year = (earliestYear != null) ? earliestYear : LocalDate.now().getYear();
+	    return LocalDate.of(year, 12, 31);
 	}
 	
 	private Page<FeedbackResponse> mapToResponse(Page<Feedback> feedbacks) {

@@ -71,16 +71,25 @@ public class AuditLogService {
             int page,
             int size
     ) {
-        Integer earliestYear = bookingRepository.getEarliestYear();
+    	Integer earliestYear = bookingRepository.getEarliestYear();
+
+        int year = (earliestYear != null) ? earliestYear : LocalDateTime.now().getYear();
 
         LocalDateTime startTime = start != null
-		    ? start
-		    : LocalDateTime.of(
-		        earliestYear != null ? earliestYear : LocalDateTime.now().getYear(),
-		        1, 1, 0, 0
-	    );
+            ? start
+            : LocalDateTime.of(year, 1, 1, 0, 0);
 
-        LocalDateTime endTime = end != null ? end : LocalDateTime.now();
+        LocalDateTime endTime = end != null
+            ? end
+            : LocalDateTime.of(year, 12, 31, 23, 59, 59);
+
+        if (startTime.isAfter(endTime)) {
+            throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
+        }
+
+        if (startTime.isAfter(endTime)) {
+            throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
+        }
 
         if (startTime.isAfter(endTime)) {
             throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
