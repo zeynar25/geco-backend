@@ -26,8 +26,8 @@ public class JwtService {
 				.setClaims(claims)
 				.setSubject(username)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-//				.setExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000)) // 10 minutes validity
-				.setExpiration(new Date(System.currentTimeMillis() + 10L * 365 * 24 * 60 * 60 * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000)) // 10 minutes validity
+//				.setExpiration(new Date(System.currentTimeMillis() + 10L * 365 * 24 * 60 * 60 * 1000)) // infinite validity
 				.signWith(getkey())
 				.compact();
 	}
