@@ -87,14 +87,6 @@ public class AuditLogService {
             throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
         }
 
-        if (startTime.isAfter(endTime)) {
-            throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
-        }
-
-        if (startTime.isAfter(endTime)) {
-            throw new IllegalArgumentException("Start timestamp must be before end timestamp.");
-        }
-
         Pageable pageable = PageRequest.of(
                 page,
                 size,

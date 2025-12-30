@@ -137,6 +137,7 @@ public class FeedbackService extends BaseService{
 	    }
 	    
 	    Integer earliestYear = bookingRepository.getEarliestYear();
+	    
 	    int year = (earliestYear != null) ? earliestYear : LocalDate.now().getYear();
 	    return LocalDate.of(year, 1, 1);
 	}
@@ -147,6 +148,7 @@ public class FeedbackService extends BaseService{
 	    }
 	    
 	    Integer earliestYear = bookingRepository.getEarliestYear();
+	    
 	    int year = (earliestYear != null) ? earliestYear : LocalDate.now().getYear();
 	    return LocalDate.of(year, 12, 31);
 	}
