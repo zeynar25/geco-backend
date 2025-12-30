@@ -1,6 +1,9 @@
 package com.example.geco.controllers;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +21,15 @@ public class AuthController extends AbstractController{
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-		String token = authService.verify(request);
-        return ResponseEntity.ok(token);
+	    try {
+	        String token = authService.verify(request);
+	        return ResponseEntity.ok(token);
+	    } catch (AuthenticationException | IllegalArgumentException e) {
+	        // Catch both authentication and manual invalid credentials
+	        return ResponseEntity.status(401).body(Map.of("error", "Incorrect email or password."));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body(Map.of("error", "An error occurred during login."));
+	    }
 	}
 	
 	@PostMapping("/logout")
