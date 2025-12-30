@@ -25,6 +25,8 @@ public class Attraction {
 	
 	@Column(columnDefinition = "TEXT")
 	private String description;
+	
+	@Column(columnDefinition = "TEXT")
 	private String funFact;
 	
 	private String photo2dUrl;
