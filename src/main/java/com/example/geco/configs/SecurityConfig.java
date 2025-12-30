@@ -40,6 +40,7 @@ public class SecurityConfig {
 		return http.cors(Customizer.withDefaults())
 		    .csrf(customizer -> customizer.disable())
 			.authorizeHttpRequests(request -> request
+					.requestMatchers(HttpMethod.POST, "/account").permitAll()
 					.requestMatchers("/account/login").permitAll()
 					.requestMatchers("/account/logout").permitAll()
 					.requestMatchers("/account/**").authenticated()
