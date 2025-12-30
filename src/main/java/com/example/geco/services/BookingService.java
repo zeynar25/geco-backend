@@ -572,36 +572,40 @@ public class BookingService extends BaseService{
 
 	@Transactional(readOnly = true)
 	public List<ChartData> getYearlyRevenue(Integer startYear, Integer endYear) {
-		if (startYear == null) {
-			startYear = bookingRepository.getEarliestYear();
-		}
-		
-		if (endYear == null) {
-			endYear = bookingRepository.getLatestYear();
-		}
-		
-		if (startYear > endYear) {
-			throw new IllegalArgumentException("Starting year cannot be greater than the ending year");
-		}
-		
-		List<ChartData> revenues = new ArrayList<>();
-	    
+	    Integer earliestYear = bookingRepository.getEarliestYear();
+	    Integer latestYear = bookingRepository.getLatestYear();
+
+	    if (startYear == null) {
+	        startYear = (earliestYear != null) ? earliestYear : LocalDate.now().getYear();
+	    }
+	    if (endYear == null) {
+	        endYear = (latestYear != null) ? latestYear : LocalDate.now().getYear();
+	    }
+
+	    if (startYear > endYear) {
+	        throw new IllegalArgumentException("Starting year cannot be greater than the ending year");
+	    }
+
+	    List<ChartData> revenues = new ArrayList<>();
+
 	    for (int year = startYear; year <= endYear; year++) {
-	    	LocalDate startDate = LocalDate.of(year, 1, 1);
+	        LocalDate startDate = LocalDate.of(year, 1, 1);
 	        LocalDate endDate = LocalDate.of(year, 12, 31);
 
 	        Long totalRevenue = bookingRepository.getTotalRevenueByBookingStatusAndVisitDateBetween(
-	            startDate, 
-	            endDate, 
+	            startDate,
+	            endDate,
 	            Booking.BookingStatus.COMPLETED
 	        );
-	        
+
 	        revenues.add(
-	        		new ChartData(
-	        				String.valueOf(year),
-	        				totalRevenue));
+	            new ChartData(
+	                String.valueOf(year),
+	                totalRevenue
+	            )
+	        );
 	    }
-	    
+
 	    return revenues;
 	}
 

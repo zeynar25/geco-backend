@@ -74,10 +74,11 @@ public class AuditLogService {
         Integer earliestYear = bookingRepository.getEarliestYear();
 
         LocalDateTime startTime = start != null
-                ? start
-                : (earliestYear != null
-                    ? LocalDateTime.of(earliestYear, 1, 1, 0, 0)
-                    : LocalDateTime.of(2000, 1, 1, 0, 0));
+		    ? start
+		    : LocalDateTime.of(
+		        earliestYear != null ? earliestYear : LocalDateTime.now().getYear(),
+		        1, 1, 0, 0
+	    );
 
         LocalDateTime endTime = end != null ? end : LocalDateTime.now();
 

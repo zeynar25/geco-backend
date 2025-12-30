@@ -132,7 +132,12 @@ public class FeedbackService extends BaseService{
 	}
 	
 	private LocalDate defaultStartDate(LocalDate startDate) {
-	    return startDate != null ? startDate : LocalDate.of(bookingRepository.getEarliestYear(), 1, 1);
+	    if (startDate != null) {
+	        return startDate;
+	    }
+	    Integer earliestYear = bookingRepository.getEarliestYear();
+	    int year = (earliestYear != null) ? earliestYear : LocalDate.now().getYear();
+	    return LocalDate.of(year, 1, 1);
 	}
 	
 	private LocalDate defaultEndDate(LocalDate endDate) {
