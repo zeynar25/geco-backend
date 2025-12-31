@@ -21,6 +21,5 @@ public class BookingUpdateRequest extends UserBookingUpdateRequest{
     private PaymentStatus paymentStatus;
     private PaymentMethod paymentMethod;
     
-    @Size(min = 5, message = "Staff reply comment must be at least 5 characters long.")
     private String staffReply;
 }
