@@ -79,7 +79,7 @@ public class PackageInclusionService extends BaseService{
 	
 	@Transactional
 	public PackageInclusion updateInclusion(int id, PackageInclusion inclusion) {
-		if (inclusion.getInclusionName() == null && inclusion.getInclusionPricePerPerson() == null) {
+		if (inclusion.getInclusionName() == null && inclusion.getInclusionDescription() == null && inclusion.getInclusionPricePerPerson() == null) {
 			throw new IllegalArgumentException("Package Inclusion name, description, and price per person are missing.");
 		}
 		
@@ -103,7 +103,7 @@ public class PackageInclusionService extends BaseService{
 			existingInclusion.setInclusionName(newName);
 	    }
 		
-		if (inclusion.getInclusionDescription() != null && inclusion.getInclusionDescription().trim().isBlank()) {
+		if (inclusion.getInclusionDescription() != null && !inclusion.getInclusionDescription().trim().isBlank()) {
 			existingInclusion.setInclusionDescription(inclusion.getInclusionDescription());
 	    }
 		
