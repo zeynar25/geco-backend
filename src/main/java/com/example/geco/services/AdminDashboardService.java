@@ -45,8 +45,8 @@ public class AdminDashboardService {
 
 	public AdminDashboardStats getDashboardStats(LocalDate date) {
 		return new AdminDashboardStats(
-				bookingService.getNumberOfBookingByMonth(LocalDate.now()),
-				bookingService.getMonthRevenue(LocalDate.now()),
+				bookingService.getNumberOfBookingByMonth(date),
+				bookingService.getMonthRevenue(date),
 				bookingService.getNumberOfPendingBookings(),
 				feedbackService.getNumberOfNewFeedbacks(FeedbackStatus.NEW)
 		);
