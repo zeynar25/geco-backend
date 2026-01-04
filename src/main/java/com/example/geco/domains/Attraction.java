@@ -21,6 +21,8 @@ public class Attraction {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer attractionId;
+	
+	@Column(unique = true)
 	private String name;
 	
 	@Column(columnDefinition = "TEXT")
