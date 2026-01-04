@@ -425,7 +425,7 @@ public class AccountService extends BaseService implements UserDetailsService{
 		Account existingAccount = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 		
-		String newPassword = "";
+		String newPassword = "password";
 		
 		if (passwordEncoder.matches(newPassword, existingAccount.getPassword())) {
 		    throw new IllegalArgumentException("New password must be different from current password.");
