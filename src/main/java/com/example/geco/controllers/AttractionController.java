@@ -51,6 +51,17 @@ public class AttractionController extends AbstractController {
         AttractionResponse attraction = attractionService.getAttraction(id);
         return new ResponseEntity<>(attraction, HttpStatus.OK);
     }
+    
+    @GetMapping("/search")
+    @Operation(summary = "Search attractions by name", description = "Search attractions by partial name. Optional `active` query param filters active/inactive.")
+    public ResponseEntity<List<AttractionResponse>> searchAttractions(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "active", required = false) Boolean active) {
+
+        List<AttractionResponse> results = attractionService.searchAttractions(name, active);
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+    
 
     @GetMapping
     @Operation(

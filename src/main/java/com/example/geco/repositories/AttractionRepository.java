@@ -14,4 +14,7 @@ public interface AttractionRepository  extends JpaRepository<Attraction, Integer
 	List<Attraction> findAllByOrderByName();
 
 	List<Attraction> findAllByIsActiveOrderByName(boolean isActive);
+
+	List<Attraction> findByNameContainingIgnoreCaseOrderByName(String name);
+    List<Attraction> findByNameContainingIgnoreCaseAndIsActiveOrderByName(String name, boolean isActive);
 }

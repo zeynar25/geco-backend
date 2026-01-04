@@ -124,6 +124,18 @@ public class AttractionService extends BaseService{
 	            .orElseThrow(() -> new EntityNotFoundException("Attraction with ID '"+ id + "' not found."));
         return toResponse(attraction);
 	}
+	
+	@Transactional(readOnly = true)
+	public List<AttractionResponse> searchAttractions(String name, Boolean active) {
+	    if (name == null) name = "";
+	    List<Attraction> results;
+	    if (active == null) {
+	        results = attractionRepository.findByNameContainingIgnoreCaseOrderByName(name);
+	    } else {
+	        results = attractionRepository.findByNameContainingIgnoreCaseAndIsActiveOrderByName(name, active);
+	    }
+	    return results.stream().map(this::toResponse).collect(Collectors.toList());
+	}
 
 	@Transactional(readOnly = true)
 	public List<AttractionResponse> getAllAttractions() {
