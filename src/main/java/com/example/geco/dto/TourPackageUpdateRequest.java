@@ -37,6 +37,8 @@ public class TourPackageUpdateRequest {
     
     @Size(min = 1, message = "Notes must be at least be 1 character long.")
     private String notes;
+    
+    private List<String> allowedStartTimes;
 
     private List<Integer> inclusionIds;
 }

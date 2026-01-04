@@ -1,8 +1,12 @@
 package com.example.geco.domains;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -47,6 +51,15 @@ public class TourPackage {
     )
 	@Builder.Default
     private List<PackageInclusion> inclusions = new ArrayList<>();
+	
+	@ElementCollection
+	@CollectionTable(
+	    name = "package_allowed_start_times",
+	    joinColumns = @JoinColumn(name = "package_id")
+	)
+	@Column(name = "start_time")
+	@Builder.Default
+	private List<String> allowedStartTimes = new ArrayList<>();
 	
 	@Builder.Default
 	private boolean isActive = true;

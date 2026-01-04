@@ -29,20 +29,25 @@ public class TourPackageService extends BaseService{
 	
 	public TourPackage createTourPackageCopy(TourPackage tourPackage) {
 		return TourPackage.builder()
-				.packageId(tourPackage.getPackageId())
-				.name(tourPackage.getName())
-				.duration(tourPackage.getDuration())
-				.description(tourPackage.getDescription())
-				.basePrice(tourPackage.getBasePrice())
-				.minPerson(tourPackage.getMinPerson())
-				.maxPerson(tourPackage.getMaxPerson())
-				.inclusions(
-						tourPackage.getInclusions() != null
-				        ? List.copyOf(tourPackage.getInclusions())
-				                : null
-				)
-				.isActive(tourPackage.isActive())
-			    .build();
+            .packageId(tourPackage.getPackageId())
+            .name(tourPackage.getName())
+            .duration(tourPackage.getDuration())
+            .description(tourPackage.getDescription())
+            .basePrice(tourPackage.getBasePrice())
+            .minPerson(tourPackage.getMinPerson())
+            .maxPerson(tourPackage.getMaxPerson())
+            .inclusions(
+                    tourPackage.getInclusions() != null
+                    ? List.copyOf(tourPackage.getInclusions())
+                    : null
+            )
+            .allowedStartTimes(
+                    tourPackage.getAllowedStartTimes() != null
+                    ? List.copyOf(tourPackage.getAllowedStartTimes())
+                    : null
+            )
+            .isActive(tourPackage.isActive())
+            .build();
 	}
 	
 	
@@ -56,6 +61,7 @@ public class TourPackageService extends BaseService{
 		Integer minPerson = request.getMinPerson();
 		Integer maxPerson= request.getMaxPerson();
 		String notes = request.getNotes() != null ? request.getNotes().trim() : null;
+		List<String> allowedStartTimes = request.getAllowedStartTimes();
 		List<Integer> inclusionIds = request.getInclusionIds();
 		
 		List<PackageInclusion> inclusions =
@@ -65,17 +71,18 @@ public class TourPackageService extends BaseService{
 	        throw new IllegalArgumentException("Some inclusion IDs do not exist.");
 	    }
 	    
-		TourPackage tourPackage = TourPackage.builder()
-				.name(name)
-				.description(description)
-				.duration(duration)
-				.basePrice(basePrice)
-				.pricePerPerson(pricePerPerson)
-				.minPerson(minPerson)
-				.maxPerson(maxPerson)
-				.notes(notes)
-				.inclusions(inclusions)
-				.build();
+	    TourPackage tourPackage = TourPackage.builder()
+            .name(name)
+            .description(description)
+            .duration(duration)
+            .basePrice(basePrice)
+            .pricePerPerson(pricePerPerson)
+            .minPerson(minPerson)
+            .maxPerson(maxPerson)
+            .notes(notes)
+            .inclusions(inclusions)
+            .allowedStartTimes(allowedStartTimes != null ? new java.util.ArrayList<>(allowedStartTimes) : null)
+            .build();
 		
 		TourPackage savedPackage = tourPackageRepository.save(tourPackage);
 		
@@ -123,93 +130,100 @@ public class TourPackageService extends BaseService{
                 .collect(Collectors.toList());
     }
 	
-	public TourPackage updatePackage(int id, TourPackageUpdateRequest request) {
-		String name = request.getName() != null ? request.getName().trim() : null;
-		String description = request.getDescription() != null ? request.getDescription().trim() : null;
-		Integer duration = request.getDuration();
-		Double basePrice = request.getBasePrice();
-		Double pricePerPerson = request.getPricePerPerson();
-		Integer minPerson = request.getMinPerson();
-		Integer maxPerson = request.getMaxPerson();
-		String notes = request.getNotes() != null ? request.getNotes().trim() : null;
-		List<Integer> inclusionIds = request.getInclusionIds() != null ? request.getInclusionIds() : List.of();
-		
-		if (name == null 
-				&& description == null 
-				&& duration == null
-				&& basePrice == null
-				&& (inclusionIds == null || inclusionIds.isEmpty())) {
-			throw new IllegalArgumentException("No update fields provided.");
-		}
-		
-		TourPackage existingTourPackage = tourPackageRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Tour package with ID '" + id + "' not found."));
-		
-	    TourPackage prevTourPackage = createTourPackageCopy(existingTourPackage);
-		
-	    if (name != null) {
-	        if (name.isBlank()) {
-	            throw new IllegalArgumentException("Name cannot be blank.");
-	        }
-	        existingTourPackage.setName(name);
-	    }
+    public TourPackage updatePackage(int id, TourPackageUpdateRequest request) {
+        String name = request.getName() != null ? request.getName().trim() : null;
+        String description = request.getDescription() != null ? request.getDescription().trim() : null;
+        Integer duration = request.getDuration();
+        Double basePrice = request.getBasePrice();
+        Double pricePerPerson = request.getPricePerPerson();
+        Integer minPerson = request.getMinPerson();
+        Integer maxPerson = request.getMaxPerson();
+        String notes = request.getNotes() != null ? request.getNotes().trim() : null;
+        List<String> allowedStartTimes = request.getAllowedStartTimes();
+        List<Integer> inclusionIds = request.getInclusionIds();
 
-		
-	    if (description != null) {
-	        if (description.isBlank()) {
-	            throw new IllegalArgumentException("Description cannot be blank.");
-	        }
-	        existingTourPackage.setDescription(description);
-	    }
-		
-		if (duration != null) {
-		    existingTourPackage.setDuration(duration);
-		}
+        if (name == null
+                && description == null
+                && duration == null
+                && basePrice == null
+                && allowedStartTimes == null
+                && inclusionIds == null) {
+            throw new IllegalArgumentException("No update fields provided.");
+        }
 
+        TourPackage existingTourPackage = tourPackageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tour package with ID '" + id + "' not found."));
 
-		if (basePrice != null) {
-			existingTourPackage.setBasePrice(basePrice);
-		}
+        TourPackage prevTourPackage = createTourPackageCopy(existingTourPackage);
 
-		if (pricePerPerson != null) {
-			existingTourPackage.setPricePerPerson(pricePerPerson);
-		}
-		
-		if (minPerson != null) {
-		    existingTourPackage.setMinPerson(minPerson);
-		}
+        if (name != null) {
+            if (name.isBlank()) {
+                throw new IllegalArgumentException("Name cannot be blank.");
+            }
+            existingTourPackage.setName(name);
+        }
 
-		if (maxPerson != null) {
-		    existingTourPackage.setMaxPerson(maxPerson);
-		}
-		
-		if (notes != null) {
-	        if (notes.isBlank()) {
-	            throw new IllegalArgumentException("Notes cannot be blank.");
-	        }
-	        existingTourPackage.setNotes(notes);
-	    }
-		
-		if (inclusionIds != null) {
-			if (inclusionIds.isEmpty()) {
-		        existingTourPackage.getInclusions().clear();
-		        
-		    } else {
-				List<PackageInclusion> inclusions =
-						inclusionRepository.findAllByInclusionIdIn(inclusionIds);
+        if (description != null) {
+            if (description.isBlank()) {
+                throw new IllegalArgumentException("Description cannot be blank.");
+            }
+            existingTourPackage.setDescription(description);
+        }
 
-			    if (inclusions.size() != inclusionIds.size()) {
-			        throw new IllegalArgumentException("Some inclusion IDs do not exist.");
-			    }
-			    
-			    existingTourPackage.setInclusions(inclusions);
-		    }
-		}
-		
-		logIfStaffOrAdmin("TourPackage", (long) id, LogAction.UPDATE, prevTourPackage, existingTourPackage);
-		
-		return tourPackageRepository.save(existingTourPackage);
-	}
+        if (duration != null) {
+            existingTourPackage.setDuration(duration);
+        }
+
+        if (basePrice != null) {
+            existingTourPackage.setBasePrice(basePrice);
+        }
+
+        if (pricePerPerson != null) {
+            existingTourPackage.setPricePerPerson(pricePerPerson);
+        }
+
+        if (minPerson != null) {
+            existingTourPackage.setMinPerson(minPerson);
+        }
+
+        if (maxPerson != null) {
+            existingTourPackage.setMaxPerson(maxPerson);
+        }
+
+        if (notes != null) {
+            if (notes.isBlank()) {
+                throw new IllegalArgumentException("Notes cannot be blank.");
+            }
+            existingTourPackage.setNotes(notes);
+        }
+
+        if (allowedStartTimes != null) {
+            if (allowedStartTimes.isEmpty()) {
+                existingTourPackage.setAllowedStartTimes(null);
+            } else {
+                existingTourPackage.setAllowedStartTimes(new java.util.ArrayList<>(allowedStartTimes));
+            }
+        }
+
+        if (inclusionIds != null) {
+            if (inclusionIds.isEmpty()) {
+                existingTourPackage.setInclusions(new java.util.ArrayList<>());
+            } else {
+                List<PackageInclusion> inclusions =
+                        inclusionRepository.findAllByInclusionIdIn(inclusionIds);
+
+                if (inclusions.size() != inclusionIds.size()) {
+                    throw new IllegalArgumentException("Some inclusion IDs do not exist.");
+                }
+
+                existingTourPackage.setInclusions(new java.util.ArrayList<>(inclusions));
+            }
+        }
+
+        logIfStaffOrAdmin("TourPackage", (long) id, LogAction.UPDATE, prevTourPackage, existingTourPackage);
+
+        return tourPackageRepository.save(existingTourPackage);
+    }
 	
 	public void softDeletePackage(int id) {
 		TourPackage tourPackage = tourPackageRepository.findById(id)
