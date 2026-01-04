@@ -101,13 +101,13 @@ public class BookingService extends BaseService{
 		}
 		
 		// Park opens by 8:00.
-		LocalTime startTime = LocalTime.of(8, 0);
+		LocalTime startTime = LocalTime.of(7, 0);
 		
 		// Closes by 17:00.
 		LocalTime endTime = LocalTime.of(17, 0);
 		
 		if (visitTime.isBefore(startTime) || visitTime.isAfter(endTime)) {
-			throw new IllegalArgumentException("Booking visit time must be between 8:00 and end at by 17:00.");
+			throw new IllegalArgumentException("Booking visit time must be between 7:00 and end at by 17:00.");
 		}
 		
 	    // Check if there's an overlap in schedule and selected schedule.
