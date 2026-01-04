@@ -425,6 +425,10 @@ public class AccountService extends BaseService implements UserDetailsService{
 		Account existingAccount = accountRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Account with ID '" + id + "' not found."));
 		
+		if (getLoggedAccountRole() == Role.STAFF && existingAccount.getRole() == Role.ADMIN) {
+			throw new IllegalArgumentException("Staff cannot reset the ADMIN's password.");
+		}
+		
 		String newPassword = "password";
 		
 		if (passwordEncoder.matches(newPassword, existingAccount.getPassword())) {
