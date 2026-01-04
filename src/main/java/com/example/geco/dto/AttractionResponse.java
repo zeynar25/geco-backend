@@ -14,6 +14,7 @@ public class AttractionResponse {
     private String name;
     private String description;
     private String funFact;
-    private String photo2dUrl;
+    private String photo2dUrl; 
+    private String glbUrl; 
     private boolean isActive;
 }

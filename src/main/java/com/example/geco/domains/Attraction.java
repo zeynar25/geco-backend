@@ -31,6 +31,8 @@ public class Attraction {
 	
 	private String photo2dUrl;
 	
+	private String glbUrl;
+	
 	@Builder.Default
 	private boolean isActive = true;
 }

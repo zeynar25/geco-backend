@@ -32,20 +32,15 @@ import jakarta.validation.Valid;
 @Tag(name = "Attraction", description = "Operations about attractions")
 public class AttractionController extends AbstractController {
 
-    @PostMapping( 
-    		consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    @Operation(
-        summary = "Add a new attraction",
-        description = "Creates a new attraction with the provided details"
-    )
-    public ResponseEntity<AttractionResponse> addAttraction(
-    		@ModelAttribute AttractionRequest request,
-    	    @RequestPart(value = "image", required = false) MultipartFile image
-) throws IOException  {
-        AttractionResponse savedAttraction = attractionService.addAttraction(request, image);
-        return new ResponseEntity<>(savedAttraction, HttpStatus.CREATED);
-    }
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<AttractionResponse> addAttraction(
+	        @ModelAttribute AttractionRequest request,
+	        @RequestPart(value = "image", required = false) MultipartFile image,
+	        @RequestPart(value = "model", required = false) MultipartFile model
+	) throws IOException {
+	    AttractionResponse savedAttraction = attractionService.addAttraction(request, image, model);
+	    return new ResponseEntity<>(savedAttraction, HttpStatus.CREATED);
+	}
 
     @GetMapping("/{id}")
     @Operation(
@@ -87,24 +82,16 @@ public class AttractionController extends AbstractController {
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 
-    @PatchMapping(
-	    value = "/{id}",
-	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-	)
-	@Operation(
-	    summary = "Update attraction (with optional image)",
-	    description = "Updates name/description/funFact and optionally replaces the image"
-	)
-	public ResponseEntity<AttractionResponse> updateAttractionWithImage(
-	        @PathVariable int id,
-	        @ModelAttribute AttractionRequest request,
-	        @RequestPart(value = "image", required = false) MultipartFile image
-	) throws IOException {
-
-	    AttractionResponse updatedAttraction =
-	            attractionService.updateAttraction(id, request, image);
-	    return new ResponseEntity<>(updatedAttraction, HttpStatus.OK);
-	}
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AttractionResponse> updateAttractionWithImage(
+            @PathVariable int id,
+            @ModelAttribute AttractionRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "model", required = false) MultipartFile model
+    ) throws IOException {
+        AttractionResponse updatedAttraction = attractionService.updateAttraction(id, request, image, model);
+        return new ResponseEntity<>(updatedAttraction, HttpStatus.OK);
+    }
 
     @DeleteMapping("/{id}")
     @Operation(

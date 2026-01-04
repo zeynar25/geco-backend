@@ -26,7 +26,10 @@ import jakarta.persistence.EntityNotFoundException;
 @Transactional
 public class AttractionService extends BaseService{
 	@Value("${app.upload-dir.attractions:C:/sts-4.32.0.RELEASE/dev/geco/uploads/attractions}")
-	private String uploadDir;
+	private String uploadAttractionImgDir;
+	
+	@Value("${app.upload-dir.attractions.models:C:/sts-4.32.0.RELEASE/dev/geco/uploads/attractions/models}")
+	private String uploadAttractionModelDir;
 	
 	@Autowired
 	AttractionRepository attractionRepository;
@@ -43,6 +46,7 @@ public class AttractionService extends BaseService{
 				.description(a.getDescription())
 				.funFact(a.getFunFact())
 				.photo2dUrl(a.getPhoto2dUrl())
+				.glbUrl(a.getGlbUrl())
 				.isActive(a.isActive())
 			    .build();
 	}
@@ -54,12 +58,13 @@ public class AttractionService extends BaseService{
 				.description(a.getDescription())
 				.funFact(a.getFunFact())
 				.photo2dUrl(a.getPhoto2dUrl())
+				.glbUrl(a.getGlbUrl())
 				.isActive(a.isActive())
 				.build();
     }
 	
 	public AttractionResponse addAttraction(AttractionRequest request,
-            MultipartFile image) throws IOException {
+            MultipartFile image, MultipartFile model) throws IOException {
 
 		Attraction attraction = Attraction.builder()
 			.name(request.getAttractionName())
@@ -75,7 +80,7 @@ public class AttractionService extends BaseService{
 				.map(f -> f.substring(f.lastIndexOf(".")))
 				.orElse("");
 			
-			Path uploadPath = Paths.get(uploadDir);
+			Path uploadPath = Paths.get(uploadAttractionImgDir);
 			Files.createDirectories(uploadPath);
 			
 			String fileName = "attraction-" + saved.getAttractionId() + ext;
@@ -85,6 +90,27 @@ public class AttractionService extends BaseService{
 			saved.setPhoto2dUrl("/uploads/attractions/" + fileName);
 			saved = attractionRepository.save(saved);  // update with photo URL
 		}
+		
+		if (model != null && !model.isEmpty()) {
+	        String filename = Optional.ofNullable(model.getOriginalFilename())
+	            .filter(f -> f.contains("."))
+	            .map(f -> f.substring(f.lastIndexOf(".")))
+	            .orElse("");
+	        // validate extension .glb (case-insensitive)
+	        if (!".glb".equalsIgnoreCase(filename)) {
+	            throw new IllegalArgumentException("Model must be a .glb file");
+	        }
+	
+	        Path uploadPath = Paths.get(uploadAttractionModelDir);
+	        Files.createDirectories(uploadPath);
+	
+	        String modelFileName = "attraction-" + saved.getAttractionId() + ".glb";
+	        Path target = uploadPath.resolve(modelFileName);
+	        model.transferTo(target.toFile());
+	
+	        saved.setGlbUrl("/uploads/models/" + modelFileName);
+	        saved = attractionRepository.save(saved);
+	    }
 		
 		logIfStaffOrAdmin("Attraction", saved.getAttractionId().longValue(),
 		LogAction.CREATE, null, saved);
@@ -125,7 +151,7 @@ public class AttractionService extends BaseService{
 	
 	public AttractionResponse updateAttraction(int id,
             AttractionRequest request,
-            MultipartFile image) throws IOException {
+            MultipartFile image, MultipartFile model) throws IOException {
 		Attraction existingAttraction = attractionRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException(
 					"Attraction with ID '" + id + "' not found."
@@ -142,12 +168,12 @@ public class AttractionService extends BaseService{
 		if (name != null && name.length() < 1) {
 			throw new IllegalArgumentException(
 					"Attraction name must have at least 1 character."
-		);
+					);
 		}
 		if (description != null && description.length() < 10) {
 			throw new IllegalArgumentException(
 					"Attraction description must be at least 10 characters long."
-		);
+					);
 		}
 		
 		boolean hasTextChange =
@@ -158,6 +184,7 @@ public class AttractionService extends BaseService{
 		.equals(funFact)));
 		
 		boolean hasImageChange = image != null && !image.isEmpty();
+		boolean hasModelChange = model != null && !model.isEmpty();
 		
 		if (!hasTextChange && !hasImageChange) {
 			throw new IllegalArgumentException("No changes detected for the attraction.");
@@ -183,7 +210,7 @@ public class AttractionService extends BaseService{
 					.map(f -> f.substring(f.lastIndexOf(".")))
 					.orElse("");
 		
-			Path uploadPath = Paths.get(uploadDir);
+			Path uploadPath = Paths.get(uploadAttractionImgDir);
 			Files.createDirectories(uploadPath);
 			
 			String fileName = "attraction-" + existingAttraction.getAttractionId() + ext;
@@ -192,6 +219,27 @@ public class AttractionService extends BaseService{
 			
 			existingAttraction.setPhoto2dUrl("/uploads/attractions/" + fileName);
 		}
+		
+		if (hasModelChange) {
+	        String filename = Optional.ofNullable(model.getOriginalFilename())
+	            .filter(f -> f.contains("."))
+	            .map(f -> f.substring(f.lastIndexOf(".")))
+	            .orElse("");
+	        // validate extension .glb (case-insensitive)
+	        if (!".glb".equalsIgnoreCase(filename)) {
+	            throw new IllegalArgumentException("Model must be a .glb file");
+	        }
+	
+	        Path uploadPath = Paths.get(uploadAttractionModelDir);
+	        Files.createDirectories(uploadPath);
+	
+	        String modelFileName = "attraction-" + existingAttraction.getAttractionId() + ".glb";
+	        Path target = uploadPath.resolve(modelFileName);
+	        model.transferTo(target.toFile());
+	
+	        existingAttraction.setGlbUrl("/uploads/models/" + modelFileName);
+	        existingAttraction = attractionRepository.save(existingAttraction);
+	    }
 		
 		Attraction updated = attractionRepository.save(existingAttraction);
 		
