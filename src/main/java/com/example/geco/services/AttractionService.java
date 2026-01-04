@@ -108,7 +108,7 @@ public class AttractionService extends BaseService{
 	        Path target = uploadPath.resolve(modelFileName);
 	        model.transferTo(target.toFile());
 	
-	        saved.setGlbUrl("/uploads/models/" + modelFileName);
+	        saved.setGlbUrl("/uploads/attractions/models/" + modelFileName);
 	        saved = attractionRepository.save(saved);
 	    }
 		
@@ -163,7 +163,8 @@ public class AttractionService extends BaseService{
 	
 	public AttractionResponse updateAttraction(int id,
             AttractionRequest request,
-            MultipartFile image, MultipartFile model) throws IOException {
+            MultipartFile image, 
+            MultipartFile model) throws IOException {
 		Attraction existingAttraction = attractionRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException(
 					"Attraction with ID '" + id + "' not found."
@@ -198,8 +199,8 @@ public class AttractionService extends BaseService{
 		boolean hasImageChange = image != null && !image.isEmpty();
 		boolean hasModelChange = model != null && !model.isEmpty();
 		
-		if (!hasTextChange && !hasImageChange) {
-			throw new IllegalArgumentException("No changes detected for the attraction.");
+		if (!hasTextChange && !hasImageChange && !hasModelChange) {
+		    throw new IllegalArgumentException("No changes detected for the attraction.");
 		}
 		
 		Attraction prevAttraction = createAttractionCopy(existingAttraction);
@@ -249,8 +250,7 @@ public class AttractionService extends BaseService{
 	        Path target = uploadPath.resolve(modelFileName);
 	        model.transferTo(target.toFile());
 	
-	        existingAttraction.setGlbUrl("/uploads/models/" + modelFileName);
-	        existingAttraction = attractionRepository.save(existingAttraction);
+	        existingAttraction.setGlbUrl("/uploads/attractions/models/" + modelFileName);
 	    }
 		
 		Attraction updated = attractionRepository.save(existingAttraction);
