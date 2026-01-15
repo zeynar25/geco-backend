@@ -3,6 +3,7 @@ package com.example.geco.services;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,6 @@ import com.example.geco.domains.CalendarDate;
 import com.example.geco.domains.CalendarDate.DateStatus;
 import com.example.geco.dto.CalendarDateRequest;
 import com.example.geco.repositories.CalendarDateRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 @Transactional
@@ -30,30 +29,27 @@ public class CalendarDateService extends BaseService {
 			    .build();
 	}
 	
-	public CalendarDate addCalendarDate(CalendarDateRequest request) {
-		CalendarDate cd = calendarDateRepository.save(
-				CalendarDate.builder()
-					.date(request.getDate())
-					.dateStatus(request.getDateStatus())
-					.build());
-		
-		logIfStaffOrAdmin("CalendarDate", (long) cd.getDateId(), LogAction.CREATE, null, cd);
-		
-	    return cd;
-	}
-	
 
-	public CalendarDate updateCalendarDate(int id, CalendarDateRequest request) {
-		CalendarDate existingCd = calendarDateRepository.findById(id)
-	            .orElseThrow(() -> new EntityNotFoundException("Calendar Date with ID '"+ id + "' not found."));
-
-		CalendarDate prevCd = createCalendarDateCopy(existingCd);
-		existingCd.setDateStatus(request.getDateStatus());
-		calendarDateRepository.save(existingCd);
-		
-		logIfStaffOrAdmin("CalendarDate", (long) existingCd.getDateId(), LogAction.UPDATE, prevCd, existingCd);
-		
-	    return existingCd;
+	public CalendarDate updateCalendarDate(CalendarDateRequest request) {
+	    // If a CalendarDate with the requested date already exists, update it.
+	    Optional<CalendarDate> byDate = calendarDateRepository.findByDate(request.getDate());
+	    if (byDate.isPresent()) {
+	        CalendarDate existing = byDate.get();
+	        CalendarDate prev = createCalendarDateCopy(existing);
+	        existing.setDate(request.getDate());
+	        existing.setDateStatus(request.getDateStatus());
+	        CalendarDate saved = calendarDateRepository.save(existing);
+	        logIfStaffOrAdmin("CalendarDate", (long) saved.getDateId(), LogAction.UPDATE, prev, saved);
+	        return saved;
+	    } else {
+	    	CalendarDate cd = CalendarDate.builder()
+		            .date(request.getDate())
+		            .dateStatus(request.getDateStatus())
+		            .build();
+		    CalendarDate saved = calendarDateRepository.save(cd);
+		    logIfStaffOrAdmin("CalendarDate", (long) saved.getDateId(), LogAction.CREATE, null, saved);
+		    return saved;
+	    }
 	}
 	
 	@Transactional(readOnly = true)

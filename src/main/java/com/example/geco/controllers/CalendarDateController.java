@@ -20,25 +20,14 @@ import jakarta.validation.Valid;
 @RequestMapping("/calendar-date")
 @Tag(name = "Calendar Date", description = "Operations about CalendarDate")
 public class CalendarDateController extends AbstractController{
-	@PostMapping
     @Operation(
-        summary = "Create a new date",
-        description = "Adds a new date with a given status"
+        summary = "Creates or Updates an existing CalendarDate object",
+        description = "Creates or Updates an existing CalendarDate with the status provided"
     )
-    public ResponseEntity<CalendarDate> addCalendarDate(
-            @RequestBody CalendarDateRequest request) {
-        CalendarDate savedDate = calendarDateService.addCalendarDate(request);
-        return new ResponseEntity<>(savedDate, HttpStatus.CREATED);
-    }
-	
-	@PutMapping
-    @Operation(
-        summary = "Updates an existing CalendarDate object",
-        description = "Updates an existing CalendarDate with the status provided"
-    )
-    public ResponseEntity<CalendarDate> updateCalendarDate(@PathVariable int id,
+    @PostMapping
+    public ResponseEntity<CalendarDate> updateCalendarDate(
             @RequestBody @Valid CalendarDateRequest request) {
-		CalendarDate savedDate = calendarDateService.updateCalendarDate(id, request);
+		CalendarDate savedDate = calendarDateService.updateCalendarDate(request);
         return new ResponseEntity<>(savedDate, HttpStatus.OK);
     }
 }
