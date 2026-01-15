@@ -84,6 +84,8 @@ public class BookingService extends BaseService{
 				.paymentStatus(booking.getPaymentStatus())
 				.totalPrice(booking.getTotalPrice())
 				.isActive(booking.isActive())
+				.createdAt(booking.getCreatedAt())
+				.updatedAt(booking.getUpdatedAt())
 				.build();
 	}
 	
