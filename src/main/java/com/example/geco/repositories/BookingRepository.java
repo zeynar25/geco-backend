@@ -1,6 +1,7 @@
 package com.example.geco.repositories;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -138,6 +139,56 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 	        Pageable pageable
 	);
 	
+	@Query("""
+	    SELECT b
+	    FROM Booking b
+	    WHERE (:accountId IS NULL OR b.account.accountId = :accountId)
+	      AND (
+	           (:startDateTime IS NULL AND :endDateTime IS NULL)
+	           OR b.createdAt BETWEEN COALESCE(:startDateTime, b.createdAt) AND COALESCE(:endDateTime, b.createdAt)
+	      )
+	      AND (:bookingStatus IS NULL OR b.bookingStatus = :bookingStatus)
+	      AND (:paymentStatus IS NULL OR b.paymentStatus = :paymentStatus)
+	      AND (:paymentMethod IS NULL OR b.paymentMethod = :paymentMethod)
+	      AND (:email IS NULL OR LOWER(b.account.detail.email) LIKE LOWER(CONCAT('%', :email, '%')))
+	    ORDER BY b.visitDate DESC, b.visitTime ASC
+	""")
+	Page<Booking> findByFiltersByCreatedAt(
+	        @Param("accountId") Integer accountId,
+	        @Param("startDateTime") LocalDateTime startDateTime,
+	        @Param("endDateTime") LocalDateTime endDateTime,
+	        @Param("bookingStatus") BookingStatus bookingStatus,
+	        @Param("paymentStatus") PaymentStatus paymentStatus,
+	        @Param("paymentMethod") PaymentMethod paymentMethod,
+	        @Param("email") String email,
+	        Pageable pageable
+	);
+
+	@Query("""
+	    SELECT b
+	    FROM Booking b
+	    WHERE (:accountId IS NULL OR b.account.accountId = :accountId)
+	      AND (
+	           (:startDateTime IS NULL AND :endDateTime IS NULL)
+	           OR b.updatedAt BETWEEN COALESCE(:startDateTime, b.updatedAt) AND COALESCE(:endDateTime, b.updatedAt)
+	      )
+	      AND (:bookingStatus IS NULL OR b.bookingStatus = :bookingStatus)
+	      AND (:paymentStatus IS NULL OR b.paymentStatus = :paymentStatus)
+	      AND (:paymentMethod IS NULL OR b.paymentMethod = :paymentMethod)
+	      AND (:email IS NULL OR LOWER(b.account.detail.email) LIKE LOWER(CONCAT('%', :email, '%')))
+	    ORDER BY b.visitDate DESC, b.visitTime ASC
+	""")
+	Page<Booking> findByFiltersByUpdatedAt(
+	        @Param("accountId") Integer accountId,
+	        @Param("startDateTime") LocalDateTime startDateTime,
+	        @Param("endDateTime") LocalDateTime endDateTime,
+	        @Param("bookingStatus") BookingStatus bookingStatus,
+	        @Param("paymentStatus") PaymentStatus paymentStatus,
+	        @Param("paymentMethod") PaymentMethod paymentMethod,
+	        @Param("email") String email,
+	        Pageable pageable
+	);
+	
 	List<Booking> findByVisitDateAndBookingIdNotOrderByVisitTimeAsc(LocalDate visitDate, Integer id);
 
 	Page<Booking> findByAccount_AccountIdAndIsActiveOrderByVisitDateDescVisitTimeAsc(
@@ -150,4 +201,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 
 	Page<Booking> findByAccount_AccountIdAndIsActiveAndVisitDateBetween(
 			Integer accountId, boolean isActive, LocalDate startDate, LocalDate endDate, Pageable pageable);
+
+
+
 }

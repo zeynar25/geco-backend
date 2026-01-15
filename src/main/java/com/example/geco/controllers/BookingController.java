@@ -82,7 +82,7 @@ public class BookingController extends AbstractController {
 
 	        @Parameter(description = "End date filter (optional)")
 	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-
+	        
 	        @Parameter(description = "Page number (0-based)") 
 	        @RequestParam(defaultValue = "0") int page,
 
@@ -112,6 +112,9 @@ public class BookingController extends AbstractController {
 	    @RequestParam(required = false)
 	    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
+        @Parameter(description = "Which date field to use for the date filter: visitDate (default), createdAt, or updatedAt")
+        @RequestParam(required = false) String dateField,
+	    
 	    @Parameter(description = "Booking Status")
 	    @RequestParam(required = false) BookingStatus bookingStatus,
 
@@ -139,6 +142,7 @@ public class BookingController extends AbstractController {
 	        paymentStatus,
 	        paymentMethod,
 	        email,
+	        dateField,
 	        pageable
 	    );
 	    return new ResponseEntity<>(bookings, HttpStatus.OK);
@@ -160,6 +164,9 @@ public class BookingController extends AbstractController {
 	        @Parameter(description = "End date filter (optional)") 
 	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
+	        @Parameter(description = "Which date field to use for the date filter: visitDate (default), createdAt, or updatedAt")
+	        @RequestParam(required = false) String dateField,
+	        
 	        @Parameter(description = "Page number (0-based)")
 	        @RequestParam(defaultValue = "0") int page,
 

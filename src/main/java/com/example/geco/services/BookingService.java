@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
@@ -310,8 +311,53 @@ public class BookingService extends BaseService{
 	        PaymentStatus paymentStatus,
 	        PaymentMethod paymentMethod,
 	        String email,
+	        String dateField,
 	        Pageable pageable
 	) {
+	    // Default to visitDate when not specified or unrecognized
+	    if (dateField == null || dateField.equalsIgnoreCase("visitDate")) {
+	        return bookingRepository.findByFilters(
+	                accountId,
+	                startDate,
+	                endDate,
+	                bookingStatus,
+	                paymentStatus,
+	                paymentMethod,
+	                email,
+	                pageable
+	        );
+	    }
+
+	    // Convert LocalDate range to LocalDateTime range for timestamp fields
+	    LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+	    LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
+
+	    if ("createdAt".equalsIgnoreCase(dateField)) {
+	        return bookingRepository.findByFiltersByCreatedAt(
+	                accountId,
+	                startDateTime,
+	                endDateTime,
+	                bookingStatus,
+	                paymentStatus,
+	                paymentMethod,
+	                email,
+	                pageable
+	        );
+	    }
+
+	    if ("updatedAt".equalsIgnoreCase(dateField)) {
+	        return bookingRepository.findByFiltersByUpdatedAt(
+	                accountId,
+	                startDateTime,
+	                endDateTime,
+	                bookingStatus,
+	                paymentStatus,
+	                paymentMethod,
+	                email,
+	                pageable
+	        );
+	    }
+
 	    return bookingRepository.findByFilters(
 	            accountId,
 	            startDate,
