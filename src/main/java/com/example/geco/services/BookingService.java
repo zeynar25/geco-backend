@@ -369,6 +369,76 @@ public class BookingService extends BaseService{
 	            pageable
 	    );
 	}
+	
+	@Transactional(readOnly = true)
+	public Page<Booking> getBookingByFiltersByMe(
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        BookingStatus bookingStatus,
+	        PaymentStatus paymentStatus,
+	        PaymentMethod paymentMethod,
+	        String dateField,
+	        Pageable pageable
+	) {
+		
+		int accountId = getLoggedAccountId();
+		String email = getLoggedAccountEmail();
+		
+	    // Default to visitDate when not specified or unrecognized
+	    if (dateField == null || dateField.equalsIgnoreCase("visitDate")) {
+	        return bookingRepository.findByFilters(
+	                accountId,
+	                startDate,
+	                endDate,
+	                bookingStatus,
+	                paymentStatus,
+	                paymentMethod,
+	                email,
+	                pageable
+	        );
+	    }
+
+	    // Convert LocalDate range to LocalDateTime range for timestamp fields
+	    LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+	    LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
+
+	    if ("createdAt".equalsIgnoreCase(dateField)) {
+	        return bookingRepository.findByFiltersByCreatedAt(
+	                accountId,
+	                startDateTime,
+	                endDateTime,
+	                bookingStatus,
+	                paymentStatus,
+	                paymentMethod,
+	                email,
+	                pageable
+	        );
+	    }
+
+	    if ("updatedAt".equalsIgnoreCase(dateField)) {
+	        return bookingRepository.findByFiltersByUpdatedAt(
+	                accountId,
+	                startDateTime,
+	                endDateTime,
+	                bookingStatus,
+	                paymentStatus,
+	                paymentMethod,
+	                email,
+	                pageable
+	        );
+	    }
+
+	    return bookingRepository.findByFilters(
+	            accountId,
+	            startDate,
+	            endDate,
+	            bookingStatus,
+	            paymentStatus,
+	            paymentMethod,
+	            email,
+	            pageable
+	    );
+	}
 
 	@Transactional(readOnly = true)
 	public Page<Booking> getBookingByAccountAndDateRange(

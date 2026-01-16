@@ -75,25 +75,29 @@ public class BookingController extends AbstractController {
     	        Pagination is supported using 'page' and 'size'.
     	    """
 	)
-	@GetMapping("/me")
-	public ResponseEntity<Page<Booking>> getAllMyBookings(
-	        @Parameter(description = "Start date filter (optional)")
-	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-
-	        @Parameter(description = "End date filter (optional)")
-	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-	        
-	        @Parameter(description = "Page number (0-based)") 
-	        @RequestParam(defaultValue = "0") int page,
-
-	        @Parameter(description = "Page size") 
-	        @RequestParam(defaultValue = "10") int size
-	) {
-	    Pageable pageable = PageRequest.of(page, size);
-	    Page<Booking> bookings = bookingService.getMyBookingByDateRange(startDate, endDate, pageable);
-
-	    return new ResponseEntity<>(bookings, HttpStatus.OK);
-	}
+    @GetMapping("/me")
+    public ResponseEntity<Page<Booking>> getAllMyBookings(
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @RequestParam(required = false) BookingStatus bookingStatus,
+        @RequestParam(required = false) PaymentStatus paymentStatus,
+        @RequestParam(required = false) PaymentMethod paymentMethod,
+        @RequestParam(required = false) String dateField,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Booking> bookings = bookingService.getBookingByFiltersByMe(
+            startDate,
+            endDate,
+            bookingStatus,
+            paymentStatus,
+            paymentMethod,
+            dateField,
+            pageable
+        );
+        return new ResponseEntity<>(bookings, HttpStatus.OK);
+    }
     
     @Operation(
 	    summary = "Get all Bookings",
