@@ -1001,6 +1001,14 @@ public class BookingService extends BaseService{
 		}
 		
 		if (bookingStatus != null) {
+		    if (bookingStatus == BookingStatus.COMPLETED) {
+		        LocalDate visitDateForCheck = existingBooking.getVisitDate();
+		        if (visitDateForCheck == null || !visitDateForCheck.isBefore(LocalDate.now())) {
+		            throw new IllegalArgumentException(
+		                "Cannot mark booking as COMPLETED unless the visit date is before today."
+		            );
+		        }
+		    }
 		    existingBooking.setBookingStatus(bookingStatus);
 		}
 
