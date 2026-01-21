@@ -15,6 +15,13 @@ public class GecoApplication {
 
 	public static void main(String[] args) {
 		loadDotenv();
+		// debug: print GLTFPACK value loaded from .env (if any)
+		String gltf = System.getProperty("GLTFPACK");
+		if (gltf != null) {
+			System.out.println("GLTFPACK (from .env or env): " + gltf);
+		} else {
+			System.out.println("GLTFPACK not set in environment or .env");
+		}
 		SpringApplication.run(GecoApplication.class, args);
 	}
 

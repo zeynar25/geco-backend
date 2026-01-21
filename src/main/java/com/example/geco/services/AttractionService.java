@@ -10,6 +10,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.InvalidPathException;
+import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -45,6 +49,11 @@ public class AttractionService extends BaseService{
 
 	@Value("${app.storage.bucket.attraction_models}")
 	private String modelsBucket;
+
+	@Value("${app.tools.gltfpack:}")
+	private String gltfpackPath;
+
+	private static final Logger log = LoggerFactory.getLogger(AttractionService.class);
 	
 	@Autowired
 	AttractionRepository attractionRepository;
@@ -121,12 +130,96 @@ public class AttractionService extends BaseService{
             if (!".glb".equalsIgnoreCase(filename)) {
                 throw new IllegalArgumentException("Model must be a .glb file");
             }
-            String modelFileName = "attraction-" + saved.getAttractionId() + ".glb";
-            try (InputStream in = model.getInputStream()) {
-                String url = storageService.upload(in, model.getContentType() == null ? "application/octet-stream" : model.getContentType(), modelsBucket, modelFileName);
-                saved.setGlbUrl(url);
-                saved = attractionRepository.save(saved);
-            }
+			String modelFileName = "attraction-" + saved.getAttractionId() + ".glb";
+			// attempt to compress with gltfpack (CLI) then upload compressed output; fallback to original
+			Path tmpDir = null;
+			Path inTmp = null;
+			Path outTmp = null;
+			boolean uploaded = false;
+			try {
+				tmpDir = Files.createTempDirectory("gltfpack");
+				inTmp = tmpDir.resolve("in.glb");
+				outTmp = tmpDir.resolve("out.glb");
+				model.transferTo(inTmp.toFile());
+
+				boolean canRunGltfpack = false;
+				Path gltfExecPath = null;
+				if (gltfpackPath != null && !gltfpackPath.isBlank()) {
+					try {
+						gltfExecPath = Paths.get(gltfpackPath);
+						if (Files.exists(gltfExecPath) && Files.isRegularFile(gltfExecPath)) {
+							canRunGltfpack = true;
+							if (!Files.isExecutable(gltfExecPath)) {
+								log.warn("gltfpack found at {} but is not marked executable; will attempt to run anyway", gltfExecPath);
+							} else {
+								log.debug("gltfpack executable found at {}", gltfExecPath);
+							}
+						} else {
+							log.info("gltfpack not found at {}, skipping model compression", gltfpackPath);
+						}
+					} catch (InvalidPathException ex) {
+						log.warn("Invalid gltfpack path '{}', skipping compression", gltfpackPath);
+					}
+				} else {
+					log.debug("gltfpackPath is empty, skipping model compression");
+				}
+
+				Process p = null;
+				if (canRunGltfpack) {
+					String[] parts = gltfpackPath.trim().split("\\s+");
+					String exe = parts[0].replaceAll("^\"|\"$", "");
+					java.util.List<String> cmd = new java.util.ArrayList<>();
+					cmd.add(exe);
+					for (int i = 1; i < parts.length; i++) {
+						if (!parts[i].isBlank()) cmd.add(parts[i]);
+					}
+					cmd.add("-i"); cmd.add(inTmp.toString()); cmd.add("-o"); cmd.add(outTmp.toString());
+					log.debug("Running gltfpack command: {}", cmd);
+					ProcessBuilder pb = new ProcessBuilder(cmd);
+					pb.redirectErrorStream(true);
+					p = pb.start();
+				}
+				String procOut = "";
+				int rc = -1;
+				if (p != null) {
+					procOut = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+					rc = p.waitFor();
+				}
+				if (rc == 0 && Files.exists(outTmp)) {
+					try (InputStream in = Files.newInputStream(outTmp)) {
+						String url = storageService.upload(in, "model/gltf-binary", modelsBucket, modelFileName);
+						saved.setGlbUrl(url);
+						saved = attractionRepository.save(saved);
+						uploaded = true;
+					}
+				} else {
+					if (p == null) {
+						log.debug("Skipped running gltfpack; uploading original model");
+					} else {
+						log.error("gltfpack failed (rc={}): {}", rc, procOut);
+					}
+				}
+			} catch (IOException | InterruptedException e) {
+				System.err.printf("gltfpack error: %s\n", e.getMessage());
+				if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+			}
+
+			if (!uploaded) {
+				// model may have been moved by transferTo; prefer reading from the temp file if available
+				try (InputStream in = (inTmp != null && Files.exists(inTmp)) ? Files.newInputStream(inTmp) : model.getInputStream()) {
+					String url = storageService.upload(in, model.getContentType() == null ? "application/octet-stream" : model.getContentType(), modelsBucket, modelFileName);
+					saved.setGlbUrl(url);
+					saved = attractionRepository.save(saved);
+				}
+			}
+
+			// cleanup temp files/directories after upload/fallback
+			try {
+				if (tmpDir != null && Files.exists(tmpDir)) {
+					Files.list(tmpDir).forEach(p -> { try { Files.deleteIfExists(p); } catch (IOException ignore) {} });
+					Files.deleteIfExists(tmpDir);
+				}
+			} catch (IOException ignore) {}
         }
 		
 		logIfStaffOrAdmin("Attraction", saved.getAttractionId().longValue(),
@@ -245,18 +338,100 @@ public class AttractionService extends BaseService{
 		}
 		
 		if (hasModelChange) {
-	        String filename = Optional.ofNullable(model.getOriginalFilename())
-	            .filter(f -> f.contains("."))
-	            .map(f -> f.substring(f.lastIndexOf(".")))
-	            .orElse("");
-	        if (!".glb".equalsIgnoreCase(filename)) {
-	            throw new IllegalArgumentException("Model must be a .glb file");
-	        }
-	        String modelFileName = "attraction-" + existingAttraction.getAttractionId() + ".glb";
-	        try (InputStream in = model.getInputStream()) {
-	            String url = storageService.upload(in, model.getContentType() == null ? "application/octet-stream" : model.getContentType(), modelsBucket, modelFileName);
-	            existingAttraction.setGlbUrl(url);
-	        }
+		String filename = Optional.ofNullable(model.getOriginalFilename())
+			.filter(f -> f.contains("."))
+			.map(f -> f.substring(f.lastIndexOf(".")))
+			.orElse("");
+		if (!".glb".equalsIgnoreCase(filename)) {
+			throw new IllegalArgumentException("Model must be a .glb file");
+		}
+		String modelFileName = "attraction-" + existingAttraction.getAttractionId() + ".glb";
+		Path tmpDir = null;
+		Path inTmp = null;
+		Path outTmp = null;
+		boolean uploaded = false;
+		try {
+			tmpDir = Files.createTempDirectory("gltfpack");
+			inTmp = tmpDir.resolve("in.glb");
+			outTmp = tmpDir.resolve("out.glb");
+			model.transferTo(inTmp.toFile());
+
+			boolean canRunGltfpack = false;
+			Path gltfExecPath = null;
+			if (gltfpackPath != null && !gltfpackPath.isBlank()) {
+				try {
+					gltfExecPath = Paths.get(gltfpackPath);
+					if (Files.exists(gltfExecPath) && Files.isRegularFile(gltfExecPath)) {
+						canRunGltfpack = true;
+						if (!Files.isExecutable(gltfExecPath)) {
+							log.info("gltfpack found at {} but is not marked executable; attempting to run", gltfExecPath);
+						} else {
+							log.info("gltfpack executable found at {}", gltfExecPath);
+						}
+					} else {
+						log.info("gltfpack not found at {}, skipping model compression", gltfpackPath);
+					}
+				} catch (InvalidPathException ex) {
+					log.warn("Invalid gltfpack path '{}', skipping compression", gltfpackPath);
+				}
+			} else {
+				log.debug("gltfpackPath is empty, skipping model compression");
+			}
+
+			Process p = null;
+			if (canRunGltfpack) {
+				String[] parts = gltfpackPath.trim().split("\\s+");
+				String exe = parts[0].replaceAll("^\"|\"$", "");
+				java.util.List<String> cmd = new java.util.ArrayList<>();
+				cmd.add(exe);
+				for (int i = 1; i < parts.length; i++) {
+					if (!parts[i].isBlank()) cmd.add(parts[i]);
+				}
+				cmd.add("-i"); cmd.add(inTmp.toString()); cmd.add("-o"); cmd.add(outTmp.toString());
+				log.debug("Running gltfpack command: {}", cmd);
+				ProcessBuilder pb = new ProcessBuilder(cmd);
+				pb.redirectErrorStream(true);
+				p = pb.start();
+			}
+			String procOut = "";
+			int rc = -1;
+			if (p != null) {
+				procOut = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+				rc = p.waitFor();
+			}
+			if (rc == 0 && Files.exists(outTmp)) {
+				try (InputStream in = Files.newInputStream(outTmp)) {
+					String url = storageService.upload(in, "model/gltf-binary", modelsBucket, modelFileName);
+					existingAttraction.setGlbUrl(url);
+					uploaded = true;
+				}
+			} else {
+				if (p == null) {
+					log.debug("Skipped running gltfpack; uploading original model");
+				} else {
+					log.error("gltfpack failed (rc={}): {}", rc, procOut);
+				}
+			}
+		} catch (IOException | InterruptedException e) {
+			System.err.printf("gltfpack error: %s\n", e.getMessage());
+			if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+		}
+
+		if (!uploaded) {
+			// prefer reading from temp file if transferTo moved the multipart
+			try (InputStream in = (inTmp != null && Files.exists(inTmp)) ? Files.newInputStream(inTmp) : model.getInputStream()) {
+				String url = storageService.upload(in, model.getContentType() == null ? "application/octet-stream" : model.getContentType(), modelsBucket, modelFileName);
+				existingAttraction.setGlbUrl(url);
+			}
+		}
+
+		// cleanup temp files/directories after upload/fallback
+		try {
+			if (tmpDir != null && Files.exists(tmpDir)) {
+				Files.list(tmpDir).forEach(p -> { try { Files.deleteIfExists(p); } catch (IOException ignore) {} });
+				Files.deleteIfExists(tmpDir);
+			}
+		} catch (IOException ignore) {}
 	    }
 		
 		Attraction updated = attractionRepository.save(existingAttraction);
