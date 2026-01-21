@@ -21,6 +21,7 @@ import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import java.io.InputStream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,12 @@ import jakarta.persistence.EntityNotFoundException;
 public class BookingService extends BaseService{
 	@Value("${app.upload-dir.payments:C:/sts-4.32.0.RELEASE/dev/geco/uploads/payments}")
 	private String paymentsUploadDir;
+
+	@Autowired
+	private StorageService storageService;
+
+	@Value("${app.storage.bucket.booking_payments:}")
+	private String paymentsBucket;
 	
 	@Autowired
 	private AccountRepository accountRepository;
@@ -869,31 +876,69 @@ public class BookingService extends BaseService{
 			existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
 		}
 		
-		// --- NEW: handle proof-of-payment file, same pattern as AttractionService ---
+		// handle proof-of-payment file: prefer uploading to cloud storage, fallback to local
 		if (hasFile) {
-			try {
-				Path uploadPath = Paths.get(paymentsUploadDir);
-				Files.createDirectories(uploadPath);
-				
-				String originalName = proofOfPaymentFile.getOriginalFilename();
-				String ext = "";
-				
-				if (originalName != null && originalName.contains(".")) {
+			String originalName = proofOfPaymentFile.getOriginalFilename();
+			String ext = "";
+			if (originalName != null && originalName.contains(".")) {
 				ext = originalName.substring(originalName.lastIndexOf("."));
+			}
+			String fileName = "booking-" + existingBooking.getBookingId() + ext;
+			boolean saved = false;
+			
+			// try cloud upload when bucket configured (compress images first)
+			if (paymentsBucket != null && !paymentsBucket.isBlank()) {
+				try {
+					String contentType = proofOfPaymentFile.getContentType() == null ? "application/octet-stream" : proofOfPaymentFile.getContentType();
+					boolean isImage = contentType.startsWith("image/");
+					if (isImage) {
+						try {
+							byte[] compressed = ImageUtils.compressImage(proofOfPaymentFile, 0.8f, 1600, 1600);
+							String url = storageService.upload(new ByteArrayInputStream(compressed), "image/jpeg", paymentsBucket, fileName);
+							existingBooking.setProofOfPaymentPhoto(url);
+							saved = true;
+							if (existingBooking.getPaymentStatus() == PaymentStatus.UNPAID) {
+								existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
+							}
+						} catch (IOException e) {
+							System.err.printf("Image compression/upload failed for booking %d: %s\n", existingBooking.getBookingId(), e.getMessage());
+						}
+					} else {
+						try (InputStream in = proofOfPaymentFile.getInputStream()) {
+							String url = storageService.upload(in, contentType, paymentsBucket, fileName);
+							existingBooking.setProofOfPaymentPhoto(url);
+							saved = true;
+							if (existingBooking.getPaymentStatus() == PaymentStatus.UNPAID) {
+								existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
+							}
+						}
+					}
+				} catch (IOException e) {
+					System.err.printf("Cloud upload for booking %d failed: %s\n", existingBooking.getBookingId(), e.getMessage());
 				}
-				
-				String fileName = "booking-" + existingBooking.getBookingId() + ext;
-				Path target = uploadPath.resolve(fileName);
-				proofOfPaymentFile.transferTo(target.toFile());
-				
-				String url = "/uploads/payments/" + fileName;
-				existingBooking.setProofOfPaymentPhoto(url);
-				
-				if (existingBooking.getPaymentStatus() == PaymentStatus.UNPAID) {
-					existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
+			}
+			
+			// fallback to local storage (write compressed bytes for images when available)
+			if (!saved) {
+				try {
+					Path uploadPath = Paths.get(paymentsUploadDir);
+					Files.createDirectories(uploadPath);
+					Path target = uploadPath.resolve(fileName);
+					String contentType = proofOfPaymentFile.getContentType() == null ? "application/octet-stream" : proofOfPaymentFile.getContentType();
+					if (contentType.startsWith("image/")) {
+						byte[] compressed = ImageUtils.compressImage(proofOfPaymentFile, 0.8f, 1600, 1600);
+						Files.write(target, compressed);
+					} else {
+						proofOfPaymentFile.transferTo(target.toFile());
+					}
+					String url = "/uploads/payments/" + fileName;
+					existingBooking.setProofOfPaymentPhoto(url);
+					if (existingBooking.getPaymentStatus() == PaymentStatus.UNPAID) {
+						existingBooking.setPaymentStatus(PaymentStatus.PAYMENT_VERIFICATION);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException("Failed to save proof of payment file", e);
 				}
-			} catch (IOException e) {
-				throw new RuntimeException("Failed to save proof of payment file", e);
 			}
 		}
 		
