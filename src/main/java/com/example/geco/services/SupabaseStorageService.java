@@ -68,35 +68,28 @@ public class SupabaseStorageService implements StorageService {
 
     @Override
     public String upload(InputStream input, String contentType, String bucket, String key) throws IOException {
-        // Read all bytes from input then PUT to Supabase
-        byte[] data;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            byte[] buf = new byte[8192];
-            int r;
-            while ((r = input.read(buf)) != -1) {
-                baos.write(buf, 0, r);
-            }
-            data = baos.toByteArray();
-        }
-
         String encodedBucket = URLEncoder.encode(bucket, StandardCharsets.UTF_8);
         String encodedKey = URLEncoder.encode(key, StandardCharsets.UTF_8);
         String target = supabaseUrl + "/storage/v1/object/" + encodedBucket + "/" + encodedKey;
+
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofInputStream(() -> input);
 
         HttpRequest req = HttpRequest.newBuilder()
             .uri(URI.create(target))
             .header("Authorization", "Bearer " + serviceKey)
             .header("Content-Type", contentType == null ? "application/octet-stream" : contentType)
-            .PUT(HttpRequest.BodyPublishers.ofByteArray(data))
+            .PUT(body)
             .build();
 
         HttpResponse<String> resp;
         try {
-            System.out.printf("Supabase upload -> base=%s bucket=%s key=%s contentType=%s size=%d\n", supabaseUrl, bucket, key, contentType, data.length);
+            System.out.printf("Supabase upload -> base=%s bucket=%s key=%s contentType=%s (streaming)\n", supabaseUrl, bucket, key, contentType);
             resp = http.send(req, HttpResponse.BodyHandlers.ofString());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IOException("Upload interrupted", e);
+        } finally {
+            try { input.close(); } catch (IOException ignore) {}
         }
 
         if (resp.statusCode() / 100 != 2) {
