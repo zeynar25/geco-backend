@@ -203,5 +203,18 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>{
 			Integer accountId, boolean isActive, LocalDate startDate, LocalDate endDate, Pageable pageable);
 
 
-
+	long countByVisitDateAndBookingStatus(LocalDate visitDate, BookingStatus bookingStatus);
+	long countByVisitDateAndBookingStatusIn(LocalDate visitDate, List<BookingStatus> statuses);
+	
+	@Query("""
+	  SELECT b.visitDate, COUNT(b)
+	  FROM Booking b
+	  WHERE b.visitDate >= :fromDate
+	    AND b.bookingStatus IN :statuses
+	  GROUP BY b.visitDate
+	""")
+	List<Object[]> countBookingsByVisitDateFromAndStatusIn(
+	    @Param("fromDate") LocalDate fromDate,
+	    @Param("statuses") List<BookingStatus> statuses
+	);
 }

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -37,6 +38,7 @@ import com.example.geco.domains.Booking.PaymentMethod;
 import com.example.geco.domains.Booking.PaymentStatus;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.CalendarDate;
+import com.example.geco.domains.CalendarDate.DateStatus;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
 import com.example.geco.dto.BookingInclusionRequest;
@@ -47,6 +49,7 @@ import com.example.geco.dto.ChartData;
 import com.example.geco.dto.UserBookingUpdateRequest;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
+import com.example.geco.repositories.CalendarDateRepository;
 import com.example.geco.repositories.PackageInclusionRepository;
 import com.example.geco.repositories.TourPackageRepository;
 import com.example.geco.utils.ImageUtils;
@@ -61,6 +64,12 @@ public class BookingService extends BaseService{
 
 	@Autowired
 	private StorageService storageService;
+	
+	@Autowired
+	private RestrictionService restrictionService;
+
+	@Autowired
+	private CalendarDateRepository calendarDateRepository;
 
 	@Value("${app.storage.bucket.booking_payments:}")
 	private String paymentsBucket;
@@ -576,16 +585,12 @@ public class BookingService extends BaseService{
 
 	@Transactional(readOnly = true)
 	public Map<Integer, CalendarDay> getCalendar(int year, int month) {
-
 	    if (year <= 0) {
 	        throw new IllegalArgumentException("Invalid year.");
 	    }
-
 	    if (month < 1 || month > 12) {
 	        throw new IllegalArgumentException("Invalid month.");
 	    }
-
-	    Map<Integer, CalendarDay> calendar = new HashMap<>();
 
 	    YearMonth yearMonth = YearMonth.of(year, month);
 	    int daysInMonth = yearMonth.lengthOfMonth();
@@ -593,40 +598,63 @@ public class BookingService extends BaseService{
 	    LocalDate start = yearMonth.atDay(1);
 	    LocalDate end = yearMonth.atEndOfMonth();
 
-	    List<Booking> allBookings =
-	            bookingRepository.findByVisitDateBetween(start, end);
-
+	    List<Booking> allBookings = bookingRepository.findByVisitDateBetween(start, end);
 	    Map<LocalDate, List<Booking>> bookingsByDate =
-	            allBookings.stream()
-	                .collect(Collectors.groupingBy(Booking::getVisitDate));
+	        allBookings.stream().collect(Collectors.groupingBy(Booking::getVisitDate));
 
 	    List<CalendarDate> calendarDates =
-	            calendarDateService.getCalendarDateByYearMonth(null, yearMonth);
+	        calendarDateService.getCalendarDateByYearMonth(null, yearMonth);
 
-	    Map<LocalDate, CalendarDate.DateStatus> dateStatusMap =
-	            calendarDates.stream()
-	                .collect(Collectors.toMap(
-	                    CalendarDate::getDate,
-	                    CalendarDate::getDateStatus
-	                ));
+	    Map<LocalDate, CalendarDate> calendarDateByDate =
+	        calendarDates.stream().collect(Collectors.toMap(CalendarDate::getDate, Function.identity()));
+
+	    Integer globalBookingLimit = restrictionService
+	        .getRestriction("booking_limit")
+	        .getValue();
+
+	    Map<Integer, CalendarDay> calendar = new HashMap<>();
 
 	    for (int day = 1; day <= daysInMonth; day++) {
-
 	        LocalDate date = yearMonth.atDay(day);
-	        CalendarDate.DateStatus status = dateStatusMap.get(date);
 
-	        List<Booking> bookingList =
-	                bookingsByDate.getOrDefault(date, List.of());
+	        CalendarDate calendarDate = calendarDateByDate.get(date);
+	        CalendarDate.DateStatus storedStatus =
+	            (calendarDate != null ? calendarDate.getDateStatus() : null);
+
+	        Integer perDateLimit =
+	            (calendarDate != null ? calendarDate.getBookingLimit() : null);
+
+	        Integer effectiveLimit =
+	            (perDateLimit != null ? perDateLimit : globalBookingLimit);
+
+	        List<Booking> bookingList = bookingsByDate.getOrDefault(date, List.of());
 
 	        int visitorCount = bookingList.stream()
-	                .mapToInt(Booking::getGroupSize)
-	                .sum();
-	        
+	            .mapToInt(Booking::getGroupSize)
+	            .sum();
+
+	        long acceptedBookings = bookingList.stream()
+	            .filter(b ->
+	                b.getBookingStatus() == Booking.BookingStatus.APPROVED ||
+	                b.getBookingStatus() == Booking.BookingStatus.COMPLETED
+	            )
+	            .count();
+
+	        CalendarDate.DateStatus effectiveStatus =
+	            (storedStatus != null ? storedStatus : CalendarDate.DateStatus.AVAILABLE);
+
+	        if (effectiveStatus != CalendarDate.DateStatus.CLOSED && effectiveLimit != null) {
+	            if (acceptedBookings >= effectiveLimit) {
+	                effectiveStatus = CalendarDate.DateStatus.FULLY_BOOKED;
+	            }
+	        }
+
 	        calendar.put(day, CalendarDay.builder()
-	                .bookings(bookingList.size())
-	                .visitors(visitorCount)
-	                .status(status)
-	                .build()
+	            .bookings(bookingList.size())
+	            .visitors(visitorCount)
+	            .status(effectiveStatus)
+	            .bookingLimit(effectiveLimit)
+	            .build()
 	        );
 	    }
 
@@ -759,7 +787,6 @@ public class BookingService extends BaseService{
 	    
 	    return revenues;
 	}
-	
 	
 	public Booking updateBooking(int id,
             UserBookingUpdateRequest request,
@@ -1057,6 +1084,7 @@ public class BookingService extends BaseService{
 		        }
 		    }
 		    existingBooking.setBookingStatus(bookingStatus);
+		    calendarDateService.refreshCalendarDateStatus(existingBooking.getVisitDate());
 		}
 
 		if (paymentStatus != null) {
