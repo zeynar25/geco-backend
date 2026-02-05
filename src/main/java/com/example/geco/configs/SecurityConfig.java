@@ -97,6 +97,7 @@ public class SecurityConfig {
 		            
 		            
 		            .requestMatchers("/calendar-date/**").hasAnyRole("STAFF", "ADMIN")
+		            .requestMatchers("/restriction/**").hasAnyRole("STAFF", "ADMIN")
 		            
 		            .requestMatchers("/home").permitAll()
 		            .requestMatchers("/calendar/**").permitAll()
