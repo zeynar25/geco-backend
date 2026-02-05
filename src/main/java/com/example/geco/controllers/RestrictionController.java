@@ -2,6 +2,7 @@ package com.example.geco.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.geco.domains.Restriction;
+import com.example.geco.dto.FeedbackResponse;
 import com.example.geco.dto.RestrictionRequest;
 import com.example.geco.dto.RestrictionUpdateRequest;
 
@@ -34,7 +36,33 @@ public class RestrictionController extends AbstractController{
         return new ResponseEntity<>(savedRestriction, HttpStatus.CREATED);
     }
 	 
-	 @Operation(
+	@Operation(
+        summary = "Get Restriction by ID",
+        description = "Retrieve a single restriction by its unique ID."
+    )
+    @GetMapping("/{id}")
+    public ResponseEntity<Restriction> getRestriction(
+        @Parameter(description = "ID of the restriction to retrieve")
+        @PathVariable int id
+    ) {
+        Restriction restriction = restrictionService.getRestriction(id);
+        return new ResponseEntity<>(restriction, HttpStatus.OK);
+    }
+	 
+	@Operation(
+       summary = "Get Restriction by name",
+       description = "Retrieve a single restriction by its name."
+   )
+   @GetMapping("/name/{name}")
+   public ResponseEntity<Restriction> getRestrictionByName(
+       @Parameter(description = "Name of the restriction to retrieve")
+       @PathVariable String name
+   ) {
+       Restriction restriction = restrictionService.getRestriction(name);
+       return new ResponseEntity<>(restriction, HttpStatus.OK);
+   }
+	 
+	@Operation(
         summary = "Update a Restriction",
         description = "Update the details of a restriction by ID. Fields that are null or empty will not be updated."
     )
