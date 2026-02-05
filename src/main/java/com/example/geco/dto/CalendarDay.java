@@ -15,4 +15,5 @@ public class CalendarDay {
 	int visitors;
 	int bookings;
 	DateStatus status;
+	int bookingLimit;
 }
