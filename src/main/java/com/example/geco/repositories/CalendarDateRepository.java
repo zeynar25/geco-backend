@@ -21,4 +21,10 @@ public interface CalendarDateRepository extends JpaRepository<CalendarDate, Inte
 	List<CalendarDate> findByDateStatusAndDateBetweenOrderByDate(
 			DateStatus status, LocalDate startDate, LocalDate endDate
 	);
+	
+	List<CalendarDate> findByDateGreaterThanEqual(LocalDate date);
+	
+	List<CalendarDate> findByDateGreaterThanEqualAndBookingLimit(
+			LocalDate date, Integer bookingLimit
+	);
 }

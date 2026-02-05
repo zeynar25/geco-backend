@@ -1,5 +1,7 @@
 package com.example.geco.services;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,9 @@ import jakarta.persistence.EntityNotFoundException;
 public class RestrictionService extends BaseService{
 	@Autowired
 	RestrictionRepository restrictionRepository;
+	
+	@Autowired
+	CalendarDateService calendarDateService;
 	
 	public Restriction createRestrictionCopy(Restriction restriction) {
 		return Restriction.builder()
@@ -93,6 +98,7 @@ public class RestrictionService extends BaseService{
 	    }
 
 	    Restriction before = createRestrictionCopy(restriction);
+	    Boolean changed = false;
 
 	    if (nameUsable) {
 	        String currentName = restriction.getName();
@@ -108,6 +114,7 @@ public class RestrictionService extends BaseService{
 	            });
 
 	            restriction.setName(normalizedName);
+	            changed = true;
 	        }
 	    }
 
@@ -122,16 +129,24 @@ public class RestrictionService extends BaseService{
 
 	        if (!sameValue) {
 	            restriction.setValue(newValue);
+	            changed = true;
 	        }
+	    }
+	    
+	    if (!changed) {
+	        throw new IllegalArgumentException("No changes detected.");
 	    }
 
 	    Restriction savedRestriction = restrictionRepository.save(restriction);
 	    logIfStaffOrAdmin("Restriction", id.longValue(), LogAction.UPDATE, before, savedRestriction);
+
+	    boolean isBookingLimit = savedRestriction.getName() != null
+	        && savedRestriction.getName().trim().equalsIgnoreCase("booking limit");
+
+	    if (isBookingLimit && !java.util.Objects.equals(before.getValue(), savedRestriction.getValue())) {
+	        calendarDateService.updateCalendarDateBookingLimit(LocalDate.now(), before.getValue(), savedRestriction.getValue());
+	    }
 	    
-	    
-	    // if saved Restriction's name is booking limit;
-	    // Implement update each CalendarDate date's booking limit, 
-	    // with parameter of from today's date, old and new booking limit value;
 	    return savedRestriction;
 	}
 }

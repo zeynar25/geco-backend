@@ -29,6 +29,20 @@ public class CalendarDateService extends BaseService {
 			    .build();
 	}
 	
+	@Transactional(readOnly = true)
+	public List<CalendarDate> getCalendarDateByYearMonth(
+			DateStatus status,
+			YearMonth yearMonth) {
+		LocalDate startDate = yearMonth.atDay(1);
+	    LocalDate endDate = yearMonth.atEndOfMonth();
+		
+		if (status == null) {
+		    return calendarDateRepository.findByDateBetweenOrderByDate(startDate, endDate);
+		}
+		
+	    return calendarDateRepository.findByDateStatusAndDateBetweenOrderByDate(status, startDate, endDate);
+	}
+	
 
 	public CalendarDate updateCalendarDate(CalendarDateRequest request) {
 	    // If a CalendarDate with the requested date already exists, update it.
@@ -52,17 +66,28 @@ public class CalendarDateService extends BaseService {
 	    }
 	}
 	
-	@Transactional(readOnly = true)
-	public List<CalendarDate> getCalendarDateByYearMonth(
-			DateStatus status,
-			YearMonth yearMonth) {
-		LocalDate startDate = yearMonth.atDay(1);
-	    LocalDate endDate = yearMonth.atEndOfMonth();
-		
-		if (status == null) {
-		    return calendarDateRepository.findByDateBetweenOrderByDate(startDate, endDate);
-		}
-		
-	    return calendarDateRepository.findByDateStatusAndDateBetweenOrderByDate(status, startDate, endDate);
+	@Transactional
+	public void updateCalendarDateBookingLimit(LocalDate fromDate, Integer oldValue, Integer newValue) {
+	    if (fromDate == null) {
+	        fromDate = LocalDate.now();
+	    }
+	    if (newValue == null) {
+	        throw new IllegalArgumentException("New booking limit is missing.");
+	    }
+	    if (newValue < 0) {
+	        throw new IllegalArgumentException("New booking limit must be 0 or greater.");
+	    }
+
+	    // SAFEST: only overwrite rows that still match the old limit
+	    List<CalendarDate> datesToUpdate =
+	        (oldValue == null)
+	            ? calendarDateRepository.findByDateGreaterThanEqual(fromDate)
+	            : calendarDateRepository.findByDateGreaterThanEqualAndBookingLimit(fromDate, oldValue);
+
+	    for (CalendarDate calendarDate : datesToUpdate) {
+	        calendarDate.setBookingLimit(newValue);
+	    }
+
+	    calendarDateRepository.saveAll(datesToUpdate);
 	}
 }

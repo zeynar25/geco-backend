@@ -38,4 +38,6 @@ public class CalendarDate {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private DateStatus dateStatus;
+	
+	private Integer bookingLimit;
 }
