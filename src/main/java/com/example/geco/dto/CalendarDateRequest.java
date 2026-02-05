@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.example.geco.domains.CalendarDate.DateStatus;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +21,7 @@ public class CalendarDateRequest {
 	
 	@NotNull(message = "CalendarDate's dateStatus is missing.")
 	private DateStatus dateStatus;
+	
+	@Min(value = 0, message = "CalendarDate's bookingLimit must be 0 or greater.")
+    private Integer bookingLimit;
 }

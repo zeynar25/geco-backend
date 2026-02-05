@@ -45,24 +45,36 @@ public class CalendarDateService extends BaseService {
 	
 
 	public CalendarDate updateCalendarDate(CalendarDateRequest request) {
-	    // If a CalendarDate with the requested date already exists, update it.
+	    if (request == null) {
+	        throw new IllegalArgumentException("CalendarDate request is missing.");
+	    }
+
 	    Optional<CalendarDate> byDate = calendarDateRepository.findByDate(request.getDate());
+
 	    if (byDate.isPresent()) {
 	        CalendarDate existing = byDate.get();
 	        CalendarDate prev = createCalendarDateCopy(existing);
+
 	        existing.setDate(request.getDate());
 	        existing.setDateStatus(request.getDateStatus());
+
+	        if (request.getBookingLimit() != null) {
+	            existing.setBookingLimit(request.getBookingLimit());
+	        }
+
 	        CalendarDate saved = calendarDateRepository.save(existing);
 	        logIfStaffOrAdmin("CalendarDate", (long) saved.getDateId(), LogAction.UPDATE, prev, saved);
 	        return saved;
 	    } else {
-	    	CalendarDate cd = CalendarDate.builder()
-		            .date(request.getDate())
-		            .dateStatus(request.getDateStatus())
-		            .build();
-		    CalendarDate saved = calendarDateRepository.save(cd);
-		    logIfStaffOrAdmin("CalendarDate", (long) saved.getDateId(), LogAction.CREATE, null, saved);
-		    return saved;
+	        CalendarDate cd = CalendarDate.builder()
+	            .date(request.getDate())
+	            .dateStatus(request.getDateStatus())
+	            .bookingLimit(request.getBookingLimit())
+	            .build();
+
+	        CalendarDate saved = calendarDateRepository.save(cd);
+	        logIfStaffOrAdmin("CalendarDate", (long) saved.getDateId(), LogAction.CREATE, null, saved);
+	        return saved;
 	    }
 	}
 	
