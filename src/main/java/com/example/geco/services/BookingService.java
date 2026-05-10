@@ -38,7 +38,6 @@ import com.example.geco.domains.Booking.PaymentMethod;
 import com.example.geco.domains.Booking.PaymentStatus;
 import com.example.geco.domains.BookingInclusion;
 import com.example.geco.domains.CalendarDate;
-import com.example.geco.domains.CalendarDate.DateStatus;
 import com.example.geco.domains.PackageInclusion;
 import com.example.geco.domains.TourPackage;
 import com.example.geco.dto.BookingInclusionRequest;
@@ -49,7 +48,6 @@ import com.example.geco.dto.ChartData;
 import com.example.geco.dto.UserBookingUpdateRequest;
 import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
-import com.example.geco.repositories.CalendarDateRepository;
 import com.example.geco.repositories.PackageInclusionRepository;
 import com.example.geco.repositories.TourPackageRepository;
 import com.example.geco.utils.ImageUtils;
@@ -61,15 +59,15 @@ import jakarta.persistence.EntityNotFoundException;
 public class BookingService extends BaseService{
 	@Value("${app.upload-dir.payments:C:/sts-4.32.0.RELEASE/dev/geco/uploads/payments}")
 	private String paymentsUploadDir;
+	
+	@Autowired
+	private NotificationService notificationService;
 
 	@Autowired
 	private StorageService storageService;
 	
 	@Autowired
 	private RestrictionService restrictionService;
-
-	@Autowired
-	private CalendarDateRepository calendarDateRepository;
 
 	@Value("${app.storage.bucket.booking_payments:}")
 	private String paymentsBucket;
@@ -310,6 +308,9 @@ public class BookingService extends BaseService{
 		Booking savedBooking = bookingRepository.save(booking);
 		
 		logIfStaffOrAdmin("Booking", (long) savedBooking.getBookingId(), LogAction.CREATE, null, savedBooking);
+		
+		String message = "New booking saved.";
+		notificationService.addNotification(account, savedBooking, message);
 		
 		return savedBooking;
 	}
@@ -973,7 +974,43 @@ public class BookingService extends BaseService{
 		
 		logIfStaffOrAdmin("Booking", (long) id, LogAction.UPDATE, prevBooking, existingBooking);
 		
-		return bookingRepository.save(existingBooking);
+		Booking updatedBooking = bookingRepository.save(existingBooking);
+		
+		
+		// Specific notification message based on changes.
+		StringBuilder notificationMsg = new StringBuilder("Booking updated: ");
+		boolean hasChanges = false;
+
+		if (!prevBooking.getVisitDate().equals(existingBooking.getVisitDate())) {
+		    notificationMsg.append("Visit date changed to ").append(existingBooking.getVisitDate()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getVisitTime().equals(existingBooking.getVisitTime())) {
+		    notificationMsg.append("Visit time changed to ").append(existingBooking.getVisitTime()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getGroupSize().equals(existingBooking.getGroupSize())) {
+		    notificationMsg.append("Group size changed from ").append(prevBooking.getGroupSize())
+		        .append(" to ").append(existingBooking.getGroupSize()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getTotalPrice().equals(existingBooking.getTotalPrice())) {
+		    notificationMsg.append("Total price updated to ").append(existingBooking.getTotalPrice()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (prevBooking.getProofOfPaymentPhoto() == null && existingBooking.getProofOfPaymentPhoto() != null) {
+		    notificationMsg.append("Proof of payment uploaded. ");
+		    hasChanges = true;
+		}
+
+		String message = hasChanges ? notificationMsg.toString().trim() : "Your booking has been updated.";
+		notificationService.addNotification(updatedBooking.getAccount(), updatedBooking, message);
+
+		return updatedBooking;
 	}
 	
 	public Booking updateBookingByStaff(int id, BookingUpdateRequest request) {
@@ -1101,7 +1138,83 @@ public class BookingService extends BaseService{
 		
 		logIfStaffOrAdmin("Booking", (long) id, LogAction.UPDATE, prevBooking, existingBooking);
 		
-		return bookingRepository.save(existingBooking);
+		Booking updatedBooking = bookingRepository.save(existingBooking);
+		
+		
+		// Specific notification message based on staff changes.
+		StringBuilder notificationMsg = new StringBuilder("Your booking has been updated: ");
+		boolean hasChanges = false;
+
+		if (!prevBooking.getBookingStatus().equals(existingBooking.getBookingStatus())) {
+		    String statusMsg = existingBooking.getBookingStatus().toString();
+		    switch(existingBooking.getBookingStatus()) {
+		        case PENDING:
+		            statusMsg = "awaiting review";
+		            break;
+		        case APPROVED:
+		            statusMsg = "approved";
+		            break;
+		        case REJECTED:
+		            statusMsg = "rejected";
+		            break;
+		        case CANCELLED:
+		            statusMsg = "cancelled";
+		            break;
+		        case COMPLETED:
+		            statusMsg = "marked as completed";
+		            break;
+		    }
+		    notificationMsg.append("Booking ").append(statusMsg).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getPaymentStatus().equals(existingBooking.getPaymentStatus())) {
+		    String paymentMsg = existingBooking.getPaymentStatus().toString();
+		    switch(existingBooking.getPaymentStatus()) {
+		        case UNPAID:
+		            paymentMsg = "marked as unpaid";
+		            break;
+		        case PAYMENT_VERIFICATION:
+		            paymentMsg = "pending payment verification";
+		            break;
+		        case VERIFIED:
+		            paymentMsg = "payment verified";
+		            break;
+		        case REJECTED:
+		            paymentMsg = "payment rejected";
+		            break;
+		        case REFUNDED:
+		            paymentMsg = "refunded";
+		            break;
+		    }
+		    notificationMsg.append("Payment status: ").append(paymentMsg).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getVisitDate().equals(existingBooking.getVisitDate())) {
+		    notificationMsg.append("Visit date changed to ").append(existingBooking.getVisitDate()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getVisitTime().equals(existingBooking.getVisitTime())) {
+		    notificationMsg.append("Visit time changed to ").append(existingBooking.getVisitTime()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (!prevBooking.getGroupSize().equals(existingBooking.getGroupSize())) {
+		    notificationMsg.append("Group size changed to ").append(existingBooking.getGroupSize()).append(". ");
+		    hasChanges = true;
+		}
+
+		if (existingBooking.getStaffReply() != null && !existingBooking.getStaffReply().equals(prevBooking.getStaffReply())) {
+		    notificationMsg.append("Staff replied: ").append(existingBooking.getStaffReply()).append(". ");
+		    hasChanges = true;
+		}
+
+		String message = hasChanges ? notificationMsg.toString().trim() : "Your booking has been updated.";
+		notificationService.addNotification(updatedBooking.getAccount(), updatedBooking, message);
+
+		return updatedBooking;
 	}
 	
 	public void softDeleteBooking(int id) {
@@ -1116,6 +1229,9 @@ public class BookingService extends BaseService{
 
 	    booking.setActive(false);
 		bookingRepository.save(booking);
+		
+		String message = "Your booking has been cancelled.";
+		notificationService.addNotification(booking.getAccount(), booking, message);
 		
 		logIfStaffOrAdmin("Booking", (long) id, LogAction.DISABLE, prevBooking, booking);
 	}
