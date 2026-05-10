@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -642,13 +643,21 @@ public class BookingService extends BaseService{
 	            .count();
 
 	        CalendarDate.DateStatus effectiveStatus =
-	            (storedStatus != null ? storedStatus : CalendarDate.DateStatus.AVAILABLE);
+        	    (storedStatus != null ? storedStatus : CalendarDate.DateStatus.AVAILABLE);
 
-	        if (effectiveStatus != CalendarDate.DateStatus.CLOSED && effectiveLimit != null) {
-	            if (acceptedBookings >= effectiveLimit) {
-	                effectiveStatus = CalendarDate.DateStatus.FULLY_BOOKED;
-	            }
-	        }
+        	// Add restrictions on Saturday and Sunday
+        	DayOfWeek dayOfWeek = date.getDayOfWeek();
+        	boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+
+        	if (isWeekend) {
+        	    effectiveStatus = CalendarDate.DateStatus.CLOSED;
+        	}
+
+        	if (effectiveStatus != CalendarDate.DateStatus.CLOSED && effectiveLimit != null) {
+        	    if (acceptedBookings >= effectiveLimit) {
+        	        effectiveStatus = CalendarDate.DateStatus.FULLY_BOOKED;
+        	    }
+        	}
 
 	        calendar.put(day, CalendarDay.builder()
 	            .bookings(bookingList.size())
