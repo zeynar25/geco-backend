@@ -51,6 +51,7 @@ import com.example.geco.repositories.AccountRepository;
 import com.example.geco.repositories.BookingRepository;
 import com.example.geco.repositories.PackageInclusionRepository;
 import com.example.geco.repositories.TourPackageRepository;
+import com.example.geco.utils.DateTimeUtils;
 import com.example.geco.utils.ImageUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -310,7 +311,10 @@ public class BookingService extends BaseService{
 		
 		logIfStaffOrAdmin("Booking", (long) savedBooking.getBookingId(), LogAction.CREATE, null, savedBooking);
 		
-		String message = "New booking saved.";
+		String convertedDate = DateTimeUtils.formatDate(visitDate); 
+		String convertedTime = DateTimeUtils.formatTime(visitTime);
+		
+		String message = "Your booking on " + convertedDate + " at " + convertedTime + " was successfully submitted.";
 		notificationService.addNotification(account, savedBooking, message);
 		
 		return savedBooking;
@@ -798,8 +802,9 @@ public class BookingService extends BaseService{
 	    return revenues;
 	}
 	
-	public Booking updateBooking(int id,
-            UserBookingUpdateRequest request,
+	public Booking updateBooking(
+			int id,
+			UserBookingUpdateRequest request,
             Boolean resubmit,
             MultipartFile proofOfPaymentFile) {
 
@@ -985,9 +990,11 @@ public class BookingService extends BaseService{
 		
 		Booking updatedBooking = bookingRepository.save(existingBooking);
 		
-		
 		// Specific notification message based on changes.
-		StringBuilder notificationMsg = new StringBuilder("Booking updated: ");
+		String convertedDate = DateTimeUtils.formatDate(updatedBooking.getVisitDate()); 
+		String convertedTime = DateTimeUtils.formatTime(updatedBooking.getVisitTime());
+		
+		StringBuilder notificationMsg = new StringBuilder("Your booking on " + convertedDate + " at " + convertedTime + " was updated. ");
 		boolean hasChanges = false;
 
 		if (!prevBooking.getVisitDate().equals(existingBooking.getVisitDate())) {
@@ -1151,7 +1158,10 @@ public class BookingService extends BaseService{
 		
 		
 		// Specific notification message based on staff changes.
-		StringBuilder notificationMsg = new StringBuilder("Your booking has been updated: ");
+		String convertedDate = DateTimeUtils.formatDate(updatedBooking.getVisitDate()); 
+		String convertedTime = DateTimeUtils.formatTime(updatedBooking.getVisitTime());
+		
+		StringBuilder notificationMsg = new StringBuilder("Your booking on " + convertedDate + " at " + convertedTime + " was updated. ");
 		boolean hasChanges = false;
 
 		if (!prevBooking.getBookingStatus().equals(existingBooking.getBookingStatus())) {
@@ -1239,8 +1249,13 @@ public class BookingService extends BaseService{
 	    booking.setActive(false);
 		bookingRepository.save(booking);
 		
-		String message = "Your booking has been cancelled.";
-		notificationService.addNotification(booking.getAccount(), booking, message);
+		// Specific notification message based on changes.
+		String convertedDate = DateTimeUtils.formatDate(booking.getVisitDate()); 
+		String convertedTime = DateTimeUtils.formatTime(booking.getVisitTime());
+		
+		StringBuilder notificationMsg = new StringBuilder("Your booking on " + convertedDate + " at " + convertedTime + " was updated. ");
+		
+		notificationService.addNotification(booking.getAccount(), booking, notificationMsg.toString().trim());
 		
 		logIfStaffOrAdmin("Booking", (long) id, LogAction.DISABLE, prevBooking, booking);
 	}
