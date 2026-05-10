@@ -29,12 +29,12 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "account_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false, referencedColumnName = "accountId")
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id")
+    @ManyToOne
+    @JoinColumn(name = "booking_id", nullable = false, referencedColumnName = "bookingId")
     private Booking booking;
 
     @Column(nullable = false, length = 1000)
