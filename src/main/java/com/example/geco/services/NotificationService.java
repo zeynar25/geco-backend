@@ -1,5 +1,9 @@
 package com.example.geco.services;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,19 +47,34 @@ public class NotificationService extends BaseService {
         return notificationRepository.findByAccount_AccountIdAndIsActive(accountId, true, pageable);
     }
     
+    private LocalDateTime startOfDay(LocalDate date) {
+        return date == null ? null : date.atStartOfDay();
+    }
+
+    private LocalDateTime endOfDay(LocalDate date) {
+        return date == null ? null : date.atTime(LocalTime.MAX);
+    }
+
     @Transactional(readOnly = true)
     public Page<Notification> getMyNotifications(
             Boolean isRead,
+            LocalDate startDate,
+            LocalDate endDate,
             int page,
             int size) {
         int accountId = getLoggedAccountId();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        
-        if (isRead == null) {
-            return notificationRepository.findByAccount_AccountIdAndIsActive(accountId, true, pageable);
+
+        LocalDateTime start = startOfDay(startDate);
+        LocalDateTime end = endOfDay(endDate);
+
+        if (start != null && end != null && end.isBefore(start)) {
+            throw new IllegalArgumentException("End date cannot be earlier than start date.");
         }
-        
-        return notificationRepository.findByAccount_AccountIdAndReadAndIsActive(accountId, isRead, true, pageable);
+
+        return notificationRepository.searchMyNotifications(
+            accountId, isRead, start, end, true, pageable
+        );
     }
     
     public Notification markAsRead(int notificationId) {
