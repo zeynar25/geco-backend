@@ -67,34 +67,30 @@ public class FeedbackController extends AbstractController {
         return new ResponseEntity<>(feedback, HttpStatus.OK);
     }
 
+    
     // =========================
     // LOGGED-IN USER FEEDBACKS
     // =========================
 
     @Operation(
-        summary = "Get all my feedbacks",
-        description = """
-            Retrieve all feedbacks submitted by the logged-in user.
-            You may optionally filter by:
-            - Category ID (to get feedbacks of a specific category)
-            - Start and end dates (to get feedbacks within a date range)
-            - Pagination parameters (page, size)
-
-            If no filters are provided, all feedbacks for the user are returned.
-        """
+        summary = "Get my feedbacks",
+        description = "Retrieve feedbacks submitted by the logged-in user. Optional filters: categoryId, startDate, endDate, stars. Pagination supported."
     )
     @GetMapping("/me")
     public ResponseEntity<Page<FeedbackResponse>> getMyFeedbacks(
         @Parameter(description = "Filter feedbacks by category ID")
         @RequestParam(required = false) Integer categoryId,
 
-        @Parameter(description = "Start date for filtering feedbacks (defaults to earliest date if not provided)")
+        @Parameter(description = "Start date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 
-        @Parameter(description = "End date for filtering feedbacks (defaults to today if not provided)")
+        @Parameter(description = "End date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+        @Parameter(description = "Filter feedbacks by rounded stars (1-5). Returns ratings >= stars and < stars+1")
+        @RequestParam(required = false) Integer stars,
 
         @Parameter(description = "Page number (0-based index)", example = "0")
         @RequestParam(defaultValue = "0") int page,
@@ -104,28 +100,24 @@ public class FeedbackController extends AbstractController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<FeedbackResponse> feedbacks =
-            feedbackService.getMyFeedbacks(categoryId, startDate, endDate, pageable);
+            feedbackService.getMyFeedbacks(categoryId, startDate, endDate, stars, pageable);
         return ResponseEntity.ok(feedbacks);
     }
 
-    // =========================
-    // ADMIN/STaff LISTS
-    // =========================
-
     @Operation(
         summary = "Get all feedbacks",
-        description = "Retrieve all feedbacks. Can filter by category ID, date range, status, activeness, email, and includes pagination."
+        description = "Retrieve all feedbacks. Optional filters: categoryId, startDate, endDate, feedbackStatus, isActive, email, stars. Pagination supported."
     )
     @GetMapping
     public ResponseEntity<Page<FeedbackResponse>> getFeedbacks(
         @Parameter(description = "Filter feedbacks by category ID")
         @RequestParam(required = false) Integer categoryId,
 
-        @Parameter(description = "Start date for filtering feedbacks")
+        @Parameter(description = "Start date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 
-        @Parameter(description = "End date for filtering feedbacks")
+        @Parameter(description = "End date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
@@ -138,6 +130,9 @@ public class FeedbackController extends AbstractController {
         @Parameter(description = "Filter feedbacks by account email (contains, case-insensitive)")
         @RequestParam(required = false) String email,
 
+        @Parameter(description = "Filter feedbacks by rounded stars (1-5). Returns ratings >= stars and < stars+1")
+        @RequestParam(required = false) Integer stars,
+
         @Parameter(description = "Page number (0-based index)", example = "0")
         @RequestParam(defaultValue = "0") int page,
 
@@ -147,25 +142,25 @@ public class FeedbackController extends AbstractController {
         Pageable pageable = PageRequest.of(page, size);
         Page<FeedbackResponse> feedbacks =
             feedbackService.getFeedbacks(
-                categoryId, startDate, endDate, feedbackStatus, isActive, email, pageable
+                categoryId, startDate, endDate, feedbackStatus, isActive, email, stars, pageable
             );
         return ResponseEntity.ok(feedbacks);
     }
 
     @Operation(
         summary = "Get active feedbacks",
-        description = "Retrieve all active feedbacks. Can filter by category ID, date range, status, email, and includes pagination."
+        description = "Retrieve active feedbacks. Optional filters: categoryId, startDate, endDate, feedbackStatus, email, stars. Pagination supported."
     )
     @GetMapping("/active")
     public ResponseEntity<Page<FeedbackResponse>> getActiveFeedbacks(
         @Parameter(description = "Filter feedbacks by category ID")
         @RequestParam(required = false) Integer categoryId,
 
-        @Parameter(description = "Start date for filtering feedbacks")
+        @Parameter(description = "Start date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 
-        @Parameter(description = "End date for filtering feedbacks")
+        @Parameter(description = "End date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
@@ -175,6 +170,9 @@ public class FeedbackController extends AbstractController {
         @Parameter(description = "Filter feedbacks by account email (contains, case-insensitive)")
         @RequestParam(required = false) String email,
 
+        @Parameter(description = "Filter feedbacks by rounded stars (1-5). Returns ratings >= stars and < stars+1")
+        @RequestParam(required = false) Integer stars,
+
         @Parameter(description = "Page number (0-based index)", example = "0")
         @RequestParam(defaultValue = "0") int page,
 
@@ -183,26 +181,24 @@ public class FeedbackController extends AbstractController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<FeedbackResponse> feedbacks =
-            feedbackService.getFeedbacks(
-                categoryId, startDate, endDate, feedbackStatus, true, email, pageable
-            );
+            feedbackService.getFeedbacks(categoryId, startDate, endDate, feedbackStatus, true, email, stars, pageable);
         return ResponseEntity.ok(feedbacks);
     }
 
     @Operation(
         summary = "Get inactive feedbacks",
-        description = "Retrieve all inactive feedbacks. Can filter by category ID, date range, status, email, and includes pagination."
+        description = "Retrieve inactive feedbacks. Optional filters: categoryId, startDate, endDate, feedbackStatus, email, stars. Pagination supported."
     )
     @GetMapping("/inactive")
     public ResponseEntity<Page<FeedbackResponse>> getInactiveFeedbacks(
         @Parameter(description = "Filter feedbacks by category ID")
         @RequestParam(required = false) Integer categoryId,
 
-        @Parameter(description = "Start date for filtering feedbacks")
+        @Parameter(description = "Start date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 
-        @Parameter(description = "End date for filtering feedbacks")
+        @Parameter(description = "End date for filtering feedbacks (ISO date)")
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
@@ -212,6 +208,9 @@ public class FeedbackController extends AbstractController {
         @Parameter(description = "Filter feedbacks by account email (contains, case-insensitive)")
         @RequestParam(required = false) String email,
 
+        @Parameter(description = "Filter feedbacks by rounded stars (1-5). Returns ratings >= stars and < stars+1")
+        @RequestParam(required = false) Integer stars,
+
         @Parameter(description = "Page number (0-based index)", example = "0")
         @RequestParam(defaultValue = "0") int page,
 
@@ -220,9 +219,7 @@ public class FeedbackController extends AbstractController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<FeedbackResponse> feedbacks =
-            feedbackService.getFeedbacks(
-                categoryId, startDate, endDate, feedbackStatus, false, email, pageable
-            );
+            feedbackService.getFeedbacks(categoryId, startDate, endDate, feedbackStatus, false, email, stars, pageable);
         return ResponseEntity.ok(feedbacks);
     }
 

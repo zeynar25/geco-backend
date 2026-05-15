@@ -125,6 +125,67 @@ public class FeedbackService extends BaseService{
 	    return toResponse(feedback);
 	}
 	
+	@Transactional(readOnly = true)
+	public Page<FeedbackResponse> getMyFeedbacks(
+	        Integer categoryId, LocalDate startDate, LocalDate endDate, Integer stars, Pageable pageable) {
+	    startDate = defaultStartDate(startDate);
+	    endDate = defaultEndDate(endDate);
+	    validateDateRange(startDate, endDate);
+
+	    int accountId = getLoggedAccountId();
+
+	    Double minStars = null;
+	    Double maxStars = null;
+	    if (stars != null) {
+	        if (stars < 1 || stars > 5) {
+	            throw new IllegalArgumentException("Stars filter must be between 1 and 5.");
+	        }
+	        minStars = stars.doubleValue();
+	        maxStars = minStars + 1.0;
+	    }
+
+	    Page<Feedback> feedbacks = feedbackRepository.searchMyFeedbacks(
+	        accountId, categoryId, startDate, endDate, minStars, maxStars, pageable
+	    );
+
+	    return mapToResponse(feedbacks);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<FeedbackResponse> getFeedbacks(
+	        Integer categoryId,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        FeedbackStatus feedbackStatus,
+	        Boolean isActive,
+	        String email,
+	        Integer stars,
+	        Pageable pageable
+	) {
+	    startDate = defaultStartDate(startDate);
+	    endDate = defaultEndDate(endDate);
+	    validateDateRange(startDate, endDate);
+
+	    String q = email == null ? "" : email.trim();
+	    if (q.isEmpty()) q = null;
+
+	    Double minStars = null;
+	    Double maxStars = null;
+	    if (stars != null) {
+	        if (stars < 1 || stars > 5) {
+	            throw new IllegalArgumentException("Stars filter must be between 1 and 5.");
+	        }
+	        minStars = stars.doubleValue();
+	        maxStars = minStars + 1.0;
+	    }
+
+	    Page<Feedback> feedbacks = feedbackRepository.searchFeedbacks(
+	        categoryId, startDate, endDate, feedbackStatus, isActive, q, minStars, maxStars, pageable
+	    );
+
+	    return mapToResponse(feedbacks);
+	}
+	
 	private void validateDateRange(LocalDate startDate, LocalDate endDate) {
 	    if (endDate.isBefore(startDate)) {
 	        throw new IllegalArgumentException("End date cannot be earlier than start date.");
