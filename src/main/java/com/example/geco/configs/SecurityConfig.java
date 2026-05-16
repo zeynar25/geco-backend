@@ -95,9 +95,11 @@ public class SecurityConfig {
 		            .requestMatchers(HttpMethod.DELETE, "/feedback/{id}").hasRole("ADMIN") 
 		            .requestMatchers(HttpMethod.PATCH, "/feedback/restore/{id}").hasRole("ADMIN") 		            
 		            
-		            
 		            .requestMatchers("/calendar-date/**").hasAnyRole("STAFF", "ADMIN")
 		            .requestMatchers("/restriction/**").hasAnyRole("STAFF", "ADMIN")
+		            
+		            .requestMatchers(HttpMethod.GET, "/payment-settings/active").permitAll()
+		            .requestMatchers(HttpMethod.PATCH, "/payment-settings/staff").hasAnyRole("STAFF", "ADMIN")
 		            
 		            .requestMatchers("/home").permitAll()
 		            .requestMatchers("/calendar/**").permitAll()
